@@ -64,3 +64,6 @@ ex) s = "leetcodecode", wordDict = ["leet","code", "le", "et"]
 
 
 
+https://leetcode.com/problems/boats-to-save-people/
+https://leetcode.com/problems/koko-eating-bananas/solution/
+https://leetcode.com/problems/maximal-square/
