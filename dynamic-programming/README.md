@@ -27,6 +27,19 @@ O(N^2) /  O(N)
 
 
 
+### Maximal Square
+
+https://leetcode.com/problems/maximal-square/
+
+문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형을 찾아라.
+
+dp(i, j)를 matrix[i][j] 위치에서 왼쪽 위로 만들 수 있는 최대의 정사각형이라 정의한다.    
+그러면 `dp(i, j) = min(dp(i-1,j), dp(i,j-1), dpIi-1,j-1))` 가 된다.   
+먼저 dp(i-1, j), dp(i, j-1) 을 생각해보고 꼬투리를 dp(i-1, j-1) 로 채운다고 접근하면 될 것 같다.   
+이렇게 하면 dp로 풀이는 가능하고, 공간 최적화를 하려면 직전 row의 정보만 보관하면 된다.
+
+
+
 
 
 
