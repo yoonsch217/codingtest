@@ -9,6 +9,8 @@ while left <= right:
     right = mid - 1
 return left or right
 ```
+
+left는 condition을 만족하는 가장 작은 값이다.   
 이렇게 하는데 마지막에 left일지 right일지 헷갈릴 때가 많다.    
 그럴 때는 o o o x x x 로 생각을 한다.   
 end case는 left == right == mid 일 때다.   
