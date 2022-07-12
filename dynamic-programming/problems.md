@@ -39,3 +39,13 @@ dp(i, j)를 matrix[i][j] 위치에서 왼쪽 위로 만들 수 있는 최대의 
 
 
 
+https://leetcode.com/problems/delete-and-earn/solution/ 740
+숫자 리스트가 있고 거기서 x를 뽑으면 그 값을 얻는데 대신 그 x 하나를 지워야하고 x+1전부와 x-1 전부를 지워야한다. 최대>로 얻을 수 있는 sum은?
+dp 일반식을 세우고 싶었는데 dp(i)가 뭘 의미해야할지 몰랐었다. i를 뽑는 개수라고 하기는 i, i+1의 관계가 안 만들어지고.
+근데 i를 1~i 까지의 답이라고 생각하면 나온다. house robber의 살짝 변형. 한칸 두칸의 살짝 변형.
+
+https://leetcode.com/problems/longest-increasing-subsequence/solution/
+dp 일반식 찾기 어려우면 직접 다 예시를 써보면서 해본다. 좀 긴 것 같아도 겁먹지말고 다 써본다. 다 iterate해야하는 거일 수 있다.
+
+
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/

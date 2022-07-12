@@ -1,17 +1,70 @@
+## 개념
+
+정렬된 순서가 아닌, 최댓값 혹은 최솟값만 필요한 경우 사용한다.   
+priority queue라는 개념이 있는데 이는 abstract dat type이고 실제 자료 구조는 아니다.   
+priority queue를 구현하는 방법에 linked list, heap 등이 있는 것이다.   
+
+linked list의 경우 insertion, deletion에 대해 O(1)의 시간이 걸리지만 검색에는 O(N)의 시간이 걸린다.   
+heap의 경우는 insertion, deletion에 대해 O(logN)의 시간이 걸리지만 min/max 값을 찾는 데는 O(1)의 시간이 걸린다.
 
 
-## Problems
+### implementation
+
+heap은 complete binary tree이고 각 노드의 값은 자식 노드보다 큰 값을 갖지 않는다.   
+
+complete binary tree의 특징
+- root index가 1이고 현재 노드가 arr[n]일 때 
+  - parent node: arr[n//2]
+  - left child node: arr[n*2]
+  - right child node: arr[n*2+1]
+- arr[1] ~ arr[len(arr)//2] 까지는 leaf node가 아니다.
+
+insertion
+- complete binary tree가 되도록 leaf 노드에 추가를 한다.
+- 그 노드에 대해 parent 노드와 비교하면서 자기보다 크면 자리를 바꾸면서 bubble up 한다.
+
+deletion
+- root를 제거하고 leaf 노드의 가장 오른쪽 노드를 root로 올려서 complete binary tree를 유지한다.
+- root 위치로 올린 노드를 왼쪽과 오른쪽 child 노드들과 비교해서 크면 자리를 바꾸면서 bubble down 한다. 
+left child, right child 둘 다 current보다 작다면 둘 중 작은 걸 고른다.
 
 
-### 378. Kth Smallest Element in a Sorted Matrix
+### Heap Sort
 
-https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix
+1. heapify: array를 complete binary tree로 바꾼 뒤 leaf node가 아닌 node들에 대해 작업한다.
+2. root를 heap에서 뽑아서 array에 넣는다.
+3. heap이 빌 때까지 반복한다.
 
-문제: 이차원 매트릭스의 각 행과 열이 정렬이 되어 있다. 전체 숫자 중 작은 것부터 순서대로 셌을 때 k 번째인 값을 구하라.
+O(NlogN) / O(N)
 
-external sort처럼 생각을 해보면, 각 행이 정렬되어 있기 때문에 각 행의 맨 앞끼리만 비교하면서 k번째인 값을 구하면 된다.   
-리스트가 두 개라면 포인터를 하나씩 두면서 할 수 있지만 N개의 포인터를 두는 건 쉽지 않다.   
-이럴 때는 힙을 사용하면 쉽게 해결할 수 있다.    
-힙에 각 `(row의 head 값, row, col)` 를 넣고 k 번 iterate하면 된다.   
+### python
+
+```python
+import heapq
+
+myheap = [3, 1, 2]
+heapq.heapify(myheap)  # 기본적으로는 minheap이기 때문에 maxheap을 구현하려면 -1을 곱해서 저장해야한다.
+heapq.heappush(myheap, 5)
+heapq.heappop(myheap)
+heapq.nlargest(2, myheap)  # k개의 큰 원소를 리스트로 반환한다.
+
+# count라는 dictionary에서 value가 큰 기준으로 nlargest 사용하기
+count = {"a": 4, "b": 1, ...}
+heapq.nlargest(k, count.keys(), key=count.get)
+```
+
+heapify의 complexity   
+O(N) time, O(N) space   
+O(NlogN)으로 생각할 수 있는데 O(N)이다. 각 노드의 heapify는 O(h)의 시간이 들고 h의 높이를 갖는 노드는 n/pow(2, h+1) 만큼 있다.   
+따라서 T(N) = sigma(0 to logN) n/pow(2, h+1) * O(h) = O(n * sigma(0 to logN) h/pow(2, h)) = O(N)    
+https://www.geeksforgeeks.org/time-complexity-of-building-a-heap/   
+
+
+## 전략
+
+top k problems / k-th largest element   
+size k의 min heap을 만들고 k+1개째 부터는 넣어야할 값을 root와 비교해서 크면 root를 빼고 넣는다.   
+전체 값들에 대해 완료했을 때 root가 k-th largest element이고 heap의 리스트가 top k elements이다.   
+O(Nlogk) / O(k) => 처음 k minheap 만드는 시간 k, 그 이후 작업 (N-k) * logk
 
 
