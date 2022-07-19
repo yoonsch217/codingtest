@@ -6,10 +6,15 @@ Tree의 경우는 root만 알면 다 조회가 가능하다.
 
 ### 용어
 
-- cut: 그래프에서 두 개의 disjoint subset으로 나눌 때의 각 파티션이다.
-- crossing edge: 하나의 vertex set에서 다른 vertex set으로 연결하는 edge들이다.
-- adjacency list: 각 vertex는 인접한 노드의 리스트를 갖고 있다. undirected라면 연결된 두 노드는 서로의 노드를 저장한다.
-- adjacency matrix: N개의 노드에 대해서 NxN matrix를 갖고 (i, j) 위치의 값은 i에서 j로의 edge가 있는지를 나타내는 boolean 값이다. undirected graph라면 symmetric matrix가 만들어진다.
+- cut
+그래프에서 두 개의 disjoint subset으로 나눌 때의 각 파티션이다.
+- crossing edge
+하나의 vertex set에서 다른 vertex set으로 연결하는 edge들이다.
+- adjacency list
+각 vertex는 인접한 노드의 리스트를 갖고 있다. undirected라면 연결된 두 노드는 서로의 노드를 저장한다.
+- adjacency matrix
+N개의 노드에 대해서 NxN matrix를 갖고 (i, j) 위치의 값은 i에서 j로의 edge가 있는지를 나타내는 boolean 값이다. undirected graph라면 symmetric matrix가 만들어진다.
+edge 수가 node 수에 비해 상당히 클 때 효과적이다.
 adjacent node를 iterate한다고 했을 때 adjacency list를 사용하면 바로 접근이 가능하지만 adjacency matrix를 사용하면 한 row를 다 읽어야한다.
 
 
