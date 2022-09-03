@@ -21,3 +21,26 @@ https://leetcode.com/problems/car-pooling/
 그러면 그 map을 iterate하면서 value 값을 더하거나 뺄 수 있고, iterate하다가 멈춘 지점의 상황을 알 수 있다.   
 froms와 tos를 구해서 시간별로 더하고 뺀다.   
 혹은 시각이 1~1000까지라는 제약이 있다면 bucket sort를 사용할 수도 있다. 
+
+
+### 2158. Amount of New Area Painted Each Day
+
+https://leetcode.com/problems/amount-of-new-area-painted-each-day/
+
+문제: 0-indexed 2D integer array paint가 주어진다. 각 element는 두 개의 원소를 갖는데 start position과 end position이다. paint array를 앞에서부터 iterate하면서 start position ~ end position 까지 색칠한다. 이전 작업에서 색칠된 부분은 더 색칠을 못한다. 각 iteration에서 색칠한 수를 구하라.
+
+sweep line이라는 개념이 들어간다.   
+https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/1740812/Python-Complete-3-solutions-using-different-data-structures   
+좀 어렵다.   
+먼저 iteratre하면서 각각의 start position과 index를 tuple로 묶어서 리스트에 넣는다. end position과 index도 마찬가지로 넣는다. 각각이 start인지 end인지 boolean 등으로 표시를 해놓는다.    
+그 다음에 position을 기준으로 sort를 한다.   
+그러면 그 리스트를 앞에서부터 스캔하면 빠른 position부터 나올 것이다.   
+그다음에는 전체 길이에 맞는 buffer array를 만든다.   
+그러고는 position array를 iterate하면서 start가 나오면 그때부터 buffer의 해당 position에 해당 index를 넣는다. end가 나오면 해당 index에 대해서 그만 넣는다.   
+이렇게 하면 나중에 buffer array를 살펴봤을 때 어떤 칸에 1, 5가 있다면 인덱스 1 작업과 인덱스 5 작업에 의해 색칠될 수 있던 공간이라는 뜻이다.   
+인덱스 낮은 작업이 우선이므로 인덱스 1의 작업에 의한 색칠 부분으로 인식하면 된다.   
+
+
+
+
+

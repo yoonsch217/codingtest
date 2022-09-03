@@ -23,3 +23,38 @@ i+1의 온도가 더 낮다면 i+1+answer[i+1] 위치로 가서 또 비교한다
 
 https://leetcode.com/problems/trapping-rain-water/
 
+
+
+### 856. Score of Parentheses
+
+https://leetcode.com/problems/score-of-parentheses/
+
+문제: balanced parentheses string s가 주어졌을 때 점수를 구하라. () 형태로 붙어 있는 짝이 1점이고 (A) 처럼 감싸고 있으면 A*2이다. AB처럼 연속되어 있으면 A+B이다.
+
+먼저 들었던 생각은 recursion하게 푸는 것이었다. 맨 처음은 left parenthesis일테니까 그 ( 에 대응하는 )로 한번 자른다. `helper(s) = 2*helper(s[1:k]) + helper([k+1:])`     
+인덱스가 하나 차이난다면 1점을 return한다. 인덱스가 하나 넘게 차이난다면 안에 더 있는 거니까 helper(left+1, right-1) * 2 를 return한다.   
+본 작업 전에 linear하게 훑으면서 각 괄호에 매칭하는 괄호 인덱스를 저장하면 O(N) 시간에 풀 수 있다.   
+그런데 이 방법은 예외 처리가 조금 필요하다. 
+
+stack을 사용해서 풀 수도 있다. 각 뎁스마다 값을 저장하는 것이다.   
+left parenthesis 나올 때마다 depth가 늘어나니까 stack에 추가하고 right parenthesis 나올 때마다 depth 하나 탈출하니까 pop을 하면서 이전 depth의 값에 추가해준다.   
+
+```python
+def solve(s: str) -> int:
+    s2 = [0]
+    for i, c in enumerate(s):
+        if c == '(':
+            s2.append(0)
+        else:
+            tmp = s2.pop()
+            if s[i-1] == '(':
+                tmp += 1
+            else:
+                tmp = tmp*2
+            s2[-1] += tmp
+
+    return s2[-1]
+```
+
+마지막 방법은 power로 생각하는 것이다. 특정 depth에 있는 ()는 밖으로 나올 때마다 2가 곱해진다.   
+그러면 왼쪽부터 linear하게 탐색하면서 열릴 때마다 depth를 증가시킨다. 닫힐 때 depth를 확인해서 pow(2, depth)를 결과에 더해준다. 바로 붙어있는 괄호들에 대해서만 처리하면 되는 듯.
