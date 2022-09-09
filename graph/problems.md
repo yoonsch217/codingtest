@@ -67,5 +67,100 @@ https://leetcode.com/problems/step-by-step-directions-from-a-binary-tree-node-to
 DFS는 이렇게 구현했다: base case로는 node가 없으면 return None, target node이면 []를 반환하도록 했다. 그리고 left child와 right child를 각각 recursive 호출하면서 None이면 무시, 아니면 어디로 갔는지를 기록해준다. 이 때 처음에 틀린 거는, 이렇게 append하면 root에서의 path는 거꾸로 봐야한다는 점을 놓쳤었다.
 
 
+### 743. Network Delay Time
+
+https://leetcode.com/problems/network-delay-time
+
+문제: n개의 노드가 주어지고 1번부터 n번까지 레이블이 되어 있다. times라는 리스트가 주어지는데 `times[i] = (u, v, w)` 로써 u 노드로부터 v 노드로 이동하는 데 w의 시간이 걸린다는 뜻이다. 노드 k에서 시작했을 때 모든 노드에 다 전파가 되는 데까지 걸리는 최소 시간을 구하라. 전파를 못 한다면 -1을 반환하라.
+
+Dijkstra's Algorithm 문제이다. source는 k가 되고 k로부터 각각 노드까지의 최소 거리를 구한 후 그 max를 구하면 된다.
+
+<details>
+
+```python
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        # Dijkstra's Algorithm으로 source로부터의 최소 cost를 다 구하고 그것들의 max를 구한다.
+        d = {}  # value: distance, 만약 path가 필요하다면 (distance, previous) 이렇게 넣으면 된다.
+        for i in range(n):
+            d[i+1] = math.inf
+        d[k] = 0
+
+        adj_matrix = [[] for _ in range(n+1)]  # (dest, cost)
+        for time in times:
+            src, dest, cost = time
+            adj_matrix[src].append((dest, cost))
+
+        heap = [(0, k, k)]  # (distance, next, previous)
+        
+        while True:
+            next_cost, next_vertex, prev_vertex = heapq.heappop(heap)
+            for dest, cost in adj_matrix[next_vertex]:
+                if d[dest] <= d[next_vertex] + cost:
+                    continue
+                d[dest] = d[next_vertex] + cost
+                heapq.heappush(heap, (cost, dest, next_vertex))
+            if len(heap) == 0:
+                break
+
+        res = max(map(lambda x: d[x], d))
+        return res if res != math.inf else -1
+```
+
+</details>
+
+
+### 787. Cheapest Flights Within K Stops
+
+문제: n개의 노드가 있고 flights라는 리스트가 있다. flights에는 (출발지, 목적지, 가격) 의 데이터가 리스트로 저장되어 있다. 최대로 들를 수 있는 노드의 수가 k로 주어졌을 때 src 노드에서 dst 노드로 가는 최소 요금을 구하라. 만약 갈 수 없다면 -1을 반환하라.
+
+이 문제에서 주의해야할 점은 어떤 노드에 방문했을 때 원래 있던 price가 더 낮더라도 지금의 count가 낮다면 지금의 값을 버릴 수 없다는 것이다.    
+예를 들어 노드 A에 5번 거쳐서 100의 price가 들었는데 이번 작업에서 2번 거쳐서 150의 price가 들었다고 하더라도 이 (A, 150, 2) 의 값도 유지해야한다.   
+(A, 150, 2)가 (A, 100, 5)보다 더 낮은 가격으로 갈 순 없겠지만 최대로 도달할 수 있는 거리에서 차이가 난다.   
+k가 5라면 (A, 100, 5)의 경우는 거기서 break를 해버리기 때문에 unreachable로 판단할 수 있다.   
+
+Approach 1: BFS   
+queue를 사용해서 (node, price, stops)를 저장하면서 찾을 수 있다. stops == k 인 경우는 continue하고 아닌 경우는 k += 1 하면서 iterate한다.     
+만약 목적지 노드가 dst라면 `res = min(res, price+edge['price'])` 로 업데이트하면 된다.
+TLE 에러 발생.   
+근데 optimize해서 O(EK) / O(V^2 + VK) 로 풀 수는 있다. (node, price, stops)를 넣는 게 아니라 k번 iterate하도록 한다. 
+그리고 distances 라는 딕셔너리에 (node, stops) 로 stops만큼 갔을 때의 node까지 최소 거리를 저장한다.    
+어떤 stop의 iteration에서 한 노드에 여러 edge가 접근할 수 있다. 그때 가장 최솟값을 구하기 위해서 (node, stops+1)에 대해 계속 참조하면서 업데이트해야한다.
+
+<details>
+
+```python
+        while bfsQ and stops < K + 1:
+            
+            # Iterate on current level
+            length = len(bfsQ)
+            for _ in range(length):
+                node = bfsQ.popleft()
+                
+                # Loop over neighbors of popped node
+                for nei in range(n):
+                    if adj_matrix[node][nei] > 0:
+                        dU = distances.get((node, stops), float("inf"))  # 이 값은 항상 있다. 이전 iteration에서 만든 값이다.
+                        dV = distances.get((nei, stops + 1), float("inf"))  # 아직 unreached 상태라면 inf일테다. 있다면 다른 노드에서 간 결과인데 그거랑 비교하는 것이다.
+                        wUV = adj_matrix[node][nei]
+                        
+                        if dU + wUV < dV:
+                            distances[nei, stops + 1] = dU + wUV
+                            bfsQ.append(nei)
+```
+
+</details>
+
+
+Approach 2: Dikjstra's algorithm
+기존의 알고리즘하고의 차이점은 cost가 작지 않더라도 cnt가 작으면 저장해야한다는 것이다.   
+`costs = [math.inf for _ in range(n)]`, `stops = [math.inf for _ in range(n)`으로 초기화시키고 minheap에 처음에 (cost, stops, node) = (0, 0, src) 를 넣는다.   
+heappop을 하고 neighboring edges를 보면서 cost가 기존의 cost보다 작은지 확인한다. cost가 더 작다면 costs[node]와 stops[node] 를 업데이트한 후에 heap에 넣는다. cost가 작지 않더라도 stops가 더 작다면 heap에 넣는다.   
+즉, cost가 더 작거나 stops가 더 작을 때 heap에 넣어주는 것이다.   
+Time Complexity: O(V^2logV), Space Complexity: O(V^2) adj_matrix
+
+Approach 3: Bellman Ford's Algorithm   
+k번 iterate하면 k 번 hop했을 때의 결과를 알 수 있다.   
+Time Complexity: O(KE), Space Complexity: O(V)
 
 
