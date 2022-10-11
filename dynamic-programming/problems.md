@@ -49,6 +49,36 @@ nums[i]가 양수일지 음수일지 모르기 때문에 이전까지의 min, ma
 bottom up으로 하는 게 효율적이다.   
 
 
+### 279. Perfect Squares
+
+https://leetcode.com/problems/perfect-squares/
+
+문제: 어떤 int n이 주어졌을 때 perfect square로만 합쳐서 n을 만들도록 할 때의 perfect square number의 최소의 개수를 구하라. perfect square는 정수의 제곱이다.
+
+my approach:   
+dp(i)를 최소 개수라고 할 때, `dp(i) = min(dp(j) + dp(i-j)) where 1 <= j < i/2, or 1 if i is a perfect square` 이다.   
+a + b = c라고 할 때 a를 이루는 최소 수가 dp(a)이고 b를 이루는 최소 개수가 dp(b)니까 그 두 개 합한 게 되기 때문이다.   
+그런데 이렇게 하면 TLE가 난다.    
+
+`dp(i) = min(dp(i-k)+1) for k in perfect square numbers below i` 로 할 수도 있는데 그래도 TLE가 난다.
+
+근데 dp 표현식은 저게 맞다. 내가 각 iteration마다 i가 perfect square 인지 체크하고 맞으면 1로 한 뒤 continue하는 코드를 넣었는데 이게 오히려 시간을 느리게 했나보다. 이 부분을 제외하니까 시간 내로 들어온다.   
+perfect square인 경우가 극히 드물텐데 그걸 위해 연산을 했으니 비효율적이었나보다.   
+Time Complexity: O(n sqrt(n))
+
+greedy 방식을 사용할 수도 있다. `result = dp(n, k) for n in [i, .. n]` 이고 dp(n, k)는 k 개의 perfect square로 n을 만들 수 있으면 true를 반환하고 그게 그때의 최적의 답이다.   
+`dp(n, k) = dp(n-squarenum, k-1) + 1`      
+이걸 증명하는 건 contradiction을 이용할 수 있다. dp(n, i)가 있고 그 뒤에 dp(n, j)가 나왔고 dp(n, j)가 더 작은 수라고 하자. dp(n, j)의 답은 j인데 이는 i보다 작아야한다. 그런데 먼저 수행된 i가 더 작아야하므로 모순이다.   
+Time Complexity: O(n^(h/2)) where h is the maximal number of recursion that could happen   
+n-ary tree로 생각할 수 있다. 어떤 parent node의 숫자를 기준으로, 그 숫자보다 작은 square number를 뺀 node들을 child node로 갖는다.   
+
+greedy 방식을 n-ary tree로 생각할 때, 각 레벨을 BFS로 탐색하는 것으로 볼 수도 있다.    
+레벨이 곧 사용된 perfect square 숫자의 개수이기 때문이다.   
+
+
+
+
+
 ---
 
 
