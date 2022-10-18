@@ -131,4 +131,27 @@ start < end면 rotated가 안 된거니까 그거에 대한 처리를 먼저 한
 binary search를 써서 mid가 nums[0]보다 작았을 때, nums[mid-1]이 nums[0]보다 크거나 같으면 rotate 직후의 값이므로 nums[mid]를 반환한다. 아니면 left half를 탐색한다(right를 옮긴다). 이 때, mid는 항상 1보다 크므로 별도의 range check을 할 필요는 없다.   
 mid가 nums[0]보다 크면 right half를 탐색한다(left를 옮긴다).    
 
- 
+
+
+
+### 154. Find Minimum in Rotated Sorted Array II
+
+https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
+
+문제: 중복된 값이 있는 integer array가 ascending order로 정렬되어 있었는데 몇 번의 rotation이 일어난 상태이다. 이 array에서 최솟값을 구하라.
+
+(내 풀이) 중복된 값이 있음으로서 달라지는 부분이 있다.   
+로직은 다음과 같다.   
+- 기본 binary search 템플릿을 사용한다.
+- nums[left] < nums[right] 라면 그 subarray는 rotation이 없는 것이므로 nums[left] 를 반환한다.
+- mid가 mid-1보다 작으면 mid가 rotation point이므로 nums[mid]를 반환한다. left가 최솟값이 아님을 보장하므로 mid-1은 항상 존재한다. 이 다음은 항상 rotated되었음을 가정하고 진행할 수 있다.
+- mid가 left보다 작다면 rotation point가 왼쪽에 있을테니 left half를 탐색한다.
+- mid가 left보다 크다면 rotation point가 오른쪽일테니 right half를 탐색한다. 
+- mid가 left와 같을 때가 문제이다.
+  - right가 left보다 작다면 right half를 탐색한다. right가 left보다 큰 건 이미 처리했다.
+  - right가 left와 같을 때만 남았는데 이 때는 linear하게 탐색을 한다.
+
+(solution) 비슷한데 훨씬 간단하다. right랑 비교하면 unrotated array에 대해 고려하지 않아도 되네? 왜지,
+- mid가 right보다 작으면 left half를 본다. left에서 mid 사이에 rotation point가 있어야한다.
+- mid가 right보다 크면 right half를 본다.
+- 아니면 right를 하나 줄임으로써 범위를 좁힌다.
