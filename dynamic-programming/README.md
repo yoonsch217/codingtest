@@ -42,9 +42,16 @@ state reduction에는 일반화될 수 있는 방법은 없고 잘 관찰해야�
 변수끼리 상관관계가 있다면 합칠 수 있는지 생각해본다.   
 혹은 전체 상태를 저장하고 있었는데 실제로는 최근 n개의 상태만 필요하지 않은지도 확인해본다.   
 
+
+### Counting dp
+
+min, max를 사용하지 않고 count를 합치는 형태의 dp 문제이다.   
+number of ways를 구하는 문제로 나올 수 있다.   
+다른 dp들과 다르게 base case나 out of bound case가 보통은 0이 아니다.
+
 ## 전략
 
-- state variable을 찾고 dp(i)의 표현식을 찾는다.   
+- state variable을 찾고 dp(i)의 표현식을 찾는다. 여러 상황에 대한 합으로 만들어질 수 있으니 상황 분석을 잘 하자.   
 - base case를 찾는다.   
 
 
