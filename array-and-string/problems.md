@@ -18,8 +18,8 @@ https://leetcode.com/problems/car-pooling/
 문제: capacity 라는 integer와 passengers라는 리스트가 주어진다. passengers 리스트는 `[승객수, 탑승 시각, 하차 시각]` 로 구성되어 있다. 전체 여정을 하면서 capacity를 넘는 순간이 있다면 false, 그렇지 않다면 true를 반환한다.
 
 어떤 시간 순서열에서 i ~ j 까지 어떤 변화가 있다가 사라져야한다면 map[i] += event, map[j] -= event 식으로 사용한다.   
-그러면 그 map을 iterate하면서 value 값을 더하거나 뺄 수 있고, iterate하다가 멈춘 지점의 상황을 알 수 있다.   
-froms와 tos를 구해서 시간별로 더하고 뺀다.   
+그러면 그 map을 key로 sort하면 시간 순서대로 정렬이 된다. froms와 tos를 iterate하면서 확인한다.   
+`dd = sorted(d.items())` 이렇게 하면 dict가 key로 정렬된 후에 tuple list로 저장이 .   
 혹은 시각이 1 ~ 1000까지라는 제약이 있다면 bucket sort를 사용할 수도 있다. 
 
 
