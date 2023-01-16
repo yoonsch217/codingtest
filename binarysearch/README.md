@@ -13,6 +13,7 @@ return left or right
 ```
 
 left는 condition을 만족하는 가장 작은 값이다.   
+이 loop가 끝나면 left는 condition_a를 만족하지 않는 위치에 있거나 array를 넘어서야한다. 왜냐하면 condition을 만족하면 left는 계속해서 오른쪽으로 이동하기 때문이다.   
 이렇게 하는데 마지막에 left일지 right일지 헷갈릴 때가 많다.    
 그럴 때는 o o o x x x 혹은 x x x o o o로 생각을 한다.   
 
