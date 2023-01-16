@@ -12,9 +12,10 @@ while left <= right:
 return left or right
 ```
 
-left는 condition을 만족하는 가장 작은 값이다.   
-이 loop가 끝나면 left는 condition_a를 만족하지 않는 위치에 있거나 array를 넘어서야한다. 왜냐하면 condition을 만족하면 left는 계속해서 오른쪽으로 이동하기 때문이다.   
-이렇게 하는데 마지막에 left일지 right일지 헷갈릴 때가 많다.    
+https://leetcode.com/problems/find-smallest-letter-greater-than-target 의 예시. target보다 큰 최소의 값을 구하는 문제이다.   
+condition은 mid위치의 값이 target보다 작거나 같을 때이다. 그때는 답이 오른쪽에 있으므로 left를 옮겨야한다. 이 loop가 끝나면 left는 condition_a를 만족하지 않는 위치에 있거나 array를 넘어서야한다. 즉, left 위치의 값이 target보다 크면서 가장 왼쪽에 위치한다. 왜냐하면 condition을 만족하면 left는 계속해서 오른쪽으로 이동하기 때문이다.   
+
+마지막에 left일지 right일지 헷갈릴 때가 많다.    
 그럴 때는 o o o x x x 혹은 x x x o o o로 생각을 한다.   
 
 ~end case는 `left == right == mid` or `left == mid, right = left + 1` 일 때다.   
