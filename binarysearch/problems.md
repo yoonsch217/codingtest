@@ -26,7 +26,7 @@ ladders 개수 L 을 크기로 갖는 힙을 생성하고 앞에서부터 높이
 
 Binary Search    
 특정 위치까지 갈 수 있나 없나는 판단할 수 있다. 그 구간의 height diffs를 받아서 정렬한 뒤 min부터 벽돌 사용하도록 하면 판단이 된다.    
-0~threshold 까지는 reachable 이고 threshold+1~end 는 unreachable이다.   
+0 ~ threshold 까지는 reachable 이고 threshold+1 ~ end 는 unreachable이다.   
 이 특성을 이용해서 binary search를 사용할 수 있다.    
 다만 매번 정렬을 하면 너무 cost가 크기 때문에 한번 정렬해서 height diff마다 position을 붙여놓는다. 그러고는 linear하게 iterate하면서 현재 찍은 기준 position보다 낮은 index를 가진 경우만 벽돌이나 사다리에서 차감한다.
 NlogN
@@ -102,9 +102,11 @@ class Solution:
 근데 솔루션 보니까 `mid = bisect_left(arr, x)` 로 간단히 구해버렸다..
 
 그리고 신기한 솔루션도 하나 있다.   
-답의 첫 번째 인덱스에 대해 left bound는 0이 될 것이고 right bound는 n-k가 될 것이다. n-k 부터 시작을 해서 끝(n-1까지 다 해야 k개가 되기 때문이다.   
-그러면 이 두 bound에 대해 작업을 한다. left, right에 대해 mid를 구한 후 mid 값과 mid + k 값을 비교한다. mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k 중 하나는 버려져야한다.      
-mid가 target에 더 가깝다면 mid+k 이후는 버려야한다. 안 그러면 mid를 버려야하는데 mid가 더 가깝기 때문에 버리면 안 되기 때문이다.   
+답 subarray의 시작 지점을 찾는 것이다.   
+시작 지점의 left bound는 0이 될 것이고 right bound는 n-k가 될 것이다. n-k 부터 시작을 해서 끝(n-1)까지 다 해야 k개가 되기 때문이다.   
+그러면 이 두 bound에 대해 작업을 한다. left, right에 대해 mid를 구한 후 mid 값과 mid + k 값을 비교한다. mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k 중 하나는 버려져야한다. k+1로 하는 이유는 최적화된 subarray가 더 오른쪽에 있는지 왼쪽에 있는지 알아야하기 때문이다.      
+mid가 target에 더 가깝다면 mid+k 이후는 subarray에 포함될 수가 없으므로 버려야하고 subarray의 시작지점은 mid 이하가 된다. 안 그러면 mid를 버려야하는데 mid가 더 가깝기 때문에 버리면 안 되기 때문이다.   
+right(시작지점의 right bount)를 mid로 옮기고 다음 iteration을 진행한다.   
 이걸 반복하다가 left == right 되는 순간이 답이다.
 
 
