@@ -13,11 +13,17 @@ dp(i)를 i번째 칸에 도착하기 위한 최소의 cost라고 하자.
 ### Word Break
 https://leetcode.com/problems/word-break/
 
-문제: 문자열 s가 있고 word_dict이라는 문자열 리스트가 있다. word_dict에 있는 문자열들로 s를 만들 수 있는지 판단하라.
+문제: 문자열 s가 있고 word_dict이라는 문자열 리스트가 있다. word_dict에 있는 문자열들로 s를 만들 수 있는지 판단하라. leetcode, ['leet', 'code']
 
-dp(i): i~end까지의 결과    
+dp(i): 문자열s의 i~end까지 substring에 대한 결과(0~i로 해도 된다.)    
 dp(0)을 구하면 된다.   
 dp(i)에 대해 j를 i+1부터 끝까지 이동시키면서 s[i:j]가 word_dict에 있는지 확인하고 있으면 dp(j)를 반환하면 된다.   
+근데 substring 자르고 dp recursive하게 부를 때 index 설정하는 게 헷갈린다.   
+```
+dp(i): [0~i]까지의 substring에 대한 결과
+dp(i) = dp(i-j) and exists(s[i-j+1 : i+1]) for j in range(1, i+2), dp(음수) = True
+j ranger가 헷갈렸는데 dp(i-1) and exists(s[i:i+1]) 부터 dp(-1) and exists(s[0:i+1]) 가 나오도록 설정해야한다.
+```
 
 O(N^2) /  O(N)
 
