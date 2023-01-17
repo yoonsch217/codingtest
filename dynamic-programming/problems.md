@@ -22,7 +22,7 @@ dp(i)에 대해 j를 i+1부터 끝까지 이동시키면서 s[i:j]가 word_dict�
 ```
 dp(i): [0~i]까지의 substring에 대한 결과
 dp(i) = dp(i-j) and exists(s[i-j+1 : i+1]) for j in range(1, i+2), dp(음수) = True
-j ranger가 헷갈렸는데 dp(i-1) and exists(s[i:i+1]) 부터 dp(-1) and exists(s[0:i+1]) 가 나오도록 설정해야한다.
+j range가 헷갈렸는데 dp(i-1) and exists(s[i:i+1]) 부터 dp(-1) and exists(s[0:i+1]) 가 나오도록 설정해야한다.
 ```
 
 O(N^2) /  O(N)
@@ -35,9 +35,11 @@ https://leetcode.com/problems/maximal-square/
 
 문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형을 찾아라.
 
-dp(i, j)를 matrix[i][j] 위치에서 왼쪽 위로 만들 수 있는 최대의 정사각형이라 정의한다.    
-그러면 `dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1))` 가 된다.   
-먼저 dp(i-1, j), dp(i, j-1) 을 생각해보고 꼬투리를 dp(i-1, j-1) 로 채운다고 접근하면 될 것 같다.   
+```
+dp(i, j): matrix[i][j] 위치에서 왼쪽 위로 만들 수 있는 최대의 정사각형 크기라 정의한다.    
+dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1)) + 1 
+```
+먼저 dp(i-1, j), dp(i, j-1) 을 생각해서 겹치는 영역이 최대 정사각형의 후보이다. 두 개가 같은 경우는 모서리가 1인지 고려해야하는데 그 상황을 dp(i-1, j-1) 로 채운다고 접근하면 될 것 같다.   
 이렇게 하면 dp로 풀이는 가능하고, 공간 최적화를 하려면 직전 row의 정보만 보관하면 된다.
 
 
