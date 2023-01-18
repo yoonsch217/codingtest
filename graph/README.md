@@ -90,8 +90,8 @@ stack 혹은 recursion을 사용한다.
 Time: O(V+E), Space: O(V)   
 
 All possible paths를 구할 때 recursion을 사용하여 backtracking을 한다.   
-이 때 각 작업마다 path를 고유하게 갖고 있어야하는데 처음에는 copy.deepcopy를 사용했었다.   
-그런데 그렇게 하면 너무 시간이 많이 걸리고 dfs함수 부른 뒤 cur_path.pop()를 해주는 방식으로 시간을 절약할 수 있다.   
+이 때 각 작업마다 path를 고유하게 갖고 있어야하는데 처음에는 다음 recursion을 호출할 때 현재 path를 deepcopy하여 넘겨줬다.   
+그런데 그렇게 하면 너무 시간이 많이 걸리기 때문에 dfs함수 부를 때 cur_path list를 넘겨줘서 그대로 사용한다. dfs 함수가 끝나면 cur_path.pop()를 해주는 방식으로 원래의 상태로 돌아옴으로써 시간을 절약할 수 있다.   
 Time: O(2^N * N) => 가능한 path가 2^(N-1)-1, 각 path마다 다음 path 만들 때 O(N)개의 다음 node가 있으니까 O(N)의 시간 필요. 두 개 곱하면 loose upper bound   
 Space: O(2^N * N) => 가능한 path가 2^(N-1)-1, 각 path마다 O(N) 노드가 있다.   
 
@@ -108,7 +108,7 @@ shortest path를 찾으려면 path를 리스트 복사해가면서 저장해야�
 
 src에서 dest까지의 최단 경로를 찾는 방법이다..   
 각 노드가 최대 k개의 adjacent node를 갖고, s에서 t까지의 최단 거리가 d라고 해보자.   
-BFS를 사용하는 경우 exponential하게 증가하게 되고 O(k^d)의 시간이 걸린다.   
+BFS를 사용하는 경우 하나의 level 지날 때마다 하나의 노드 당 k개의 edge가 있으므로 `k*k*...*k`를 d 번 해야 도착한다. 즉, exponential하게 증가하게 되고 O(k^d)의 시간이 걸린다.   
 
 bidirectional search를 사용하면 s와 t 두 노드에서 동시에 시작하기 때문에 O(2 * k^d/2) 의 시간이 걸린다.   
 s와 t에서 탐색을 하다가 두 그래프가 만나면 종료하게 된다.   
@@ -132,12 +132,13 @@ cut property: 두 cut을 잇는 crossing edge 중 가장 weight가 작은 edge�
 
 ### Kruskal's Algorithm
 
-1. edge를 weight가 증가하는 순서로 정렬한다.
-2. weight가 작은 edge부터 MST에 추가한다. 이 때 cycle을 만드는 edge는 넘어간다.
+1. edge를 weight가 증가하는 순서로 정렬 또는 heapify한다.
+2. weight가 작은 edge부터 MST에 추가한다. 이 때 union-find를 사용하여 cycle을 만드는지 체크하고 cycle 만드는 edge는 넘어간다.
 3. N-1 edge를 찾을 때까지 2번 동작을 반복한다.
 
-greedy algorithm이 적용된 방법이다.   
+greedy algorithm과 union-find algorithm을 사용한다.   
 sorting을 해도 되고 heap을 써도 된다.   
+왜 N-1개의 edge가 필요한가는 귀납법으로 증명하자. 2개일 때 한 개가 필요하다. vertex가 하나 추가되면 하나의 edge만 더 추가돼야한다.
 
 
 Time Complexity: O(E log E)   
@@ -148,13 +149,22 @@ union-find data structure를 사용하는 데 O(V)의 공간이 필요하다.
 
 ### Prim's Algorithm
 
-1. visited set, non-visited set 두 개를 둔다.
-처음에는 visited set에 원소 하나를 둔다.
-2. visited set 그룹에서 non-visited set 그룹으로 가는 crossing edge 중 가장 weight가 작은 걸 고른다.
+1. visited set, non-visited set 두 개를 둔다. 처음에 visited set에 원소 하나를 둔다.
+2. visited set 그룹에서 non-visited set 그룹으로 가는 crossing edge 중 가장 weight가 작은 걸 고르고 상대 vertex를 visited set으로 옮긴다.
 visited 에 추가되는 각 element마다 edge 목록이 있는데 그걸 다 heap에 넣으면 항상 최소를 얻을 수 있다.
 3. non-visited set 이 빌 때까지 반복한다.
 
 greedy strategy를 사용한다.   
+visited set, unvisited set은 visited라는 boolean list를 사용해서 할 수도 있다.   
+
+구현
+- visited set에 처음 vertex 0이 들어가게 된다.
+- 0에서 나머지로 가는 edge들을 heap에 넣는다.
+- 그 중 최소를 뽑는다. 상대 vertex가 unvisited라면(맨 처음은 무조건 unvisited일 것이다.) 그 vertex를 visited로 넣는다.
+- 해당 vertex에서 갈 수 있는 edge들을 heap에 넣는다. 그럼 vertex 0에서 나가는 edge와 새로 추가된 vertex에서 나가는 edge가 모두 heap에 있다.
+- 그 중 최소를 뽑아서 unvisited인 vetex인지 확인하고 visited면 넘어간다. unvisited면 이를 반복한다.
+
+Kruskal's algorithm은 edge를 추가하면서 mst를 확장하지만 Prim's algorithm은 vertex를 추가하면서 mst를 확장한다.
 
 Time Complexity: O(E log V) for binary heap, O(E + V log V) for Fibonacci heap.   
 Space Complexity: O(V)   
@@ -174,7 +184,7 @@ edge relaxation란, 다른 vertex를 거치더라도 더 weight 합이 작은 �
 non-negative weight의 weighted directed graph 에서 사용할 수 있다.   
 Greedy approach를 사용한다. 각 단계에서 갈 수 있는 vertex를 보면서 그 vertex로 가기 위한 최소의 weight를 구한다.
 
-- 각 vertex의 결과를 저장하는 자료구조를 정의한다. `d = {}  # value: (distance, previous)`
+- 각 vertex의 결과를 저장하는 자료구조를 정의한다. `d = {}  # key: vertex, value: (distance, previous)`
 - source vertex부터 시작을 한다. source vertex의 distance는 0, previous vertex는 자기 자신이다. `heap = [(0, k, k)]  # (distance, next, previous)`
 - visited set에서 갈 수 있는 vertex 중 가장 가까운 vertex 부터 순서대로 탐방을 한다. min heap을 사용할 수 있다.
 - 방문한 vertex의 distance를 min(기존 distance, previous vertex의 distance + weight) 로 업데이트를 한다. 업데이트가 되면 previous vertex도 업데이트해야한다.
