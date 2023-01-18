@@ -112,6 +112,8 @@ class Solution:
 
 ### 787. Cheapest Flights Within K Stops
 
+https://leetcode.com/problems/cheapest-flights-within-k-stops/description/
+    
 문제: n개의 노드가 있고 flights라는 리스트가 있다. flights에는 (출발지, 목적지, 가격) 의 데이터가 리스트로 저장되어 있다. 최대로 들를 수 있는 노드의 수가 k로 주어졌을 때 src 노드에서 dst 노드로 가는 최소 요금을 구하라. 만약 갈 수 없다면 -1을 반환하라.
 
 이 문제에서 주의해야할 점은 어떤 노드에 방문했을 때 원래 있던 price가 더 낮더라도 지금의 count가 낮다면 지금의 값을 버릴 수 없다는 것이다.    
