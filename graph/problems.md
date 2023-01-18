@@ -163,6 +163,60 @@ Time Complexity: O(V^2logV), Space Complexity: O(V^2) adj_matrix
 
 Approach 3: Bellman Ford's Algorithm   
 k번 iterate하면 k 번 hop했을 때의 결과를 알 수 있다.   
-Time Complexity: O(KE), Space Complexity: O(V)
+- dist list를 만들어서 source 빼고 inf로 초기화한다.   
+- 전체 edge를 k+1번 iterate하면서 dist를 업데이트한다. 
+- source가 inf라면 아직 시작을 못 하는 상태니까 무시한다. source가 inf가 아니면 여기에 k+1 이내로 도달할 수 있다는 것이므로 그 상태에서 dest의 dist 값을 업데이트한다. 더 줄일 수 있으면 줄이고 없으면 무시한다.
+- k+1번 iterate한 뒤에 dist[target] 값을 반환한다.
 
+<details>
 
+```python
+dist = [math.inf] * n
+dist[src] = 0
+for _ in range(K+1):
+    next_dist = copy.deepcopy(dist)
+    for _from, _to, _price in flights:
+        if dist[_from] == math.inf:
+            continue
+        next_dist[_to] = min(next_dist[_to], dist[_from] + _price)
+    dist = next_dist
+if dist[dst] == math.inf:
+    return -1
+return dist[dst]
+```
+    
+</details>
+    
+Time Complexity: O((V+E)*K), Space Complexity: O(V)
+
+Bellman Ford는 각 iteration마다 한 번의 전체 이동을 하면서 dist를 업데이트하는 것이다. 그래서 iteration이 k+1번 일어난다.   
+Dijkstra는 queue를 이용해서 stop이 점차 늘어난다.
+    
+Simple Dijkstra
+- dist 값을 inf로 초기화하고 dist[src]만 0으로 한다. adj_list도 만들어놓는다.
+- queue에 (stops, cur_node, price)를 넣는다. 초기에는 (0, src, 0)이 들어갈 것이다.
+- while queue 조건동안 queue를 pop하면서 반복한다. stops가 k+1보다 크면 그 이후에 queue에 들어간 값은 다 k+1보다 크므로 break한다.
+- cur_node에서 reachable한 node들의 dist를 확인해서 업데이트할 수 있는지 확인한다. `dist[reachable] > dist[cur_node] + price` 라면 거기로 갈 수 있는 거니까 업데이트하고 queue에 추가한다. (안 가는 거에 대한 건 저장을 안 해도 되나? 굳이 안 줄여도 될 수도 있잖아.)
+- break가 되거나 queue가 비어서 loop를 빠져나오면 그 결과를 반환한다.
+
+<details>
+
+```python
+dist = [math.inf] * n
+dist[src] = 0
+queue = deque([(0, src, 0)])  # stops, node, price
+
+while queue:
+    stops, cur, price = queue.popleft()
+    if stops > K:
+        break
+    for _to, _price in adj_list[cur]:
+        if dist[_to] <= price + _price:
+            continue
+        dist[_to] = price + _price
+        queue.append((stops+1, _to, dist[_to]))
+
+return -1 if dist[dst] == math.inf else dist[dst]
+```
+
+</details>
