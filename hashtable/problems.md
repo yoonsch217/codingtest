@@ -13,5 +13,7 @@ ord() 함수로 count를 증가시킨 다음에 마지막에 counts list를 hash
 대신 tuple(counts)를 하면 빠른 시간에 hashable key 생성이 된다.
 
 
-
+Complexity
+- Time Complexity: O(NK) where N is the length of `strs`, and K is the maximum length of a string in `strs`.
+- Space Complexity: O(NK)
 
