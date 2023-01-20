@@ -16,6 +16,8 @@ recursion으로 row를 늘려가면서 invalid한 순간 멈추고 backtracking�
 diagonal or anti-diagonal의 경우는 `abs(cur_row - compare_row) == abs(cur_col - compare_col)` 으로 할 수 있다.   
 recursion이 끝날 때마다 occupied.pop() 을 해줘서 불필요한 copy를 막음으로써 시간 복잡도를 줄인다.   
 
+<details>
+    
 ```python
 class Solution:
     def totalNQueens(self, n: int) -> int:
@@ -46,6 +48,8 @@ class Solution:
         return self.cnt
 ```
 
+</details>
+
 Complexity:   
 solution 대로 하면 O(N!)/O(N)이다. set 비교하는 건 O(1)이니까 처음에 N개, 그 다음에 N-1, ... 해서 N!이다.    
 확실히 빠르네 솔루션이.
@@ -61,6 +65,8 @@ robot 객체에는 move, turnRight, turnLeft, clean 네 가지의 함수가 있�
 
 방문한 곳은 다시 방문하지 않는 것이 좋다. 따라서 visited set을 만들어서 들고 다닌다. 네 방향 다 살펴봤을 때 더이상 갈 곳이 없다면 처음의 위치로 backtracking을 한다. 이렇게 함으로써 맨 처음 기준으로 네 방향을 다 탐색할 수가 있다.
 
+<details>
+    
 ```python
 class Solution:
     def cleanRoom(self, robot):
@@ -91,6 +97,7 @@ class Solution:
         helper((0, 0), 0)
 ```
 
+</details>
 
 ### 50. Pow(x, n)
 
