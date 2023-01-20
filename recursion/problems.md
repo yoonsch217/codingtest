@@ -48,7 +48,33 @@ class Solution:
         return self.cnt
 ```
 
+```python
+# solution
+def get_valid_positions(row, col):
+    if col in cols or (row - col) in diagonals or (row + col) in anti_diagonals:
+        return 0
+    if row+1 >=n:  # 이 base case를 잘못 둬서 고생했다. 처음에는 row >= n 일 때 return 1을 하도록 했는데 이렇게 하면 n=4일 때 (4,0),(4,1),(4,2),(4,3) 모두 1을 return 하니까 n배 큰 답이 나온다.
+        return 1
+
+    cols.add(col)
+    diagonals.add(row-col)
+    anti_diagonals.add(row+col)
+    tmp = 0
+    for i in range(n):                
+        tmp += get_valid_positions(row+1, i)
+    cols.remove(col)
+    diagonals.remove(row-col)
+    anti_diagonals.remove(row+col)
+    return tmp
+
+res = 0
+for i in range(n):
+    res += get_valid_positions(0, i)
+```
+    
 </details>
+
+
 
 Complexity:   
 solution 대로 하면 O(N!)/O(N)이다. set 비교하는 건 O(1)이니까 처음에 N개, 그 다음에 N-1, ... 해서 N!이다.    
@@ -119,37 +145,3 @@ base case는 target_power가 0 혹은 1일 때이다.
 
 
 
-### 491. Non-decreasing Subsequences
-
-https://leetcode.com/problems/non-decreasing-subsequences
-
-문제: 숫자의 리스트가 주어진다. 숫자 범위는 -100에서 100 까지이고 리스트 길이는 최대 15이다. 이 리스트에서 non decreasing subsequence들의 리스트를 반환하라. subsequence는 붙어있을 필요가 없고 기존 리스트의 순서대로만 출현하면 된다.
-
-backtracking을 이용해야한다.   
-어떤 순간에 지금까지 만들어진 subsequence가 있을 때, 그 뒤의 숫자를 본다. 그 숫자가 최근보다 작으면 무시한다. 그렇지 않다면 두 가지 옵션이 있다. 그 숫자를 추가하든가, 무시하든가.   
-그 결과를 set에 저장해서 중복을 제거한다.   
-
-<details>
-
-```python
-class Solution:
-    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
-
-        res = set()
-        sequence = []
-
-        def backtrack(idx):
-            if idx == len(nums):
-                if len(sequence) > 1:
-                    res.add(tuple(sequence))
-                return
-            if not sequence or sequence[-1] <= nums[idx]:
-                sequence.append(nums[idx])
-                backtrack(idx+1)
-                sequence.pop()
-            backtrack(idx+1)
-        backtrack(0)
-        return list(res)
-```
-                                                        
-</details>
