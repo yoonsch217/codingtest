@@ -3,6 +3,8 @@
 여러 솔루션들을 탐색하면서(Constraint Satisfaction Problems or CSPs) 후보 솔루션들을 만들어낸다. 
 어떤 후보 솔루션이 답으로 갈 수 없음을 알게 되면 그 후보는 버린다.
 
+subsequences/combinations/permutations 문제의 경우 backtracking을 고려해야한다.
+
 개념적으로 tree traversal과 비슷하다. 어떤 노드에서 자식 노드를 iterate하다가 어떤 노드가 valid solution으로 갈 수 없음을 알게 되면 현재 노드를 버리고 부모 노드로 backtrack하여 다른 후보들을 본다.
 backtracking은 불필요한 탐색을 줄여주기 때문에 brute force보다 효율적이다.
 
