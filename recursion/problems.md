@@ -145,3 +145,105 @@ base case는 target_power가 0 혹은 1일 때이다.
 
 
 
+### 93. Restore IP Addresses
+
+https://leetcode.com/problems/restore-ip-addresses/description/
+
+문제: 길이가 1에서 15까지인 문자열이 주어졌고 각 문자는 digit이다. 이 문자열에 dot 세 개를 넣어서 만들 수 있는 valid ip address의 리스트를 반환하라. 각 숫자는 0 ~ 255 까지의 값이어야하고 cannot have leading zeros의 조건을 만족해야한다.
+
+
+iterative한 방법과 backtracking의 방법이 있다.   
+iterative한 건, is_valid(start_idx, end_idx)를 만들어 놓고 3중 for 문을 통해 각 위치에 dot을 넣는 것이다. 그래서 만들어진 4개의 part가 다 valid하면 정답에 추가한다.    
+
+<details>
+
+```python
+def restoreIpAddresses(self, s: str) -> List[str]:
+    n = len(s)
+    if n > 12 or n < 4:
+        return []
+
+    @lru_cache(maxsize=None)
+    def get_valid_value_or_none(start_idx, end_idx):
+        if end_idx - start_idx >= 3:
+            return None
+        if start_idx != end_idx and s[start_idx] == '0':
+            return None
+        value = 0
+        right = end_idx
+        while start_idx <= right:
+            value += int(s[right]) * pow(10, end_idx - right)
+            right -= 1
+        if 0 <= value <= 255:
+            return s[start_idx: end_idx+1]
+        return None
+
+    ans = []
+    for i in range(3):
+        for j in range(i+1, n-1):
+            if j >= i+4:
+                break
+            for k in range(j+1, n-1):
+                if k >= j+4:
+                    break
+                first = get_valid_value_or_none(0, i)
+                second = get_valid_value_or_none(i+1, j)
+                third = get_valid_value_or_none(j+1, k)
+                fourth = get_valid_value_or_none(k+1, n-1)
+                if any(res is None for res in [first, second, third, fourth]):
+                    continue
+                ans.append('.'.join([first, second, third, fourth]))
+
+    return ans
+```
+
+</details>
+    
+    
+backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack 시작하기 전에 dots.append(cur_dot_idx)하고 끝나면 dots.pop() 을 한다.   
+각 dot마다 iterate할 때는 세 번만 iterate하면 된다.   
+    
+<details>
+
+```python
+        @lru_cache(maxsize=None)
+        def get_valid_seq_or_none(start_idx, end_idx):
+            if end_idx - start_idx >= 3 or end_idx >= n:
+                return None
+            if start_idx != end_idx and s[start_idx] == '0':
+                return None
+            value = 0
+            right = end_idx
+            while start_idx <= right:
+                value += int(s[right]) * pow(10, end_idx - right)
+                right -= 1
+            if 0 <= value <= 255:
+                return s[start_idx: end_idx+1]
+            return None
+        
+        tmp_list = []
+        def backtrack(start_idx, remained_dots):
+            if start_idx >= n:
+                return
+            if remained_dots == 0:
+                valid_seq = get_valid_seq_or_none(start_idx, n-1)
+                if valid_seq:
+                    tmp_list.append(valid_seq)
+                    ans.append('.'.join(tmp_list))
+                    tmp_list.pop()
+
+            # start idx is the very next idx of the latest dot
+            # Verify if valid and put dot
+            for i in range(3):
+                valid_seq = get_valid_seq_or_none(start_idx, start_idx + i)
+                if valid_seq:
+                    tmp_list.append(valid_seq)
+                    backtrack(start_idx + i + 1, remained_dots - 1)
+                    tmp_list.pop()
+
+        
+        backtrack(0, 3)
+        return ans
+```
+
+</details>
