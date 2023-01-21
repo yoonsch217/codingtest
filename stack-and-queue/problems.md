@@ -9,6 +9,28 @@ decreasing monotonic stack을 사용한다.
 pop하는 원소는 그 index와 현재 index의 차이만큼 기다리면 현재 기온을 만나게 되는 것이므로 answer 리스트에는 그 index 차이를 저장한다.   
 각 원소에 대해 한 번씩만 작업을 하게 되므로 O(N) 시간이 걸리게 되고 stack을 위한 O(N) 공간이 필요하게 된다.   
 
+<details>
+    
+```python
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        n = len(temperatures)
+        stack = []
+        ans = [0] * n
+        for i in range(n):
+            if not stack:
+                stack.append(i)
+                continue
+            while stack and temperatures[stack[-1]] < temperatures[i]:
+                past_i = stack.pop()
+                ans[past_i] = i - past_i
+            stack.append(i)
+        
+        return ans
+```
+    
+</details>
+
 혹은 리스트를 뒤에서부터 iterate하면서 현재 날짜의 기온보다 높은 기온이 나오는 날을 찾는 방법도 있다.   
 지금까지의 가장 높은 기온을 저장하는 hottest variable을 두고 현재 기온이 hottest보다 높다면 hottest를 업데이트하고 continue한다.   
 이렇게 하는 이유는 그런 경우 더 따뜻한 날이 나올 수 없으므로 추가 작업이 필요 없기 때문이다.   
@@ -17,6 +39,31 @@ i+1의 온도가 더 낮다면 i+1+answer[i+1] 위치로 가서 또 비교한다
 더 높은 온도가 나올 때까지 반복을 하는데 이렇게 하면 각 원소마다 두 번씩만 작업을 하게 된다.(backward iterate할 때 한 번, jump하면서 날 찾을 때 한 번)   
 따라서 O(N) time에 O(1) space 답을 해결할 수 있다.   
 
+<details>
+
+```python
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        n = len(temperatures)
+        ans = [0] * n
+        hottest = 0
+
+        for i in range(n-1, -1, -1):
+            cur = temperatures[i]
+            if cur >= hottest:
+                hottest = cur
+                continue
+            comp_idx = i + 1
+            ans[i] += 1
+            while cur >= temperatures[comp_idx]:
+                ans[i] += ans[comp_idx]
+                comp_idx += ans[comp_idx]
+        
+        return ans
+
+```
+
+</details>
 
 
 ### 42. Trapping Rain Water
