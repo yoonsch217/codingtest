@@ -70,6 +70,71 @@ class Solution:
 
 https://leetcode.com/problems/trapping-rain-water/
 
+문제: integer array가 주어지고 각 index의 값들은 그 index 위치에서의 bar 높이이다. 얼만큼의 물이 고일 수 있는지 구하라.
+
+아이디어가 중요하다. brute force한 방법 먼저 생각해보자. 내가 처음 생각했던 건, 각 bar 기준으로 오른쪽으로 닿을 때까지 간 뒤에 닿게 되면 그만큼 물을 채우는 것이었다. 그런데 이렇게 하면 hole이 많아서 복잡해진다.   
+
+현재 위치 i에서 물이 차려면 i 기준 왼쪽과 오른쪽 둘 다에 i보다 높은 bar가 있어야한다.    
+`cur_trapped_water = min(left_max, right_max) - cur_height`
+각 위치 i 기준으로 왼쪽에서 가장 높은 bar의 높이가 저장된 left_maxs와 오른쪽으로 한 결과인 right_maxs를 만든 뒤 답을 구한다.   
+O(N) / O(N)
+
+<details>
+
+```python
+    def trap(self, height: List[int]) -> int:        
+        n = len(height)
+        total = 0
+
+        left_maxs = [0] * n  # i 기준 왼쪽 중에 가장 큰 값
+        right_maxs = [0] * n
+        left_max = right_max = 0
+        for i in range(1, n):
+            left_max = max(left_max, height[i-1])
+            left_maxs[i] = left_max
+        for i in range(n-2, -1, -1):
+            right_max = max(right_max, height[i+1])
+            right_maxs[i] = right_max
+
+        for i in range(n):
+            cur_trapped = min(left_maxs[i], right_maxs[i]) - height[i]
+            if cur_trapped > 0:
+                total += cur_trapped
+        
+        return total
+```
+
+</details>
+
+위의 방법은 두 번 iterate해야하는데 stack을 쓰면 한 번의 iterate로 가능하다.    
+decreasing monotonic stack을 만들면서 오른쪽으로 이동하는 것이다. 
+그러다가 pop해야할 상황, 즉 현재 높이가 더 큰 상황이 발생하게 되고 pop 하고도 stack에 값이 남아있다면 pop하는 위치 기준으로 left bar와 right bar(current bar)가 존재한다는 의미이다.   
+또한 left bar와 right bar 사이에 popped bar보다 높은 건 없고 popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다. 따라서 left bar에서 right bar까지는 popped bar 높이로 평평하다고 가정할 수 있다. 
+
+<details>
+
+```python
+    def trap(self, height: List[int]) -> int:        
+        n = len(height)
+        total = 0
+        stack = []
+
+        current = 0
+        while current < n:
+            while stack and height[current] > height[stack[-1]]:
+                top = stack.pop()
+                if not stack:
+                    break
+                distance = current - stack[-1] - 1
+                bounded_height = min(height[current], height[stack[-1]]) - height[top]
+                total += distance * bounded_height
+            stack.append(current)
+            current += 1
+        
+        return total
+```
+
+</details>
 
 
 ### 856. Score of Parentheses
