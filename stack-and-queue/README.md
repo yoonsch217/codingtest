@@ -13,7 +13,9 @@ linked list처럼 구현할 수가 있다.
 recurse하면서 stack에 데이터를 넣고 backtrack하면서 하나씩 없애는 방식이다.     
 또한 recursive 알고리즘을 iterative 알고리즘으로 바꿀 때 사용할 수도 있다.  
 
-Python에서는 list가 stack의 역할을 한다.
+Python에서는 list가 stack의 역할을 한다.   
+
+recursion도 stack을 이용한 것이다. call stack.
 
 ### Queue
 
