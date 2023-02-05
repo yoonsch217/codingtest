@@ -258,6 +258,30 @@ Complexity
 - Space Complexity: O(V)
 
 
+## Kahn's Algorithm for Topological Sorting
+
+Directed Acyclic Graph에서 vertex 사이에 순서가 있을 때 linear sorting을 제공한다.
+Prerequisite가 있는 course를 듣는 순서를 정하는 상황이 하나의 예이다. cycle이 있으면 불가능하다.
+
+in-degree 라는 값이 있다. 해당 vertex에 대해 required vertex가 몇 개가 남았는지를 나타낸다. required vertex 중 하나가 처리되면 in-degree 값은 1 감소한다. 맨 처음 시작할 때는 in-degree 값이 0인 vertex를 찾아서 시작한다.    
+기본적으론 V 개의 vertex에 대해서 모든 E 만큼 반복해야하기 때문에 O(VE) 시간이 걸리고 O(V) 공간이 필요하다.   
+
+하지만 adjacency list를 만들어서 `adj_list[course]` 가 course에 dependent한 course를 저장한다면 O(V+E) time과 O(V+E) space가 필요하다. 처음 adj list 만들 때 O(E) 시간이 필요하고 그 이후에는 vertex 방문할 때마다 연결된 edge만 찾아서 in-degree를 줄여주면 된다. 연결된 edge만 방문하기 때문에 전체 작업을 수행하면 edge는 한 번씩만 방문된다. space의 경우는 adj list 만드는 데 O(E) 공간이 필요하고 in-degree 값 저장하는 데 O(V) 공간이 필요하다.
+
+DAG 에서만 가능하다. in-degree가 0인 vertex가 하나는 있어야 가능하다. 
+
+https://leetcode.com/problems/course-schedule-ii/
+
+
+
+
+
+
+
+
+
+
+
 
 # 전략
 
