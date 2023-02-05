@@ -2,13 +2,55 @@
 
 https://leetcode.com/problems/course-schedule-ii/
 
-문제: numCourses와 prerequisites가 주어진다. prerequisites은 어떤 수업을 듣기 위해서 다른 수업을 들어야할 때가 있는데 그 정보가 있다. 들어야하는 수업 순서를 반환하라. 불가능하면 `[]`를 반환하라.
+문제: numCourses와 prerequisites가 주어진다. prerequisites은 어떤 수업을 듣기 위해서 다른 수업을 들어야할 때가 있는데 그 정보가 있다. 들어야하는 수업 순서를 반환하라. 불가능하면 `[]`를 반환하라. `prerequisites[i] = [ai, bi]` indicates that bi must be taken before course ai.
 
-Topological sort 문제이다. 먼저 defaultdict을 사용해서 adjacent list를 생성한다.    
-그리고 각 노드마다 state를 둔다. WHITE는 방문한 적 없는, DFS를 시작할 노드이다. GREY는 방문한 적 있지만 아직 마지막까지 안 간 노드이다. BLACK은 그 노드에 대한 모든 작업을 마친 노드이다.   
-모든 노드에 대해 iterate하면서 WHITE 상태이면 DFS를 한다. 그리고 DFS하면서 그 노드가 BLACK이 되면 topologically sorted array에 차례대로 추가를 한다.   
-그 topologically sorted array를 뒤집은 게 정답이다.   
-그리고 cycle이 있으면 불가능해진다. 따라서 DFS를 하다가 GREY를 다시 만난다면 cycle이 있는 것이므로 실패를 반환한다.
+
+Kahn's Algorithm
+
+<details>
+
+```python
+    def findOrder(self, n: int, courses: List[List[int]]) -> List[int]:
+        ordered_courses = []
+        
+        in_degrees = [0] * n  # in_degree[i] indicates the number of required courses to take course i
+        adj_list = defaultdict(list)
+        for next_course, required_course in courses:
+            adj_list[required_course].append(next_course)
+            in_degrees[next_course] += 1
+        
+        queue = deque()
+        for i in range(n):
+            if in_degrees[i] == 0:
+                queue.append(i)
+        
+        while queue:
+            cur = queue.popleft()
+            ordered_courses.append(cur)
+
+            for next_course in adj_list[cur]:
+                in_degrees[next_course] -= 1
+                if in_degrees[next_course] == 0:
+                    queue.append(next_course)
+        
+        if len(ordered_courses) == n:
+            return ordered_courses
+        return []
+```
+
+</details>
+
+Time: O(V+E), Space: O(V+E)이다.
+
+DFS를 이용한 방법도 있다.   
+adjacency list를 만들고 모든 vertex를 white 상태로 저장하고 시작한다.   
+어떤 하나의 vertex부터 DFS를 한다.   
+DFS를 진행하면서 방문하는 vertex는 gray 상태로 바꾸면서 진행한다.   
+어떤 gray vertex에서 더 이상 outbound가 없다면 그 vertex는 가장 나중에 들어야하는 course일 것이다. 그 course에 dependent한 게 없기 때문에.   
+그럼 그 vertex는 black으로 바꾸고 결과 stack에 추가한다.   
+이후에 black vertex는 이미 처리가 됐으므로 없는 vertex라고 생각하면 된다. 즉, 어떤 gray vertex의 outbound가 black만 있다면 outbound가 없다고 생각하면 되므로 stack에 추가한다.   
+gray vertex의 outbound에 gray vertex가 있다면 cycle이 있는 것이기 때문에 순서를 정할 수가 없는 graph이다.   
+Time: O(V+E), Space: O(V+E)이다.
 
 
 ### 95. Unique Binary Search Trees II
