@@ -29,5 +29,16 @@ https://www.geeksforgeeks.org/heapq-with-custom-predicate-in-python/
 d.items() 로 iterate하면 (key, value) 의 tuple을 iterate한다.   
 d.values() 로 iterate하면 value만 iterate한다.
 
+Get the key with the lowest value
+```
+>>> d = {320: 1, 321: 0, 322: 3}
+>>> min(d, key=d.get)
+321
+```
+
+dict에서 key 제거하기
+`my_dict.pop('key', None)`: key가 없으면 None이 반환되고 있으면 `my_dict['key']`가 반환된다.   
+`del my_dict['key']`: key가 없으면 KeyError가 raise된다.
+
 
 
