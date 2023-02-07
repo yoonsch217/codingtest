@@ -43,4 +43,40 @@ https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/174081
 
 
 
+### 904. Fruit Into Baskets
+
+https://leetcode.com/problems/fruit-into-baskets/description/
+
+문제: fruits 라는 리스트가 주어지고 각 index에 있는 값은 그 위치에 있는 과일을 의미한다. 과일이 리스트대로 일렬로 나열되어 있고 사용자는 어느 한 지점부터 오른쪽으로 과일을 주워담는다. 최대 두 종류의 과일까지 담을 수 있고 그걸 넘어서는 순간 담을 수 없고 멈춰야한다. 최대로 많이 담을 수 있는 과일의 수를 구하라.
+
+최대라는 말에 꽂혀서 dp로 생각하려다가 도저히 일반식이 안 나왔다.   
+related topic을 보니까 sliding window가 나와서 그 방법으로 풀었다.   
+
+최대 길이가 2인 dictionary를 만들고 key는 fruit, value는 그 fruit이 지금까지 나온 위치 중 가장 오른쪽 위치를 저장한다. left, right 포인터를 두고 right 포인터를 하나씩 오른쪽으로 옮긴다. 그러다가 3번째의 과일이 나오게 되면 left 포인터를 옮겨야한다. 이 때 dictionary를 이용하는데 dictionary에 있는 두 가지 과일 중 더 왼쪽에 있는 과일을 버려야한다. 그 과일의 위치 바로 다음부터가 동일한 과일이 연속으로 나오기 시작한 위치이기 때문에 거기에 left 포인터를 놓고 현재 right의 과일을 dictionary에 추가한다. 그러면 두 종류의 과일이 유지된다.
+
+<details>
+  
+```python
+def totalFruit(self, fruits: List[int]) -> int:
+    n = len(fruits)
+    d = {}  # key: fruit, value: rightmost index of the fruit
+    res = 0
+
+    left = right = 0  # fruits[left:right+1] 까지를 대상으로 한다. right is the current pointer
+
+    while right < n:
+        cur = fruits[right]
+        if cur not in d and len(d) >= 2:
+            # Move left pointer to the position where the only very previous fruit started to appear before the current fruit
+            fruit_to_drop = min(d, key=d.get)
+            left = d[fruit_to_drop] + 1  # This is the position where the other fruit starts to appear consecutively
+            del d[fruit_to_drop]
+        d[cur] = right
+        res = max(res, right - left + 1)
+        right += 1
+
+    return res
+```
+
+</details>
 
