@@ -1,3 +1,4 @@
+## 개념
 
 ### Tree
 
@@ -39,7 +40,7 @@ balanced라는 조건이 없으면 root가 median이라는 보장이 없다.
 
 
 
-### Binary Tree Traversal
+## Binary Tree Traversal
 
 - in-order traversal
 inOrder(node.left) => visit(node) => inOrder(node.right)
@@ -52,7 +53,11 @@ postOrder(node.left) => postOrder(node.right) => visit(node)
 root가 제일 마지막에 visit된다.
 
 
-in-order 을 iterative하게 하는 법: stack을 둔다.
+recursive한 거는 iterative하게 구현할 수 있다. recursion도 call stack을 사용한다.
+
+
+
+iterative한 in-order 탐색
 ```python
 while stack or root:
   while root:
@@ -62,3 +67,19 @@ while stack or root:
   # operation
   root = root.right
 ```
+
+iterative한 pre-order 탐색
+
+```python
+while stack:
+    curr_node = stack.pop()
+    if curr_node:
+        # operation
+        stack.append(curr_node.right)
+        stack.append(curr_node.left)
+
+return answer
+```
+
+### Moris Traversal
+
