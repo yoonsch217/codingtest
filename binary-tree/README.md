@@ -81,5 +81,108 @@ while stack:
 return answer
 ```
 
+이 traversal은 O(n) time / O(n) space 가 필요하다.
+
 ### Moris Traversal
+
+O(1) space로 탐색하는 방법이다.
+
+- preorder
+
+O(n) space가 필요했던 이유는 각 노드에서 left child를 모두 탐색했는지를 확인해야 parent로 return한 후에 right child로 갈 수 있기 때문이다.
+하지만 left subtree의 마지막 노드와 root를 연결시킨다면 이 오버헤드를 O(1) space로 줄일 수 있다.
+
+1. res list를 만들고 cur, last 두 개의 pointer를 만든다. cur은 처음에 root부터 시작을 한다.
+2. cur에게 left child가 있는지 확인한다.
+   - left child가 있다면 left subtree의 rightmost node를 찾아서 그 node의 right child를 cur로 연결한다. 
+   나중에 cur를 다시 방문하는 경우가 생기는데 그때를 인지할 수 있어야한다. 
+   다시 cur를 방문한 경우 left subtree의 rightmost child를 찾으려고 할 때 cur를 또 다시 방문할 것이다.
+   그런 경우 right subtree로 넘어가도록 한다.
+   - left child가 없다면 cur를 res에 추가를 한다.
+
+rightmost의 right child를 cur.right로 연결하면 안되나 생각도 했었다.   
+그런데 그렇게 하면 right subtree로 넘어가는 타이밍을 모르고 노드들이 서로 계속 연결만 돼서 무한 루프가 생길 수 있다.   
+
+
+O(n) time / O(1) space가 필요하다.   
+각 노드는 최대 두 번 방문이 될 수 있다.   
+
+<details>
+
+```python
+def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+    answer = []
+    curr = root
+    
+    while curr:
+        # cur에 대해서 left child가 없으면 cur에 대한 작업을 하고 right child로 간다.
+        # leaf node라도 right most한 node에 대해 그 당시의 root로 연결해놨기 때문이다. 없으면 loop가 끝난다.
+        if not curr.left:
+            answer.append(curr.val)
+            curr = curr.right
+
+        else:
+            last = curr.left
+            # while last.right 조건은 단순히 rightmost를 찾는 조건이다.
+            # while last.right != curr 조건이 중요한데,
+            # cur와 left subtree의 rightmost node가 같아지는 순간이 올 수 있다. 이 때는 cur이 rightmost를 통해 다시 방문된 경우이다.
+            # 이 cur는 이미 방문된 node이며 방문될 때 rightmost의 right로 연결이 되었다. 그 rightmost가 방문되고 다시 이 cur로 돌아온 것이다.
+            # 따라서 지금의 cur.left의 rightmost를 따라가다보면 다시 cur가 방문된다.
+            # 이 경우 cur는 이미 처리됐으므로 cur.right로 가야한다.
+            while last.right and last.right != curr:
+                last = last.right
+                
+            if not last.right:
+                # rightmost node를 찾은 상황이다. cur와 연결해주고 cur를 처리한 뒤에 left로 넘어간다.
+                answer.append(curr.val)
+                last.right = curr
+                curr = curr.left
+            else:
+                # last.right == curr 인 상황으로 curr에 두 번째 방문한 상황이다. curr의 right subtree로 넘어가야한다.
+                last.right = None  # 원래 상태로 복구
+                curr = curr.right
+    
+    return answer
+```
+
+</details>
+
+
+- inorder
+
+동일한 개념이다.
+
+1. root부터 cur로 놓는다.
+2. cur의 left가 없으면, cur에 대해 처리하고 cur = cur.right 로 옮겨준다.
+3. cur의 left가 있으면, cur를 left subtree의 rightmost node의 right child로 설정해준다. 그 뒤에 cur = cur.left로 옮겨준다.
+
+
+<details>
+
+```python
+def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+    res = []
+
+    cur = root
+    while cur:
+        if cur.left:
+            last = cur.left
+            while last.right is not None and last.right != cur:
+                last = last.right
+            if last.right == cur:
+                # rightmost의 right child로 연결되어 다시 방문한 상황이다.
+                res.append(cur.val)
+                cur = cur.right
+                continue
+            last.right = cur
+            cur = cur.left
+        else:
+            res.append(cur.val)
+            cur = cur.right
+    
+    return res
+```
+
+
+</details>
 
