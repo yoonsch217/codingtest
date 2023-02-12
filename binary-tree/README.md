@@ -40,7 +40,7 @@ balanced라는 조건이 없으면 root가 median이라는 보장이 없다.
 
 
 
-## Binary Tree Traversal
+## Traversal
 
 - in-order traversal
 inOrder(node.left) => visit(node) => inOrder(node.right)
@@ -51,6 +51,9 @@ root부터 시작하는 traversal이다.
 - post-order traversal
 postOrder(node.left) => postOrder(node.right) => visit(node)
 root가 제일 마지막에 visit된다.
+- level-order traversal
+queue를 두고 traverse한다.    
+recursion을 이용할 수도 있다. preorder traverse하면서 level을 저장하면서 맞는 level에 append한다. result list의 길이가 현재의 level보다 크지 않다면 빈 list를 append함으로써 현재 level에 맞는 공간을 만들어준다.
 
 
 recursive한 거는 iterative하게 구현할 수 있다. recursion도 call stack을 사용한다.
@@ -185,4 +188,41 @@ def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 
 
 </details>
+
+
+
+## Top-down vs Bottom-up
+
+### Top-down
+
+preorder traversal과 유사하다.   
+
+recursive function `top_down(node, params)`은 다음과 같다. 예시로 binary tree의 maximum depth를 구하는 것이 있다.
+
+1. null node에 대한 base case를 정의한다. (`if node is None: return`)
+2. ans를 업데이트해야하면 업데이트한다. (leaf node라면 `ans = max(ans, cur_depth)` 로 업데이트한다.)
+3. left_ans = top_down(node.left, left_params) 로 left subtree에 대한 답을 구한다. (`top_down(node.left, cur_depth+1)` 호출)
+4. right_ans = top_down(node.right, right_params) 로 right subtree에 대한 답을 구한다.
+5. 필요 시 return ans (recursion이 끝나면 `return ans`)
+
+
+
+### Bottom-up
+
+child node로 recursive하게 호출한 후 child node에서 return한 값과 current node의 값을 통해서 결과를 계산한다.   
+postorder traversal과 유사하다.   
+이것도 마찬가지로 binary tree의 maximum depth를 구할 수 있다.   
+
+1. base case를 정의한다. (`if node is None: return 0`)
+2. left_ans = bottom_up(node.left) (`left_depth = bottom_up(node.left)`)
+3. right_ans = bottom_up(node.right)
+4. return answer (`return max(left_depth, right_depth) + 1`)
+
+
+어떤 recursion에서 답을 구할 수 있는 parameter를 정할 수 있는가? 그 parameter와 현재 노드의 값을 통해 child node에게 전달할 parameter를 구할 수 있는가?   
+둘 다 맞다면 top down을 사용할 수 있다.
+
+어떤 노드에서, 그 children의 답을 안다면 현재 노드에 대한 답을 구할 수 있는가? 그렇다면 bottop up을 사용할 수 있다.
+
+
 

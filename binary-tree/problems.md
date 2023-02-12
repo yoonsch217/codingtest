@@ -36,3 +36,89 @@ https://leetcode.com/problems/step-by-step-directions-from-a-binary-tree-node-to
 대신에 root에서 DFS로 각각의 노드를 찾는다. 찾게 되면 recursion 탈출하면서 경로를 만들 수 있다.   
 각각에 가는 path를 찾게 되면 common prefix를 찾아서 없앤다. 그 뒤에 start path는 다 U로 바꾸고 dest path를 추가해주면 된다.   
 DFS는 이렇게 구현했다: base case로는 node가 없으면 return None, target node이면 []를 반환하도록 했다. 그리고 left child와 right child를 각각 recursive 호출하면서 None이면 무시, 아니면 어디로 갔는지를 기록해준다. 이 때 처음에 틀린 거는, 이렇게 append하면 root에서의 path는 거꾸로 봐야한다는 점을 놓쳤었다.
+
+
+### 101. Symmetric Tree
+
+https://leetcode.com/problems/symmetric-tree/description/
+
+문제: binary tree의 root가 주어졌을 때 그 binary tree가 symmetric한지 구하라. 세로선을 기준으로 접었을 때 동일하게 겹쳐야 symmetric한 것이다.
+
+level traversal 하는 방법으로 풀 수 있다.   
+각 level의 list가 symmetric하면 다음 level로 넘어간다. symmetric하지 않으면 False return해야한다.   
+이 때 주의할 점이 몇 가지 있다. 어떤 node의 child가 None이라도 next list에는 추가해줘야한다. 그래야 자리까지 정확히 symmetric한지 알 수 있다.   
+그 next list를 갖고 다음 iteration을 할 때는 None인 node는 무시해도 된다. 이미 이전까지의 자리를 확인했기 때문에 유효한 node에 대해서만 추가로 진행하면 된다.   
+
+<details>
+
+```python
+def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+    queue = deque([root])
+    while queue:
+        next_list = []
+        while queue:
+            cur = queue.popleft()
+            if cur is None:
+                continue
+            next_list.append(cur.left)
+            next_list.append(cur.right)
+        n = len(next_list)
+        for i in range(n//2):
+            if next_list[i] is None and next_list[n-1-i] is None:
+                continue
+            if next_list[i] is None or next_list[n-1-i] is None or next_list[i].val != next_list[n-1-i].val:
+                return False
+
+        queue = deque(next_list)
+    return True
+```
+
+</details>
+
+역시 solution이 더 깔금하다...   
+큐를 두고 처음에는 `[root, root]`를 넣는다. 처음 root는 왼쪽 subtree에 대한 root, 두 번째 root는 right subtree에 대한 root이다.   
+그러고 두 개씩 pop을 하면서 left와 right를 동시에 비교한다. left subtree에 있는 노드에 대해서는 left, right 순서로 큐에 넣고, right subtree에 있는 노드는 반대 순서로 넣는다.   
+
+<details>
+
+```python
+def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+    queue = deque([root, root])
+    while queue:
+        left = queue.popleft()
+        right = queue.popleft()
+        if left is None and right is None:
+            continue
+        if left is None or right is None:
+            return False
+        if left.val != right.val:
+            return False
+        queue.append(left.left)
+        queue.append(right.right)
+        queue.append(left.right)
+        queue.append(right.left)
+    return True
+```
+
+</details>
+
+
+left와 right 각각을 위해 root를 두 번 넣는 것이 핵심이다.
+
+비슷한 방식으로 recursive 하게도 할 수 있다. 
+
+<details>
+
+```python
+def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+    def is_mirror(left_node, right_node):
+        if left_node is None and right_node is None:
+            return True
+        if left_node is None or right_node is None:
+            return False
+        return left_node.val == right_node.val and is_mirror(left_node.left, right_node.right) and is_mirror(left_node.right, right_node.left)
+    
+    return is_mirror(root, root)
+```
+
+</details>
