@@ -108,6 +108,51 @@ i-1번째와 같은 색으로 칠하는 방법의 수는, i-2와 i-1이 서로 �
 따라서 dp(i) = (k-1) * (dp(i-1) + dp(i-2))이다.   
 
 
+### 518. Coin Change II
+
+https://leetcode.com/problems/coin-change-ii
+
+문제: coins 라는 리스트는 사용할 수 있는 coin 종류가 있고 amount라는 int가 있다. coins에 있는 coin으로 amount를 만드는 조합의 수를 구하라.
+
+내 풀이   
+```
+dp(i, upper): Number of combinations to make up i with using coins not bigger than upper
+dp(i, upper) = dp(i-coin, coin) for k in coins not greater than upper
+dp(0) = 1
+dp(i) = 0 if i < 0
+```
+
+number of coins = k 라고 할 때, O(k * (amount / min(coins))) 가 시간 복잡도 아닐까.    
+amount / min(coins) 만큼 recursion 함수가 호출되고 각 recursion마다 len(coins) 만큼 iterate하니까?   
+
+
+solution은 훨씬 간단하다. solution도 복잡도는 O(len(coins) * amount) / O(amount) 인데 실제 수행 시간은 훨씬 빠르다.
+
+<details>
+
+```python
+def change(self, amount: int, coins: List[int]) -> int:
+    dp = [0] * (amount + 1)
+    dp[0] = 1
+    
+    for coin in coins:
+        for x in range(coin, amount + 1):
+            """
+            dp[x - coin]: 지금 dp(x-1) 까지는 답이 구해진 상태이다. climbing stairs 처럼 생각을 하면 된다.
+            현재 coin을 더 사용할 수 있다면 dp(x)는 기존의 dp(x)에다가 dp(x-coin)을 더한 게 된다.
+            climbing stairs 같은 경우는 permutation이지만 지금은 combination이기 때문에 coin을 순서대로 사용해야한다.
+            """
+            dp[x] += dp[x - coin]  
+    return dp[amount]
+```
+
+</details>
+
+
+
+
+
+
 ---
 
 
