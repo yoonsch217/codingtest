@@ -150,6 +150,92 @@ def change(self, amount: int, coins: List[int]) -> int:
 
 
 
+### 91. Decode Ways
+
+https://leetcode.com/problems/decode-ways/description/
+
+문제: 숫자 1부터 26은 각각 A부터 Z까지 매핑될 수 있다. 숫자로 이루어진 문자열이 주어졌을 때 치환할 수 있는 알파벳 문자열의 종류를 구하라. 06으로 묶는 건 불가능하다. 
+
+언제나 dp(i)에 대한 일반식을 구하는 게 먼저이다.   
+dp(i)는, 
+- tmp = 0
+- if s[i] is valid, tmp += dp(i-1)
+- if s[i-1:i+1] is valid, tmp += dp(i-2)
+- dp(k) = 1, where k < 0
+- if tmp == 0, break and return 0
+
+어떤 문자열에서 하나가 추가됐을 때, 유효하다면 그 결과는 바뀌지 않고 이전 결과가 그대로 된다. 
+왜냐하면 추가됐을 때 valid한 조건이 그대로 유지되는 거지 뭔가가 경우의 수가 증가한 게 아니기 때문이다.   
+이런 개념에서, dp(i)는 뒤에서부터 하나씩 짤라가며 s[i-k : i+1] 가 valid하면 dp(i-k-1)을 추가해준다.   
+그런데 뒤에서부터 자를 때 세 개 이상 자르면 valid할 수가 없다. 최대 두자릿수이기 때문이다.   
+그리고 0이 나오면 바로 break하도록 했는데 0이 나온 뒤에는 뭘 붙여도 valid할 수가 없기 때문이다.   
+
+조금 설명하면서도 이상하긴한데.. 논리는 맞았다.
+
+
+<details>
+
+```python
+def numDecodings(self, s: str) -> int:
+    n = len(s)
+    memo = [0] * (n+2)
+    memo[-1] = 1
+    memo[-2] = 1
+
+    def is_valid(target: str) -> bool:
+        if len(target) not in [1, 2]:
+            return False
+        if target[0] == '0':
+            return False
+        target_int = int(target)
+        if target_int > 26:
+            return False
+        return True
+
+    for i in range(n):
+        tmp = 0
+        if is_valid(s[i]):
+            tmp += memo[i-1]
+        if i > 0 and is_valid(''.join(s[i-1:i+1])):
+            tmp += memo[i-2]
+        if tmp == 0:
+            break
+        memo[i] = tmp
+        print(tmp)
+    
+    return memo[n-1]
+```
+
+근데 constant space로도 할 수 있겠다. 최근 것만 쓰니까.
+
+솔루션은 같은 논리인데 코드가 더 간단한다.
+
+```python
+        if s[0] == "0":
+            return 0
+    
+        two_back = 1
+        one_back = 1
+        for i in range(1, len(s)):
+            current = 0
+            if s[i] != "0":
+                current = one_back
+            two_digit = int(s[i - 1: i + 1])
+            if two_digit >= 10 and two_digit <= 26:
+                current += two_back
+            two_back = one_back
+            one_back = current
+        
+        return one_back
+```
+
+</details>
+
+
+
+
+
+
 
 
 
