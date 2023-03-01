@@ -49,6 +49,26 @@ min, max를 사용하지 않고 count를 합치는 형태의 dp 문제이다.
 number of ways를 구하는 문제로 나올 수 있다.   
 다른 dp들과 다르게 base case나 out of bound case가 보통은 0이 아니다.
 
+
+### Kadane's Algorithm
+
+integer array가 주어졌을 때 maximum sum subarray를 구하는 알고리즘이다.   
+O(N) time, O(1) space만에 구할 수가 있다.   
+array를 iterate하면서 각 index마다 이전까지의 결과를 갖고 갈지 버릴지를 결정한다.
+
+1. best = negative infinity
+2. current = 0
+3. for num in nums:
+    3.1. current = Max(current + num, num)
+    3.2. best = Max(best, current)
+4. return best
+
+이게 모든 case를 다 cover할까? 
+i ~ j 의 범위가 답이라고 해보자. 그럼 ? ~ i-1과 j+1 ~ ? 는 음수일 것이다. 
+그렇다면 앞에서부터 iterate할 때 index가 i-1까지 가고 i에 도달하게 되면 지금까지의 답을 버리게 된다. 
+따라서 i ~ j 구간을 cover하게 된다.
+
+
 ## 전략
 
 - state variable을 찾고 dp(i)의 표현식을 찾는다. 여러 상황에 대한 합으로 만들어질 수 있으니 상황 분석을 잘 하자.   
