@@ -244,8 +244,102 @@ https://leetcode.com/problems/maximum-sum-circular-subarray
 
 Kadane's Algorithm
 
+두 가지로 나눌 수가 있다.
+- array 안에 포함되는 subarray
+- for i < j, index i에서부터 끝까지의 subarray 와 처음부터 j까지의 subarray를 연결한 array
+
+첫 번째는 Kadane's algorithm으로 구할 수 있다.
+
+두 번째는 또 여러 step으로 이루어진다. subarray를 이루는 두 개의 subarray가 하나는 맨 왼쪽이 index 0이고 하나는 맨 오른쪽이 index n-1임을 이용한다.
+- rightMax(i)를 시작이 i 이후이고 끝이 n-1인 subarray들 중에 가장 sum이 큰 값으로 정의한다.
+- ~leftMax(i)를 시작이 0이고 끝이 i 이전인 subarray들 중에 가장 sum이 큰 값으로 정의한다.~
+- ~그러면 두 번째 케이스에 대해서는, i를 1부터 n-1까지 이동하면서 leftMax(i-1) + rightMax(i) 들 중 가장 큰 값이 된다.~
+- leftMax를 할 필요가 없이 그냥 prefixSum으로 하는 게 더 간단하다. 
+- i를 0부터 n-2까지 증가하면서 prefixSum을 업데이트한다. sepcialSum(i) = max(specialSum(i-1), prefixSum(i) + rightMax(i+1))
+
+이렇게 첫 번째 case와 두 번째 case 의 결과 중 큰 값이 정답이다.   
+O(N) time, O(N) space
+
+<details>
+
+```python
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        n = len(nums)
+        
+        # Kadane's Algorithm for a single array answer
+        single_answer = -math.inf
+        cur = 0
+        for num in nums:
+            cur = max(num, cur+num)
+            single_answer = max(single_answer, cur)
+        
+        # Circular array answer
+        right_max = [-math.inf] * n
+        right_max[n-1] = nums[n-1]
+        postfix = nums[n-1]
+        for i in range(n-2, -1, -1):
+            num = nums[i]
+            postfix += num
+            right_max[i] = max(right_max[i+1], postfix)
+        
+        prefix = 0
+        circular_answer = -math.inf
+        for i in range(n-1):
+            num = nums[i]
+            prefix += num
+            circular_answer = max(circular_answer, prefix + right_max[i+1])
+        
+        return max(single_answer, circular_answer)
+```
+
+이게 내 solution인데 앞에서부터 iterate하는 건 Kadane's algorithm이랑 circular 작업에서랑 둘 다 존재하고 있다.
+이 두 작업을 같은 iteration에서 하는 게 더 효과적이다.
 
 
+
+</details>
+
+O(N) time, O(1) space를 사용하는 풀이법도 있다.
+
+이 문제를 다시 생각해보면 하나의 array에서 max sum subarray를 찾는 건데 그게 한번에 이어져있든, 끝과 처음을 통해 이어져있든 상관 없는 것이다.   
+한번에 이어진 경우는 여전히 기본 Kadane's algorithm으로 구할 수 있다.   
+끝과 처음을 통해 이어진 경우를 다른 방식으로 풀 수 있는데, 전체 array에서 가운데 subarray를 뺀 것이라고 생각하면 된다.   
+그러면 전체 array sum에서 minimum sum subarray를 구해서 그 부분을 빼면 된다.
+
+- Kadane's algorithm을 통해 normal answer 구하기
+- 전체를 더한 arraySum 구하기
+- Kadane's algorithm을 변형하여 minimum sum subarray를 구하기
+- arraySum - minSum 이 linked answer가 된다. 
+- 그런데 만약 minSum이 arraySum과 같다면? 전체 array가 min sum subarray라면 그걸 뺀 subarray는 invalid하다. 그런 경우는 normal answer를 반환하면 된다.
+- 근데 arraySum == minSum 이라면 arraySum - minSum은 0이 될 테지. 
+arraySum이 양수라면, array에 최소 하나의 양수가 있다는 거다. 그런데 minSum이 동일하려면 그 양수 하나밖에 없어야한다. 음수가 있다면 그게 min sum이 될 테고, 다른 양수가 있다면 덜 합치는 게 minSum이 돼야한다. 양수가 하나만 있다면 그건 normal answer에서 다뤄지니까 linked answer는 무시할 수 있다. 
+arraySum이 음수라면, minSum이 동일하려면 그 array에는 양수가 없어야한다. 왜냐하면 양수가 있다면 minSum은 그 양수를 포함하지 않을테고 그러면 arraySum != minSum이 되기 때문이다. 다 음수라면 그 값은 normal answer보다 클 수가 없다. normal answer은 그 중에서 가장 작은 값 하나만 골랐을 것이기 때문이다. normal answer이 음수가 되고 linked answer이 0이 되기 때문에 단순히 max(normal answer, linked answer) 하면 안 된다. 따라서 이 case에 대한 예외 처리를 해줘야한다.
+
+<details>
+
+```python
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        max_sum = -math.inf
+        min_sum = math.inf
+
+        total_sum = 0
+        max_cur = min_cur = 0
+        for num in nums:
+            max_cur = max(max_cur + num, num)
+            min_cur = min(min_cur + num, num)
+            total_sum += num
+
+            max_sum = max(max_sum, max_cur)
+            min_sum = min(min_sum, min_cur)
+        
+        if min_sum == total_sum:
+            return max_sum
+        return max(max_sum, total_sum - min_sum)
+```
+
+</details>
 
 
 

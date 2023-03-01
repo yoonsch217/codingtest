@@ -68,6 +68,7 @@ i ~ j 의 범위가 답이라고 해보자. 그럼 ? ~ i-1과 j+1 ~ ? 는 음수
 그렇다면 앞에서부터 iterate할 때 index가 i-1까지 가고 i에 도달하게 되면 지금까지의 답을 버리게 된다. 
 따라서 i ~ j 구간을 cover하게 된다.
 
+https://leetcode.com/problems/maximum-sum-circular-subarray
 
 ## 전략
 
