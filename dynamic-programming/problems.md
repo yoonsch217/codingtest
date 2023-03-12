@@ -343,6 +343,63 @@ class Solution:
 
 
 
+### 62. Unique Paths
+
+https://leetcode.com/problems/unique-paths/description/
+
+문제: robot이 m x n grid의 제일 왼쪽 위에 놓여져있고 오른쪽이나 아래로만 움직일 수 있다. grid의 제일 오른쪽 아래에 갈 수 있는 경로의 수를 구하라.
+
+
+내 solution: top down
+
+- starts from (0, 0), ends at (m-1, n-1)
+- dp(i, j): Number of possible ways to reach the end when the robot is at (i, j) position.
+- dp(i, j) = 0 if (i, j) is out of the grid, 1 if (i, j) is the target, dp(i+1, j) + dp(i, j+1) otherwise.
+
+<details>
+
+```python
+        @lru_cache(maxsize=None)
+        def getUniquePaths(i, j):
+            if i == m-1 and j == n-1:
+                return 1
+            if not 0 <= i < m or not 0 <= j < n:
+                return 0
+            return getUniquePaths(i+1, j) + getUniquePaths(i, j+1)
+        
+        return getUniquePaths(0, 0)
+```
+
+</details>
+
+
+내 solution: bottom up
+
+- The answer for (i, j) position is the sum of the answer of (i+1, j) and the answer of (i, j+1)
+- The answer for (m-1, n-1) position is 1.
+- Starting from (m-1, n-1) position, moving left and when it reaches the leftend, go to the upper rightend and moving left again, it gets the current answer from the previous answer.
+
+
+<details>
+
+```python
+prev_row = [0] * n
+prev_row[-1] = 1
+cur = 0
+for i in range(m-1, -1, -1):
+    for j in range(n-1, -1, -1):
+        if j == n-1:
+            cur = prev_row[j]
+        else:
+            cur += prev_row[j]
+        prev_row[j] = cur
+
+return cur
+```
+
+</details>
+
+
 ---
 
 
