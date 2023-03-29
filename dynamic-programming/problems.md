@@ -402,6 +402,80 @@ return cur
 https://leetcode.com/problems/unique-paths-ii/description/ 이 문제도 있는데 obstacle만 추가된 문제이다. out of grid 조건에 is_obstacle 조건만 추가하면 된다.
 
 
+
+
+
+### 64. Minimum Path Sum
+
+https://leetcode.com/problems/minimum-path-sum/description/
+
+문제: m x n grid에서 non-negative 숫자로 채워져있다. top left에서 right bottom으로 가야하는데 오른쪽 혹은 아래로만 움직일 수 있다. 가는 길에 있는 숫자의 합이 최소가 되도록 가라.
+
+
+top down: recursion 방식. O(mn) / O(mn)
+
+```
+dp(i, j): i-th row, j-th col 에서 right bottom으로 가는 최단 cost
+dp(i, j) = grid[i, j] + min(dp(i, j+1), dp(i+1, j))
+dp(i, j) = inf if (i, j) is out of range, grid[i, j] if i == len(grid) - 1 and j == len(grid[0]) - 1
+```
+
+iterative하게 하려면 하나의 row를 저장하면서 하는 방법이 있다. O(mn) / O(n)
+
+<details>
+
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        n_row = len(grid)
+        n_col = len(grid[0])
+
+        prev_row = [math.inf] * n_col
+
+        for i in range(n_row - 1, -1, -1):
+            for j in range(n_col - 1, -1, -1):
+                if j == n_col - 1:
+                    if i == n_row - 1:
+                        prev_row[j] = grid[i][j]
+                    else:
+                        prev_row[j] = grid[i][j] + prev_row[j]
+                    continue
+                prev_row[j] = grid[i][j] + min(prev_row[j], prev_row[j+1])
+        
+        return prev_row[0]
+```
+
+</details>
+
+혹은 original matrix에 업데이트하는 방법도 있다. 이렇게 하면 O(1)인 것 같다.
+
+
+
+
+
+
+### 931. Minimum Falling Path Sum
+
+
+https://leetcode.com/problems/minimum-falling-path-sum/description/
+
+문제: n x n matrix가 있을 때 falling path 중 minimum sum을 구하라. falling path란 제일 윗 row에서 제일 밑 row 까지 내려오는데 내려올 때 바로 아래나 대각선 아래로만 내려오는 path를 의미한다.
+
+
+recursion 
+
+```
+dp(i, j): (i, j) 부터 시작해서 바닥까지 가는 minimum sum
+dp(i, j) = matrix[i][j] + min(dp(i+1, j-1), dp(i+1, j), dp(i+1, j+1))
+dp(i, j) = inf if (i, j) out of range, matrix[i][j] if i == n_row - 1
+return max(dp(0, j))
+```
+
+참고로 out of range를 먼저 처리해줘야한다.
+
+이것도 마찬가지로 bottom up으로 할 수 있는데 O(N) space로 할 수 있다. 그냥 밑에 row부터 차례대로 올라오는 것이다. 결국 row 0 의 결괏값만 알면 되는 건데 이는 row 1의 결괏값만 필요하다.
+
+
 ---
 
 
