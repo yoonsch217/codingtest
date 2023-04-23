@@ -122,3 +122,52 @@ def isSymmetric(self, root: Optional[TreeNode]) -> bool:
 ```
 
 </details>
+
+
+
+### 173. Binary Search Tree Iterator
+
+https://leetcode.com/problems/binary-search-tree-iterator
+
+문제: BSTIterator 라는 class는 binary search tree 를 받아서 construct 되는데 next 라는 함수와 hasNext 라는 함수를 갖는다. next는 호출될 때마다 가장 작은 수부터 차례대로 반환되고 hasNext는 다음 next가 존재하는지를 나타내는 boolean이다. next가 호출될 때는 항상 hasNext가 true인 상황이라고 가정을 한다. next 함수와 hasNext 함수를 구현하라.
+
+나는 처음에 그냥 bst flatten을 해서 리스트를 만든 뒤에 앞에서부터 pointer를 옮겼다.    
+이렇게 해도 되지만 solution은 stack을 사용했다.
+
+<details>
+
+```python
+class BSTIterator:
+
+    def __init__(self, root: TreeNode):
+        self.stack = []
+        self._leftmost_inorder(root)
+
+    def _leftmost_inorder(self, root):
+        while root:
+            self.stack.append(root)
+            root = root.left
+
+    def next(self) -> int:
+        topmost_node = self.stack.pop()
+        if topmost_node.right:
+            self._leftmost_inorder(topmost_node.right)
+        return topmost_node.val
+
+    def hasNext(self) -> bool:
+        return len(self.stack) > 0
+```
+
+</details>
+
+
+- 처음에 left child node만 다 stack에 추가한다. 
+- 가장 작은 수는 top에 있을 것이고 next를 호출하면 그 값을 pop해야한다. 이제 top에 있는 수는 min의 parent 값이다.
+- left child만 추가했었으므로 pop된 min의 right subtree는 고려가 안 됐다. min이 right subtree를 갖는다면 min의 parent보다 작은 값이 거기 있다.
+- 따라서 pop된 min의 right subtree가 있는지 확인하고 있다면 그것도 동일하게 left child nodes들을 stack에 추가를 한다.
+
+hasNext는 O(1)의 시간을 가질 것이다.   
+next는 기본적으로 right subtree를 iterate하는 것이므로 O(N)의 시간이 필요하지만 amortized O(1)으로 볼 수 있다.   
+space는 O(N)이 필요하다.
+
+
