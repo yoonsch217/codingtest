@@ -84,7 +84,10 @@ while stack:
 return answer
 ```
 
-이 traversal은 O(n) time / O(n) space 가 필요하다.
+이 traversal은 O(n) time / O(h) space 가 필요하다.   
+space는 O(h)가 되는데, recursion을 쓰든 iteration을 쓰든 끝날 때 stack에서 removed되고 다음 작업에서 그 공간을 재사용하기 때문이다.
+
+
 
 ### Moris Traversal
 
