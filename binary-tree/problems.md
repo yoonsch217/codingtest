@@ -171,3 +171,116 @@ next는 기본적으로 right subtree를 iterate하는 것이므로 O(N)의 시�
 space는 O(N)이 필요하다.
 
 
+
+
+
+### 250. Count Univalue Subtrees
+
+문제: root node가 주어졌을 때 uni value subtree의 수를 구하라. uni value subtree란 모든 노드의 값이 동일한 subtree를 말한다.
+
+
+leaf node부터 확인을 한다. leaf node는 자기 자신 밖에 없으므로 항상 uni value subtree이다.   
+그리고 어떤 node가 uni value subtree가 아니라면 그 모든 parent들도 uni value subtree가 아니다.   
+어떤 node가 uni value subtree이려면 node.left와 node.right 모두 uni value subtree 이어야하고 node.val, node.left.val, node.right.val 이 모두 같아야한다.   
+
+O(N) / O(N)
+
+<details>
+
+
+```python
+class Solution:
+    def countUnivalSubtrees(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+        self.count = 0
+
+        def helper(cur):
+            if not (cur.left or cur.right):
+                self.count += 1
+                return cur.val
+            
+            if cur.left and cur.right:
+                from_left = helper(cur.left)
+                from_right = helper(cur.right)
+                if from_left == from_right and from_left == cur.val:
+                    self.count += 1
+                    return cur.val
+                return None
+            
+            if cur.left:
+                if helper(cur.left) == cur.val:
+                    self.count += 1
+                    return cur.val
+                return None
+            
+            if cur.right:
+                if helper(cur.right) == cur.val:
+                    self.count += 1
+                    return cur.val
+                return None
+        
+        helper(root)
+        return self.count
+```
+
+
+깔끔한 solution 풀이. return을 간단하게 했다. complexity는 똑같이 O(N) / O(N) 인데 이렇게 하니까 더 빨리 수행됐다. 이게 잘 짠 코드와의 차이이다..
+
+```python
+class Solution:
+    def countUnivalSubtrees(self, root: Optional[TreeNode]) -> int:
+        self.count = 0
+
+        def dfs(node):
+            if node is None:
+                return True
+
+            isLeftUniValue = dfs(node.left)
+            isRightUniValue = dfs(node.right)
+
+            if isLeftUniValue and isRightUniValue:
+                if node.left and node.val != node.left.val:
+                    return False
+                if node.right and node.val != node.right.val:
+                    return False
+    
+                self.count += 1
+                return True
+            return False
+        
+        dfs(root)
+        return self.count
+```
+
+</details>
+
+근데 global variable은 좋지 않은 코딩이다. 대신에 dfs 함수가 두 개의 값을 return하도록 한다.
+
+<details>
+
+```python
+    def countUnivalSubtrees(self, root: Optional[TreeNode]) -> int:
+        def dfs(node):
+            if node is None:
+                return True, 0
+            
+            left = dfs(node.left)
+            right = dfs(node.right)
+            isLeftUniValue = left[0]
+            isRightUniValue = right[0]
+            count = left[1] + right[1]
+            if isLeftUniValue and isRightUniValue:
+                if node.left and node.val != node.left.val:
+                    return False, count
+                if node.right and node.val != node.right.val:
+                    return False, count
+                return True, count + 1
+            return False, count
+        
+        return dfs(root)[1]
+```
+
+</details>
+
+
