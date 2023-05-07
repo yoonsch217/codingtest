@@ -88,6 +88,35 @@ return answer
 space는 O(h)가 되는데, recursion을 쓰든 iteration을 쓰든 끝날 때 stack에서 removed되고 다음 작업에서 그 공간을 재사용하기 때문이다.
 
 
+### BST에서 자주 쓰이는 코드 snippet
+
+inorder 결과 출력
+
+```python
+def inorder(root: Optional[TreeNode]) -> List:
+    return inorder(root.left) + [root.val] + inorder(root.right) if root else []
+```
+
+다음 값 찾기: right가 없으면?
+
+```python
+def successor(root: TreeNode) -> TreeNode:
+    root = root.right
+    while root.left:
+        root = root.left
+    return root
+```
+
+이전 값 찾기: left가 없으면?
+
+```python
+def predecessor(root: TreeNode) -> TreeNode:
+    root = root.left
+    while root.right:
+        root = root.right
+    return root
+```
+
 
 ### Moris Traversal
 

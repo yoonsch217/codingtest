@@ -284,3 +284,93 @@ class Solution:
 </details>
 
 
+
+
+
+### 450. Delete Node in a BST
+
+https://leetcode.com/problems/delete-node-in-a-bst/description/
+
+문제: BST에서 root 가 주어지고 target이 주어졌을 때 target 값을 갖는 노드를 제거된 BST의 root를 반환하라.
+
+어렵다. 이 함수는 target을 지운 뒤 그 tree의 root를 반환해준다.
+target이 왼쪽에 있다면 deleteNode(target.left)의 결과는 leftsubtree에서 target을 지우고 그 subtree의 root이다.
+그러면 root.left = deleteNode(target.left) 로 해주면 전체 tree에 대한 작업이 끝난다.
+
+1. leaf node이면, 그 node를 None으로 바꾼다.
+2. right child가 있으면 leftmost of the right subtree(successor)와 바꾼 뒤 그 node를 recursive하게 삭제한다.
+3. left child가 있으면 rightmost of the left subtree(predecessor)와 바꾸고 그 node를 recursive하게 삭제한다.
+
+헷갈리는 게, 어떤 객체 root에 대해서 root = None 하면 그 객체가 None이 돼?
+root라는 변수가 None으로 reassign 되는 게 아니라?
+root.parent.left = None 이런 식으로 해야하는 줄 알았다.
+immutable
+그럼 while successor.left: successor = successor.left 이런 식으로 하는 것도 포인터가 내려가는 게 아닌가?
+포인터 개념인줄 알았는데.
+
+<details>
+
+solution
+
+```python
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if root is None:
+            return root
+        
+        if root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        elif root.val < key:
+            root.right = self.deleteNode(root.right, key)
+        else:
+            if not(root.left or root.right):
+                root = None
+            elif root.right:
+                successor = root.right
+                while successor.left:
+                    successor = successor.left
+                root.val = successor.val
+                root.right = self.deleteNode(root.right, root.val)
+            else:
+                predecessor = root.left
+                while predecessor.right:
+                    predecessor = predecessor.right
+                root.val = predecessor.val
+                root.left = self.deleteNode(root.left, root.val)
+        
+        return root
+```
+
+</details>
+
+user solution에 있던 더 간단한 코드.
+
+1. target node의 left가 없으면 target node의 right를 반환하면 된다. right도 없다고 해도 괜찮다. 그럼 None이 반환되어야한다.
+2. target node의 right가 없으면 target node의 left를 반환하면 된다.
+3. target node가 left와 right 둘 다 있으면 successor를 찾아서 바꾼 뒤 successor node를 recursive하게 지워준다.
+
+<details>
+
+```python
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if not root: return None
+        
+        if root.val == key:
+            if not root.right: return root.left
+            
+            if not root.left: return root.right
+            
+            if root.left and root.right:
+                temp = root.right
+                while temp.left: temp = temp.left
+                root.val = temp.val
+                root.right = self.deleteNode(root.right, root.val)
+
+        elif root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        else:
+            root.right = self.deleteNode(root.right, key)
+            
+        return root
+```
+
+</details>
