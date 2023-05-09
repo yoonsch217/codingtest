@@ -177,3 +177,7 @@ return len(s)
 
 
 ## 전략
+
+하나의 그래프를 여러 개의 inter-connected graph로 나눠야 하는 graph partition 문제에 사용된다.
+
+
