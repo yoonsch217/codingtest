@@ -66,4 +66,4 @@ AND, OR, XOR, negation 연산에 대해서는 다음과 같은 properties가 있
 - Distributive Law
 - De Morgan's Law
 - -a = ~(a-1)
-
+- n & (n-1) 을 하게 되면 가장 아래의 1을 0으로 바꿔준다. 이걸 사용하면 어떤 binary에 있는 1의 수를 빠르게 셀 수 있다. 전체 리스트를 iterate할 필요 없이 1의 갯수만큼만 iterate하면 된다.
