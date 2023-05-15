@@ -67,3 +67,21 @@ AND, OR, XOR, negation 연산에 대해서는 다음과 같은 properties가 있
 - De Morgan's Law
 - -a = ~(a-1)
 - n & (n-1) 을 하게 되면 가장 아래의 1을 0으로 바꿔준다. 이걸 사용하면 어떤 binary에 있는 1의 수를 빠르게 셀 수 있다. 전체 리스트를 iterate할 필요 없이 1의 갯수만큼만 iterate하면 된다.
+- `0 ^ x = x`, `x ^ x = 0` 
+
+
+bit manipulation 문제에서 어떻게 시작할지 모르겠다면 input data에 대해 XOR 연산을 우선 해보면 힌트를 얻을 수도 있다.
+
+
+
+### State Compression via Bit Manipulation
+
+여러 value의 상태를 하나의 숫자에 저장할 수 있다.   
+예를 들어 다섯 개의 아이템이 있고 각각의 taken or not 에 대한 상태를 저장한다고 할 때, 10110(2) = 22 라는 숫자로 1, 3, 4 item은 taken, 2, 5 는 not taken 이라는 상태를 저장할 수 있다.   
+두 가지의 상태가 있고 n 개의 아이템이 있을 때, 총 2^n 개의 상태가 필요하다. 보통 n이 20 이하일 때 state compression을 사용한다.   
+
+DP에서 반복 연산을 피하기 위해 state compression이 사용되기도 한다. State Compression Dynamic Programming 이라고 하고 dp 문제 중에서 가장 어렵다.   
+state definition 을 위해 state compression을 해야한다.   
+어떻게 state를 표현할지와 state 들 사이의 관계를 알아내는 것이 중요하다.   
+
+
