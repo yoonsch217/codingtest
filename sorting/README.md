@@ -48,6 +48,58 @@ O(N^2) / O(1)
 
 
 
+### Heap Sort
+
+selection sort에서는 매 iteration마다 minimum을 찾는데 minimum 찾는 게 O(N)의 시간복잡도를 갖는다.   
+minimum 찾는 걸 빨리 해주는 heap을 사용한 알고리즘이 heap sort이다.   
+
+min heap 도 사용할 수 있지만 max heap이 더 편하다. 
+
+1. unordered array를 bottom-up heapify 한다.
+   - array를 arr[0]가 root인 binary tree로 볼 수 있다.
+   - 목적은 arr[0]에 최댓값이 들어가게 하는 것이다.
+   - arr[i]의 left child는 arr[2 * i + 1] 이고 right child는 arr[2 * i + 2] 가 된다.
+   - 맨 뒤의 node부터 앞으로 차례대로 오면서 각자의 child node가 자기보다 더 값이 크다면 swap을 한다. swap하고도 더 큰 child가 있다면 또 swap해준다. 이렇게 함으로써 각 subtree들도 max heap을 만족하게 되는 것 같다.
+2. arr[0]가 최댓값을 갖는다. arr[0]와 arr[len - 1] 를 swap한다. arr의 맨 마지막에는 최댓값이 들어가게 된다.
+3. arr[0:len-1] 에 대해 동일하게 heapify한다. 이 때는 a[0]에 대해서만 위치를 찾아주면 된다. 왜나하면 이미 a[1]과 a[2]는 각각을 root로 하는 subtree의 max 값이기 때문이다.
+4. arr[0:len-1] 의 max가 arr[0]에 오게 되면 그 값을 arr[len-2]와 swap 한 뒤에 arr[0:len-2]에 대해 동일하게 작업을 해준다.
+
+대부분의 다른 comparison based sort보다 빠르다.   
+하지만 stable한 sort가 아니다.    
+그리고 실제로는 bad cache locality 때문에 O(N log N) 보다 느린 것으로 알려졌다. locations in heaps 를 기반으로 swap을 하는데 이는 무작위로 정렬된 곳에서 index를 접근하기 위해 많은 read operation이 필요하여서 cache miss가 발생한다.   
+
+
+```py
+def heap_sort(self, lst: List[int]) -> None:
+    """
+    Mutates elements in lst by utilizing the heap data structure
+    """
+    def max_heapify(heap_size, index):
+        left, right = 2 * index + 1, 2 * index + 2
+        largest = index
+        if left < heap_size and lst[left] > lst[largest]:
+            largest = left
+        if right < heap_size and lst[right] > lst[largest]:
+            largest = right
+        if largest != index:
+            lst[index], lst[largest] = lst[largest], lst[index]
+            max_heapify(heap_size, largest)
+
+    # heapify original lst
+    for i in range(len(lst) // 2 - 1, -1, -1):
+        max_heapify(len(lst), i)
+
+    # use heap to sort elements
+    for i in range(len(lst) - 1, 0, -1):
+        # swap last element with first element
+        lst[i], lst[0] = lst[0], lst[i]
+        # note that we reduce the heap size by 1 every iteration
+        max_heapify(i, 0)
+```
+
+
+
+
 
 ### Merge Sort
 
