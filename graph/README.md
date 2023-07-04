@@ -212,6 +212,13 @@ https://leetcode.com/problems/course-schedule-ii/
 
 
 
+## cycle 있는지 확인하는 방법
+
+vertex를 white, gray, black으로 색칠하는 방법이 있다.   
+처음에는 모든 vertex가 white이다.    
+작업이 시작되었지만 모든 descendants가 처리되진 않았다면 gray이다. 이동하다가 gray vertex를 만나게 되면 cycle이 있다는 것이다.   
+모든 descendant가 처리되면 black이 된다. black 처리가 되면 이후 traverse에서 black vertex로 가더라도 cycle이 만들어지지 않는다. 이미 다른 traverse가 시작된 것이기 때문이다.   
+
 
 
 

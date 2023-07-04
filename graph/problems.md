@@ -226,3 +226,110 @@ return -1 if dist[dst] == math.inf else dist[dst]
 ```
 
 </details>
+
+
+
+
+1059. All Paths from Source Lead to Destination
+
+### 1059.All Paths from Source Lead to Destination
+
+https://leetcode.com/problems/all-paths-from-source-lead-to-destination
+
+문제: edges 라는 directed graph가 주어진다. edges[i] = [ai, bi] 는 ai에서 bi로 가는 edge가 있다는 걸 의미한다. source와 destination이 주어졌을 때 source에서 시작되는 path는 모두 destination으로 가는지를 구하라.
+
+
+내 처음 solution
+
+<details>
+
+dfs를 사용했다.
+
+```py
+    def leadsToDestination(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        adj_list = defaultdict(list)
+        for _s, _d in edges:
+            adj_list[_s].append(_d)
+        
+        if len(adj_list[source]) == 0:
+            return source == destination
+        
+        def helper(cur, visited):
+            if len(adj_list[cur]) == 0:
+                return cur == destination
+
+            visited.add(cur)
+            for next_node in adj_list[cur]:
+                if next_node in visited:
+                    return False
+                if not helper(next_node, visited):
+                    return False  # 여기서 early return을 안 하고 all(helper_results) 로 하면 속도가 느려진다.
+            visited.remove(cur)
+            return True
+
+        return helper(source, set())  # 또 set 하는 것 보다는 is_visited dict를 만들어서 각 vertex마다 true/false를 갖게 하는 게 낫겠다.
+```
+
+TLE 실패
+
+</details>
+
+
+solution
+
+cycle이 없어야하므로 tree라고 볼 수 있다. 따라서 leaf 노드가 destination이 되어야 한다.   
+근데 이게 왜 더 빠른 거지? traversing을 더 효과적으로 하나? coloring 하는 방식.   
+근데 이게 모든 path를 다 보장해주나? edge에 있는 순서대로 하는 건데, 그래도 보장을 해주나보네.    
+이게 차이인가보다. 내 방식은 너무 진짜 모든 path를 다 본다.   
+
+<details>
+
+```py
+
+class Solution:
+    GRAY = 1
+    BLACK = 2
+
+    def leadsToDestination(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        graph = self.buildDigraph(n, edges)
+        return self.leadsToDest(graph, source, destination, [None] * n)
+        
+    def leadsToDest(self, graph, node, dest, states):
+        
+        # If the state is GRAY, this is a backward edge and hence, it creates a Loop.
+        if states[node] != None:
+            return states[node] == Solution.BLACK
+        
+        # If this is a leaf node, it should be equal to the destination.
+        if len(graph[node]) == 0:
+            return node == dest
+        
+        # Now, we are processing this node. So we mark it as GRAY.
+        states[node] = Solution.GRAY
+        
+        for next_node in graph[node]:
+            
+            # If we get a `false` from any recursive call on the neighbors, we short circuit and return from there.
+            if not self.leadsToDest(graph, next_node, dest, states):
+                return False;
+        
+        # Recursive processing done for the node. We mark it BLACK.
+        states[node] = Solution.BLACK
+        return True
+        
+    def buildDigraph(self, n, edges):
+        graph = [[] for _ in range(n)]
+        
+        for edge in edges:
+            graph[edge[0]].append(edge[1])
+            
+        return graph   
+```
+
+time: O(V), space: O(V+E)
+
+Time Complexity: Typically for an entire DFS over an input graph, it takes O(V+E)\mathcal{O}(V + E)O(V+E) where VVV represents the number of vertices in the graph and likewise, EEE represents the number of edges in the graph. In the worst case EEE can be O(V2)\mathcal{O}(V^2)O(V 2) in case each vertex is connected to every other vertex in the graph. However even in the worst case, we will end up discovering a cycle very early on and prune the recursion tree. If we were to traverse the entire graph, then the complexity would be O(V2)\mathcal{O}(V^2)O(V 2) as the O(E)\mathcal{O}(E)O(E) part would dominate. However, due to pruning and backtracking in case of cycle detection, we end up with an overall time complexity of O(V)\mathcal{O}(V)O(V).
+
+</details>
+
+
