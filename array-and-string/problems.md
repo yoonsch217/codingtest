@@ -27,7 +27,7 @@ https://leetcode.com/problems/car-pooling/
 
 https://leetcode.com/problems/amount-of-new-area-painted-each-day/
 
-문제: 0-indexed 2D integer array paint가 주어진다. 각 element는 두 개의 원소를 갖는데 start position과 end position이다. paint array를 앞에서부터 iterate하면서 start position ~ end position 까지 색칠한다. 이전 작업에서 색칠된 부분은 더 색칠을 못한다. 각 iteration에서 색칠한 수를 구하라.
+문제: 0-indexed 2D integer array paint가 주어진다. paint[i] = [start_i, end_i] 인데 i 시점에 start position과 end position 사이를 칠할 수 있다. paint array를 앞에서부터 iterate하면서 해당 범위 내에 색칠을 하는데 같은 부분을 두 번 이상 색칠하지는 않는다. 각 iteration에서 색칠해아 하는 칸의 수를 구하라.
 
 sweep line이라는 개념이 들어간다.   
 https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/1740812/Python-Complete-3-solutions-using-different-data-structures   
