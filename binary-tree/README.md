@@ -30,6 +30,7 @@ complete이면서 full인 binary tree이다. 모든 leaf 노드들이 같은 lev
 in-order traverse를 하면 정렬된 순서로 방문한다.   
 balanced 상태면 검색에 O(log N)이 걸리고 unbalanced면 최대 O(N)걸린다.    
 balanced라는 조건이 없으면 root가 median이라는 보장이 없다.   
+balanced라도 root가 중앙값은 아니지. root기준 왼섭트랑 오섭트 개수가 2 이상 차이날 수 있으니까.
 
 - insert
   - leaf에 넣는다. root부터 시작해서 자기 위치를 찾아 내려온 뒤 leaf 노드에서 알맞은 child leaf로 생성한다.
