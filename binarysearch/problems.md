@@ -24,6 +24,40 @@ ladders 개수 L 을 크기로 갖는 힙을 생성하고 앞에서부터 높이
 현재 필요한 벽돌 수가 더 적으면 벽돌 소진하면 되는 것이고, 힙에 있는 최솟값이 더 작으면 예전에 썼던 사다리를 지금 쓰고 예전 작업은 벽돌로 하면 된다.   
 이렇게 해서 벽돌 수가 음수가 되면 더이상 못 가는 것이다.   
 
+<details>
+
+```py
+class Solution:
+    def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:
+        mheap = []
+        prev_h = heights[0]
+        pos = 0
+        for i, h in enumerate(heights):
+            diff = h - prev_h
+            prev_h = h 
+
+            if diff <= 0:
+                continue
+
+            if len(mheap) < ladders:
+                heapq.heappush(mheap, diff)
+                continue
+
+            if mheap and diff > mheap[0]:
+                heapq.heappush(mheap, diff)
+                diff = mheap[0]
+                heapq.heappop(mheap)
+            bricks -= diff
+            if bricks < 0:
+                return i - 1
+
+        return len(heights) - 1
+
+
+```
+    
+</details>
+
 Binary Search    
 특정 위치까지 갈 수 있나 없나는 판단할 수 있다. 그 구간의 height diffs를 받아서 정렬한 뒤 min부터 벽돌 사용하도록 하면 판단이 된다.    
 0 ~ threshold 까지는 reachable 이고 threshold+1 ~ end 는 unreachable이다.   
