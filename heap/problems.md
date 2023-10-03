@@ -10,6 +10,8 @@ external sort처럼 생각을 해보면, 각 행이 정렬되어 있기 때문�
 이럴 때는 힙을 사용하면 쉽게 해결할 수 있다.    
 힙에 각 `(row의 head 값, row, col)` 를 넣고 k 번 iterate하면 된다.   
 
+Time: O(k * logk), Space: O(k)
+
 
 <details>
 
@@ -31,3 +33,29 @@ def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
 ```
 
 </details>
+
+
+Maxheap approach   
+
+size k max heap 을 만들어서 전체 element를 다 넣어도 된다. 그러면 k smallest가 남게 된다. 그 중 max가 답이므로 heappop 한 번 하면 된다.   
+Time: O(M * N * logk), Space: O(k)
+
+
+Binary Search approach
+
+- matrix의 최솟값과 최댓값 사이를 binary search 한다.
+- 어떤 값 x에 대해서 matrix에 존재하는 x보다 작거나 같은 값의 수를 구하는 함수를 count_less_or_equal() 라고 하자.
+- count_less_or_equal(x) = k 를 만족하는 최소의 x를 구해야한다. 
+  - 최소의 x를 구해야하는 이유는, count_less_or_equal(x) != count_less_or_equal(x-1) 라는 거고, 이는 즉 x가 matrix에 실제 존재하는 값이라는 뜻이다.
+  - 각 column과 row는 sorted 상태이다. 따라서 count_less_or_equal를 구할 때 이를 활용한다. 
+  - row_pointer는 0부터 증가하고 col_pointer는 n-1로 세팅한다. 각 row에서 맨 뒤부터 보면서 x보다 작거나 같은 수가 나올 때 그 row에 대한 count를 알 수 있다. 다음 row에서는 해당 col부터 시작하면 된다.
+  - https://leetcode.com/problems/search-a-2d-matrix-ii/ 참고
+
+Time: O((M+N) * logD) for D difference between max and min, Space: O(1)
+
+
+
+
+
+
+

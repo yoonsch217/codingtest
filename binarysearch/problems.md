@@ -191,3 +191,40 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
 - mid가 right보다 작으면 left half를 본다. left에서 mid 사이에 rotation point가 있어야한다.
 - mid가 right보다 크면 right half를 본다.
 - 아니면 right를 하나 줄임으로써 범위를 좁힌다.
+
+
+### 240. Search a 2D Matrix II
+
+https://leetcode.com/problems/search-a-2d-matrix-ii/
+
+문제: 각 row와 column은 ascending order로 sort 되어 있다. target 이 해당 matrix 안에 있는지 판별하는 알고리즘을 구현하라.
+
+- 어떤 위치에서 target보다 크다면, 해당 위치 기준 righter, lower elements는 다 무시할 수 있다. 이 때는 왼쪽으로 한 칸 이동해야한다.
+- 어떤 위치에서 target보다 작다면, 해당 위치 기준 lefter, upper elements는 다 무시할 수 있다. 이 때는 아래로 한 칸 이동해야한다.
+
+Time: O(M + N) / Space: O(1)
+
+<details>
+
+```pythoon
+def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+    m, n = len(matrix), len(matrix[0])
+    row, col = 0, n - 1
+
+    while row < m:
+        while col >= 0:
+            cur = matrix[row][col]
+            if cur == target:
+                return True
+            if cur > target:
+                col -= 1
+            if cur < target:
+                break
+        row += 1
+    
+    return False
+```
+
+</details>
+
+
