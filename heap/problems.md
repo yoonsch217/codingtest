@@ -11,3 +11,23 @@ external sort처럼 생각을 해보면, 각 행이 정렬되어 있기 때문�
 힙에 각 `(row의 head 값, row, col)` 를 넣고 k 번 iterate하면 된다.   
 
 
+<details>
+
+```python
+def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+    heap = []
+    n = len(matrix)
+    for i in range(n):
+        heapq.heappush(heap, (matrix[i][0], i, 0))
+    
+    for _ in range(k):
+        ans, _row, _col = heapq.heappop(heap)
+        _next_col = _col + 1
+        if _next_col >= n:
+            continue
+        heapq.heappush(heap, (matrix[_row][_next_col], _row, _next_col))
+    
+    return ans
+```
+
+</details>
