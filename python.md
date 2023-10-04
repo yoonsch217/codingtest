@@ -41,4 +41,17 @@ dict에서 key 제거하기
 `del my_dict['key']`: key가 없으면 KeyError가 raise된다.
 
 
+sort하기   
+```
+sorted_tuples = sorted(a.items())
+혹은
+sorted_dict = OrderedDict(sorted(a.items()))
+```
+
+와 같이 할 수 있지만 느리다.
+
+```
+sorted_dict = {k: disordered[k] for k in sorted(disordered)}
+```
+이렇게 key 로만 하는 게 더 빠르다.
 

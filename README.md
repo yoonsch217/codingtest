@@ -1,3 +1,8 @@
+todo:
+premium 끝나서 다시 못 풀어본 문제   
+https://leetcode.com/problems/amount-of-new-area-painted-each-day/    
+
+
 # codingtest
 
 
