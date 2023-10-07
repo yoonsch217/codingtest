@@ -3,12 +3,40 @@
 
 https://leetcode.com/problems/unique-binary-search-trees-ii
 
-문제: integer n이 주어진다. 1부터 n까지 n개의 노드를 갖고 만들 수 있는 unique BST를 순서 상관 없이 반환하라.
+문제: integer n이 주어진다. 1부터 n까지 n개의 노드를 갖고 만들 수 있는 unique BST 리스트를 순서 상관 없이 반환하라.
 
-일반화를 잘 시켜야한다.    
-BST인 경우, 특정 노드를 기준으로 왼쪽 subtree에는 그 노드보다 작은 모든 값이 있어야 하고, 오른쪽 subtree에는 그 노드보다 큰 모든 값이 있어야한다.   
-따라서 left, right가 주어졌을 때 그 사이의 각 값들이 root이고 left ~ root-1 이 left subtree, root+1 ~ right 가 right subtree가 되도록 만든다.   
-즉, 하나의 root에 대해 helper(left, root-1) 가 left subtree로 가능한 root 목록이고 helper(root+1, right)가 right subtree로 가능한 목록이니까 이걸 2 depth loop로 엮어준다.
+- root는 1부터 n까지 될 수 있다.
+- k가 root가 되었을 때, left subtree는 1부터 k-1까지로 만들 수 있는 bst가 될 것이다.
+- helper(start, end)를 start부터 end를 통해 만들 수 있는 bst 리스트라고 하자.
+- 각 root k마다, helper(1, k-1) 중 하나가 left subtree가 되고 helper(k+1, n) 중 하나가 right subtree가 된다. 이걸 각각 엮으면 된다.
+
+내 첫 번째 solution. 근데 helper(1,3) 이나 helper(2,4)나 동일한 답이고 value만 다른 건데 이 부분 최적화를 못 했다.    
+
+
+<details>
+
+```python
+def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
+    @lru_cache(maxsize=None)
+    def helper(start_idx: int, end_idx: int) -> List[TreeNode]:
+        # Gets all the bsts that can be created from the nodes from start_idx to end_idx
+        if end_idx < start_idx:
+            return [None]
+        if start_idx == end_idx:
+            return [TreeNode(start_idx)]
+        rtn = []
+        for cur in range(start_idx, end_idx+1):
+            lss = helper(start_idx, cur-1)
+            rss = helper(cur+1, end_idx)
+            for ls in lss:
+                for rs in rss:
+                    rtn.append(TreeNode(cur, ls, rs))
+        return rtn
+
+    return helper(1, n)
+```
+
+</details>
 
 
 ### 366. Find Leaves of Binary Tree

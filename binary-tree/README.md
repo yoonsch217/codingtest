@@ -11,17 +11,17 @@
 
 child node가 최대 두 개인 트리이다. child가 없는 노드는 leaf라고 한다.   
 
-- balanced binary tree
+- balanced binary tree   
 어떤 노드에서 보더라도 왼쪽 subtree와 오른쪽 subtree의 높이가 최대 1 차이나는 경우이다.
-- complete binary tree
-트리의 각 레벨이 다 채워져야하는데 마지막 레벨에서의 rightmost 노드는 비어있을 수 있다.
-위에서 아래로, 왼쪽에서 오른쪽으로 차례대로 채워지는 트리이다.
-이걸 array로 나타낸 경우 root가 index 1일 때, index n인 노드에 대해 parent node는 arr[n//2]이고 left child node는 arr[n * 2], right child node는 arr[n * 2 + 1]이다.
-leaf node인지 아닌지는 index <= len(arr) // 2 이면 leaf node가 아닌 것이다.
-- full binary tree
-자식 노드가 0이거나 두 개인 트리이다. 한 개의 자식노드를 갖지 않는다.
-- perfect binary tree
-complete이면서 full인 binary tree이다. 모든 leaf 노드들이 같은 level에 있으며 꽉 차있다.
+- complete binary tree   
+트리의 각 레벨이 다 채워져야하는데 마지막 레벨에서의 rightmost 노드는 비어있을 수 있다.   
+위에서 아래로, 왼쪽에서 오른쪽으로 차례대로 채워지는 트리이다.   
+이걸 array로 나타낸 경우 root가 index 1일 때, index n인 노드에 대해 parent node는 arr[n//2]이고 left child node는 arr[n * 2], right child node는 arr[n * 2 + 1]이다.   
+leaf node인지 아닌지는 index <= len(arr) // 2 이면 leaf node가 아닌 것이다.   
+- full binary tree   
+자식 노드가 0이거나 두 개인 트리이다. 한 개의 자식노드를 갖지 않는다.   
+- perfect binary tree   
+complete이면서 full인 binary tree이다. 모든 leaf 노드들이 같은 level에 있으며 꽉 차있다.   
 
 
 ### Binary Search Tree(BST)
@@ -29,7 +29,7 @@ complete이면서 full인 binary tree이다. 모든 leaf 노드들이 같은 lev
 왼쪽 자식 노드들은 자기보다 다 작거나 같고, 오른쪽 자식 노드들은 다 자기보다 높다.   
 in-order traverse를 하면 정렬된 순서로 방문한다.   
 balanced 상태면 검색에 O(log N)이 걸리고 unbalanced면 최대 O(N)걸린다.    
-balanced라는 조건이 없으면 root가 median이라는 보장이 없다.   
+~balanced라는 조건이 없으면 root가 median이라는 보장이 없다.~   
 balanced라도 root가 중앙값은 아니지. root기준 왼섭트랑 오섭트 개수가 2 이상 차이날 수 있으니까.
 
 - insert
@@ -43,18 +43,19 @@ balanced라도 root가 중앙값은 아니지. root기준 왼섭트랑 오섭트
 
 ## Traversal
 
-- in-order traversal
-inOrder(node.left) => visit(node) => inOrder(node.right)
-작은 값부터 차례로 방문하게 된다.
-- pre-order traversal
-visit(node) => preOrder(node.left) => preOrder(node.right)
-root부터 시작하는 traversal이다.
-- post-order traversal
-postOrder(node.left) => postOrder(node.right) => visit(node)
-root가 제일 마지막에 visit된다.
-- level-order traversal
-queue를 두고 traverse한다.    
-recursion을 이용할 수도 있다. preorder traverse하면서 level을 저장하면서 맞는 level에 append한다. result list의 길이가 현재의 level보다 크지 않다면 빈 list를 append함으로써 현재 level에 맞는 공간을 만들어준다.
+- in-order traversal   
+inOrder(node.left) => visit(node) => inOrder(node.right)   
+작은 값부터 차례로 방문하게 된다.   
+- pre-order traversal   
+visit(node) => preOrder(node.left) => preOrder(node.right)   
+root부터 시작하는 traversal이다.   
+- post-order traversal   
+postOrder(node.left) => postOrder(node.right) => visit(node)   
+root가 제일 마지막에 visit된다.   
+- level-order traversal   
+queue를 두고 traverse한다.       
+recursion을 이용할 수도 있다. preorder traverse하면서 level을 저장하면서 맞는 level에 append한다.    
+result list의 길이가 현재의 level보다 크지 않다면 빈 list를 append함으로써 현재 level에 맞는 공간을 만들어준다.
 
 
 recursive한 거는 iterative하게 구현할 수 있다. recursion도 call stack을 사용한다.
@@ -91,14 +92,15 @@ space는 O(h)가 되는데, recursion을 쓰든 iteration을 쓰든 끝날 때 s
 
 ### BST에서 자주 쓰이는 코드 snippet
 
-inorder 결과 출력
+inorder 결과 출력    
+inorder 결과는 순서대로 정렬되어야한다. 아래처럼 정의하면 모든 노드에 대해서 왼쪽 subtree의 값이 먼저 나오고 자기 노드가 나오고 오른쪽 subtree의 값이 나오는 게 보장된다.
 
 ```python
 def inorder(root: Optional[TreeNode]) -> List:
     return inorder(root.left) + [root.val] + inorder(root.right) if root else []
 ```
 
-다음 값 찾기: right가 없으면?
+다음 값 찾기: right가 없으면? None이 나오는 거지.
 
 ```python
 def successor(root: TreeNode) -> TreeNode:
@@ -108,7 +110,7 @@ def successor(root: TreeNode) -> TreeNode:
     return root
 ```
 
-이전 값 찾기: left가 없으면?
+이전 값 찾기
 
 ```python
 def predecessor(root: TreeNode) -> TreeNode:
@@ -130,10 +132,10 @@ O(n) space가 필요했던 이유는 각 노드에서 left child를 모두 탐�
 
 1. res list를 만들고 cur, last 두 개의 pointer를 만든다. cur은 처음에 root부터 시작을 한다.
 2. cur에게 left child가 있는지 확인한다.
-   - left child가 있다면 left subtree의 rightmost node를 찾아서 그 node의 right child를 cur로 연결한다. 
-   나중에 cur를 다시 방문하는 경우가 생기는데 그때를 인지할 수 있어야한다. 
-   다시 cur를 방문한 경우 left subtree의 rightmost child를 찾으려고 할 때 cur를 또 다시 방문할 것이다.
-   그런 경우 right subtree로 넘어가도록 한다.
+   - left child가 있다면 left subtree의 rightmost node를 찾아서 그 node의 right child를 cur로 연결한다.    
+   나중에 cur를 다시 방문하는 경우가 생기는데 그때를 인지할 수 있어야한다.    
+   다시 cur를 방문한 경우 left subtree의 rightmost child를 찾으려고 할 때 cur를 또 다시 방문할 것이다.    
+   그런 경우 right subtree로 넘어가도록 한다.     
    - left child가 없다면 cur를 res에 추가를 한다.
 
 rightmost의 right child를 cur.right로 연결하면 안되나 생각도 했었다.   
@@ -170,7 +172,7 @@ def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
                 
             if not last.right:
                 # rightmost node를 찾은 상황이다. cur와 연결해주고 cur를 처리한 뒤에 left로 넘어간다.
-                answer.append(curr.val)
+                answer.append(curr.val)  # cur를 처음 방문했을 때 left subtree's rightmost node's child로 연결하고 ans에 넣는다.
                 last.right = curr
                 curr = curr.left
             else:
@@ -207,7 +209,7 @@ def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
                 last = last.right
             if last.right == cur:
                 # rightmost의 right child로 연결되어 다시 방문한 상황이다.
-                res.append(cur.val)
+                res.append(cur.val)  # 다시 방문했을 때 cur를 넣는다.
                 cur = cur.right
                 continue
             last.right = cur
@@ -228,6 +230,8 @@ def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 
 ### Top-down
 
+> 조건: 어떤 recursion에서 답을 구할 수 있는 parameter를 정할 수 있는가? 그 parameter와 현재 노드의 값을 통해 child node에게 전달할 parameter를 구할 수 있는가?   
+
 preorder traversal과 유사하다.   
 
 recursive function `top_down(node, params)`은 다음과 같다. 예시로 binary tree의 maximum depth를 구하는 것이 있다.
@@ -242,6 +246,8 @@ recursive function `top_down(node, params)`은 다음과 같다. 예시로 binar
 
 ### Bottom-up
 
+> 조건: 어떤 노드에서 그 children의 답을 안다면 현재 노드에 대한 답을 구할 수 있는가?
+
 child node로 recursive하게 호출한 후 child node에서 return한 값과 current node의 값을 통해서 결과를 계산한다.   
 postorder traversal과 유사하다.   
 이것도 마찬가지로 binary tree의 maximum depth를 구할 수 있다.   
@@ -251,11 +257,6 @@ postorder traversal과 유사하다.
 3. right_ans = bottom_up(node.right)
 4. return answer (`return max(left_depth, right_depth) + 1`)
 
-
-어떤 recursion에서 답을 구할 수 있는 parameter를 정할 수 있는가? 그 parameter와 현재 노드의 값을 통해 child node에게 전달할 parameter를 구할 수 있는가?   
-둘 다 맞다면 top down을 사용할 수 있다.
-
-어떤 노드에서, 그 children의 답을 안다면 현재 노드에 대한 답을 구할 수 있는가? 그렇다면 bottop up을 사용할 수 있다.
 
 
 
