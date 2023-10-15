@@ -47,8 +47,9 @@ https://leetcode.com/problems/find-leaves-of-binary-tree/
 
 
 기본적으로 `height(root)=1+max(height(root.left), height(root.right))` 를 생각한다.   
+그러려면 어떤 함수의 f(leftchild)와 f(rightchild) 값이 구해진 상태여야 현재 height를 구할 수 있기 때문에 left와 right 후에 자기 노드를 처리하는 post order를 사용한다.    
 getHeight이라는 함수를 만드는데 이 함수는 post-order DFS를 하면서 leaf로부터의 height를 구한다.    
-height를 구하면 `res[height].append(node.val)`을 해줌으로써 알맞은 위치에 답을 넣어주고 `return height`를 한다.   
+height를 구하면 `res[height].append(node.val)`을 해줌으로써 알맞은 위치에 답을 넣어주고 `return height`를 한다.    
 O(N) / O(N)
 
 
@@ -60,10 +61,78 @@ https://leetcode.com/problems/step-by-step-directions-from-a-binary-tree-node-to
 
 문제: binary tree가 주어지고 각 node는 고유한 값을 갖는다. start_value와 dest_value가 있을 때 start_value를 갖는 노드에서 dest_value를 갖는 노드로 가는 최단 경로를 찾아라. 위로 가야한다면 U, 왼쪽 아래로 가야한다면 L, 오른쪽 아래로 가야한다면 R을 넣는다.
 
-처음에 생각했던 건, start node를 찾아서 BFS로 dest node를 찾는 것이었다. parent node를 모르기 때문에 start node찾을 때 각 노드의 parent 노드를 저장해야한다. 그런데 이건 많이 비효율적이다.   
-대신에 root에서 DFS로 각각의 노드를 찾는다. 찾게 되면 recursion 탈출하면서 경로를 만들 수 있다.   
-각각에 가는 path를 찾게 되면 common prefix를 찾아서 없앤다. 그 뒤에 start path는 다 U로 바꾸고 dest path를 추가해주면 된다.   
-DFS는 이렇게 구현했다: base case로는 node가 없으면 return None, target node이면 []를 반환하도록 했다. 그리고 left child와 right child를 각각 recursive 호출하면서 None이면 무시, 아니면 어디로 갔는지를 기록해준다. 이 때 처음에 틀린 거는, 이렇게 append하면 root에서의 path는 거꾸로 봐야한다는 점을 놓쳤었다.
+
+내가 처음 풀은 solution. 시간이 느리게 측정된다. 각 node까지의 path를 구한 다음에 그 두 path를 비교해서 겹치는 건 없앴다. 그 다음 남은 걸로 답을 만들었다.   
+복잡도는 O(N) / O(N) 인 것 같은데. 전체 트리 한 번 훑으면서 path 찾고, 그 path 한 번 더 작업하고.   
+
+<details>
+
+```python
+class Solution:
+    def getDirections(self, root: Optional[TreeNode], startValue: int, destValue: int) -> str: 
+        self.tmp_path = deque()
+        self.path_to_start, self.path_to_dest = None, None
+
+        def helper(cur, direction):
+            if cur == None or (self.path_to_start and self.path_to_dest):
+                return
+            self.tmp_path.append((cur, direction))
+
+            if cur.val == startValue:
+                self.path_to_start = copy.deepcopy(self.tmp_path)
+            if cur.val == destValue:
+                self.path_to_dest = copy.deepcopy(self.tmp_path)
+
+            helper(cur.left, 'L')
+            helper(cur.right, 'R')
+            self.tmp_path.pop()
+        
+        helper(root, '')
+
+        while self.path_to_start and self.path_to_dest:
+            if self.path_to_start[0][0].val == self.path_to_dest[0][0].val:
+                self.path_to_start.popleft()
+                self.path_to_dest.popleft()
+            else:
+                break
+        
+        rtn = []
+        for i in range(len(self.path_to_start)):
+            rtn.append('U')
+        for i in range(len(self.path_to_dest)):
+            rtn.append(self.path_to_dest[i][1])
+        return ''.join(rtn)
+        
+```
+
+</details>
+
+솔루션도 비슷한 거 같은데 각각의 path 구할 때 root 기준의 L, R을 애초에 넣었다. 객체를 직접 다루고 가져가기보다는 필요한 결과만 다루도록 하자. 메모리도 많이 차지하고 비효율적이다.   
+그리고 deque 쓸 필요도 없었다. 어차피 한 쪽으로만 넣고 한 쪽으로만 빼니까 list로 간단히 할 수 있었다.
+
+<details>
+
+```py
+class Solution:
+    def getDirections(self, root: Optional[TreeNode], startValue: int, destValue: int) -> str:
+        def find(n: TreeNode, val: int, path: List[str]) -> bool:
+            if n.val == val:
+                return True
+            if n.left and find(n.left, val, path):
+                path += "L"
+            elif n.right and find(n.right, val, path):
+                path += "R"
+            return path
+        s, d = [], []
+        find(root, startValue, s)
+        find(root, destValue, d)
+        while len(s) and len(d) and s[-1] == d[-1]:
+            s.pop()
+            d.pop()
+        return "".join("U" * len(s)) + "".join(reversed(d))
+```
+
+</details>
 
 
 ### 101. Symmetric Tree

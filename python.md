@@ -55,3 +55,22 @@ sorted_dict = {k: disordered[k] for k in sorted(disordered)}
 ```
 이렇게 key 로만 하는 게 더 빠르다.
 
+
+### copy
+
+shallow copy: 실제로는 연결이 되어 있다. 메모리 주소만 복사한 것이고 같은 객체를 바라본다.    
+immutable 객체의 경우는 shallow copy를 하든 deep copy를 하든 상관없다. 이 객체들은 값이 바뀌면 항상 참조가 바뀐다. 값 바뀔 때마다 객체가 새로 생기는 방식이다. 
+그러면 a와 b가 같은 객체를 바라볼 때 a 값이 바뀌면 그 새로운 값을 위한 객체가 생성되고 a는 그 객체로 바라본다. b는 기존의 값을 바라본다.    
+
+- `=`: 아예 리스트도 같은 객체를 바라본다.
+- `[:]`: 얕은 복사이다. 리스트 자체는 새로 만들지만 리스트 안의 객체는 같은 객체를 바라본다. 따라서 1d array의 경우는 깊은 복사처럼 동작하지만 2d array의 경우는 얕은 복사이다.    
+- `copy.copy`: `[:]` 와 비슷하게 동작하는 것 같다.   
+- `copy.deepcopy`: deep copy가 일어난다.
+
+
+
+### compare
+
+`==` 로 비교할 때, immutable은 값이 같은지를 확인한다.   
+mutable은 reference를 확인한다. 값이 같아도 주소가 같아야한다.   
+
