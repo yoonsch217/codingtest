@@ -146,35 +146,14 @@ level traversal 하는 방법으로 풀 수 있다.
 이 때 주의할 점이 몇 가지 있다. 어떤 node의 child가 None이라도 next list에는 추가해줘야한다. 그래야 자리까지 정확히 symmetric한지 알 수 있다.   
 그 next list를 갖고 다음 iteration을 할 때는 None인 node는 무시해도 된다. 이미 이전까지의 자리를 확인했기 때문에 유효한 node에 대해서만 추가로 진행하면 된다.   
 
-<details>
-
-```python
-def isSymmetric(self, root: Optional[TreeNode]) -> bool:
-    queue = deque([root])
-    while queue:
-        next_list = []
-        while queue:
-            cur = queue.popleft()
-            if cur is None:
-                continue
-            next_list.append(cur.left)
-            next_list.append(cur.right)
-        n = len(next_list)
-        for i in range(n//2):
-            if next_list[i] is None and next_list[n-1-i] is None:
-                continue
-            if next_list[i] is None or next_list[n-1-i] is None or next_list[i].val != next_list[n-1-i].val:
-                return False
-
-        queue = deque(next_list)
-    return True
-```
-
-</details>
+또 다른 내 풀이로는, preorder traverse 하면서 list를 만든 뒤에 리스트를 비교했다.    
+child node로 갈 때 left 먼저 갈지 right 먼저 갈지의 순서만 바꿨다. None도 넣어줘야한다.    
+이것도 O(N) / O(N)의 복잡도이다.
 
 역시 solution이 더 깔금하다...   
 큐를 두고 처음에는 `[root, root]`를 넣는다. 처음 root는 왼쪽 subtree에 대한 root, 두 번째 root는 right subtree에 대한 root이다.   
 그러고 두 개씩 pop을 하면서 left와 right를 동시에 비교한다. left subtree에 있는 노드에 대해서는 left, right 순서로 큐에 넣고, right subtree에 있는 노드는 반대 순서로 넣는다.   
+두 개씩 빼면 한상 첫 번째 값은 left subtree, 두 번째 값은 right subtree 에서 온 게 보장이 되는구나.
 
 <details>
 
@@ -199,8 +178,6 @@ def isSymmetric(self, root: Optional[TreeNode]) -> bool:
 
 </details>
 
-
-left와 right 각각을 위해 root를 두 번 넣는 것이 핵심이다.
 
 비슷한 방식으로 recursive 하게도 할 수 있다. 
 
@@ -231,6 +208,13 @@ https://leetcode.com/problems/binary-search-tree-iterator
 나는 처음에 그냥 bst flatten을 해서 리스트를 만든 뒤에 앞에서부터 pointer를 옮겼다.    
 이렇게 해도 되지만 solution은 stack을 사용했다.
 
+- 처음에 left child node만 다 stack에 추가한다. 
+- 가장 작은 수는 top에 있을 것이고 next를 호출하면 그 값을 pop해야한다. 이제 top에 있는 수는 min의 parent 값이다.
+- left child만 추가했었으므로 pop된 min의 right subtree는 고려가 안 됐다. min이 right subtree를 갖는다면 min의 parent보다 작은 값이 거기 있다.
+- 따라서 pop된 min의 right subtree가 있는지 확인하고 있다면 그것도 동일하게 left child nodes들을 stack에 추가를 한다.
+
+이것도 결국 in-order traversal과 동일하게 동작을 하는데 stack을 사용하는 방법이네. memory를 height 만큼까지 쓰니까 조금 더 효율적이긴 할 것 같다.
+
 <details>
 
 ```python
@@ -257,11 +241,6 @@ class BSTIterator:
 
 </details>
 
-
-- 처음에 left child node만 다 stack에 추가한다. 
-- 가장 작은 수는 top에 있을 것이고 next를 호출하면 그 값을 pop해야한다. 이제 top에 있는 수는 min의 parent 값이다.
-- left child만 추가했었으므로 pop된 min의 right subtree는 고려가 안 됐다. min이 right subtree를 갖는다면 min의 parent보다 작은 값이 거기 있다.
-- 따라서 pop된 min의 right subtree가 있는지 확인하고 있다면 그것도 동일하게 left child nodes들을 stack에 추가를 한다.
 
 hasNext는 O(1)의 시간을 가질 것이다.   
 next는 기본적으로 right subtree를 iterate하는 것이므로 O(N)의 시간이 필요하지만 amortized O(1)으로 볼 수 있다.   
