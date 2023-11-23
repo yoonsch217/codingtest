@@ -70,7 +70,7 @@ NlogN
 
 https://leetcode.com/problems/find-peak-element/
 
-문제: integer array가 주어졌을 때 peak의 위치를 반환하라. peak란 주변보다 strictly greater한 값을 가지는 곳을 말하며 `nums[-1] = nums[n] = -math.inf` 으로 간주한다. O(log n) 의 알고리즘을 구하라.
+문제: 서로 다른 값을 갖는 integer array가 주어졌을 때 peak의 위치를 반환하라. peak란 주변보다 strictly greater한 값을 가지는 곳을 말하며 `nums[-1] = nums[n] = -math.inf` 으로 간주한다. O(log n) 의 알고리즘을 구하라.
 
 left, right를 초기화하고 nums에 -math.inf 를 append한다. 이렇게 함으로써 `nums[-1] = nums[n] = -math.inf`를 자연스럽게 적용시킬 수 있다.
 mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. -1은 -inf이고 cur보다 cur-1이 더 크기 때문이다.
@@ -78,15 +78,61 @@ mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. -1�
 오른쪽이 더 크면 right half에 어쨌든 peak가 있어야한다.
 둘 다 아니면 현재가 peak이다.
 
+포인트는, `nums[cur-1] > nums[cur]` 라면 cur의 left에 peak가 있다는 게 보장된다는 것이다. 물론 오른쪽에도 있을 수 있지만 왼쪽엔 무조건 있잖아. 
+
+<details>
+
+```py
+    def findPeakElement(self, nums: List[int]) -> int:
+        if len(nums) == 1:
+            return 0
+
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if m == 0:
+                if nums[m] > nums[m+1]:
+                    return m
+                return m + 1
+            if m == len(nums) - 1:
+                if nums[m] > nums[m-1]:
+                    return m
+                return m-1
+            
+            if nums[m-1] > nums[m]:
+                r = m - 1
+            elif nums[m+1] > nums[m]:
+                l = m + 1
+            else:
+                return m
+```
+
+</details>
+
+
+
 
 ### 658. Find K Closest Elements
 
 https://leetcode.com/problems/find-k-closest-elements/
 
-문제: sorted integer array가 주어지고 k, x가 주어진다. x랑 가장 가까운 k개의 원소를 정렬된 순서로 반환하라. abs(y - x)가 동일하면 작은 y값이 더 가까운 걸로 간주한다.
+문제: sorted integer array가 주어지고 k, x가 주어진다. x랑 가장 가까운 k개의 원소를 정렬된 순서로 반환하라. abs(y - x)가 동일하면 작은 y값이 더 가까운 걸로 간주한다. x가 arr에 존재하지 않을 수 있다.
 
-is_closer 짜는 게 어려웠다. 두 값이 같을 때 어디로 가야하는지를 판단해야한다.     
-예를 들어 target = 5, arr = [1, 2, 2, 3, 5, 6], is_closer(1, 2)가 들어왔다면 arr[1]과 arr[2]는 모두 2로 동일하다. 하지만 2는 5보다 작으므로 arr[2]가 arr[1]보다 가깝다고 볼 수 있다. 따라서 그 값과 타겟값의 크기의 비교에 따라 정해져야한다.
+너무 헤맸다.     
+헤맨 포인트:
+- x랑 가장 가까운 포인트를 찾아서 거기서부터 expand해야하는데 그 포인트를 찾는 게 어려웠다.
+- [1, 4, 4, 4, 5] 와 같이 동일한 값이 연속이고 x가 2일 때, mid 값이 index 2에 있다면 어느 쪽을 search할지 정해야한다. index 2의 값이 4이고, x 값은 2이므로 더 작은 쪽을 봐야하므로 left를 search하도록 해아한다.
+- mid-1 과 mid 중 mid-1이 더 가깝다면 mid+1은 생각할 필요 없이 left half를 탐색하면 된다.
+- 아니라면 오른쪽도 비교한다. mid-1이나 mid+1 둘 다 mid보다 가깝지 않다면 mid가 가장 가까운 포인트이다.
+- 이걸 is_closer 함수를 하나 만들어서 해야한다. 안 그러면 너무 코드가 복잡해진다.
+
+
+기본 로직
+
+- binary search를 사용하여 x에 가장 가까운 값을 찾는다.
+  - is_first_param_closer 라는 함수를 하나 짜서 `is_first_param_closer(mid-1, mid)`, `is_first_param_closer(mid, mid+1)` 를 구해서 closer 쪽으로 search한다.
+- 그 index를 기준으로 한 칸 왼쪽을 l, 한 칸 오른쪽을 r로 둔다.
+- l과 r 중 더 가까운 쪽을 한 칸 더 옮긴다. 이 작업을 k번 반복한다.
 
 <details>
 
@@ -100,7 +146,7 @@ class Solution:
         if k == len(arr):
             return arr
         
-        def is_closer(l, r):
+        def is_first_param_closer(l, r):
             if not 0 <= l < len(arr):
                 return False
             if not 0 <= r < len(arr):
@@ -112,7 +158,7 @@ class Solution:
             if l_val == r_val:
                 if l_val < x:
                     return l > r
-                return True
+                return l < r
             if abs(l_val - x) == abs(r_val - x):
                 return l_val < r_val
             return abs(l_val - x) < abs(r_val - x)
@@ -122,26 +168,94 @@ class Solution:
         while left <= right:
             mid = (left + right) // 2
             
-            if is_closer(mid-1, mid):
+            if is_first_param_closer(mid-1, mid):
                 right = mid - 1
-            elif is_closer(mid+1, mid):
+            elif is_first_param_closer(mid+1, mid):
                 left = mid + 1
             else:
                 break
-        # 이후는 mid 기준으로 expand. deque 대신 sliding window를 사용해서 index로만 비교하는 게 더 효율적일 거 같긴 하다. 
+        
+        # Expand starting from x
+        l, r = mid - 1, mid + 1
+        for remained_iter in range(k-1, 0, -1):
+            if l < 0:
+                r += remained_iter  # (l, r) 이 답이다.
+                break
+            if r > len(arr) - 1:
+                l -= remained_iter
+                break
+            
+            if abs(x - arr[l]) == abs(x - arr[r]):
+                if arr[l] < arr[r]:
+                    l -= 1
+                else:
+                    r += 1
+            
+            elif abs(x - arr[l]) < abs(x - arr[r]):
+                l -= 1
+            else:
+                r += 1
+            
+        return arr[l+1:r]
 ```
 
 </details>
 
-근데 솔루션 보니까 `mid = bisect_left(arr, x)` 로 간단히 구해버렸다..
+~근데 솔루션 보니까 `mid = bisect_left(arr, x)` 로 간단히 구해버렸다..~ 이걸로 하면 틀린다.
 
-그리고 신기한 솔루션도 하나 있다.   
-답 subarray의 시작 지점을 찾는 것이다.   
-시작 지점의 left bound는 0이 될 것이고 right bound는 n-k가 될 것이다. n-k 부터 시작을 해서 끝(n-1)까지 다 해야 k개가 되기 때문이다.   
-그러면 이 두 bound에 대해 작업을 한다. left, right에 대해 mid를 구한 후 mid 값과 mid + k 값을 비교한다. mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k 중 하나는 버려져야한다. k+1로 하는 이유는 최적화된 subarray가 더 오른쪽에 있는지 왼쪽에 있는지 알아야하기 때문이다.      
-mid가 target에 더 가깝다면 mid+k 이후는 subarray에 포함될 수가 없으므로 버려야하고 subarray의 시작지점은 mid 이하가 된다. 안 그러면 mid를 버려야하는데 mid가 더 가깝기 때문에 버리면 안 되기 때문이다.   
-right(시작지점의 right bount)를 mid로 옮기고 다음 iteration을 진행한다.   
-이걸 반복하다가 left == right 되는 순간이 답이다.
+
+
+Best 솔루션
+- answer subarray의 시작 지점을 찾는 것이다.   
+- 정답 array의 시작 지점의 left bound는 0이 될 것이고 right bound는 n-k가 될 것이다. n-k 부터 시작을 해서 끝(n-1)까지 다 해야 k개가 되기 때문이다.
+- 이 left, right에 대해 mid를 구한 후 mid 값과 mid + k 값을 비교한다. 
+mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k 중 하나는 버려져야한다. k+1로 하는 이유는 최적화된 subarray가 더 오른쪽에 있는지 왼쪽에 있는지 알아야하기 때문이다.      
+- mid가 target에 더 가깝다면 mid+k 이후는 subarray에 포함될 수가 없으므로 버려야하고 subarray의 시작지점은 mid 이하가 된다. 안 그러면 mid를 버려야하는데 mid가 더 가깝기 때문에 버리면 안 되기 때문이다.   
+- right를 mid로 옮기고 다음 iteration을 진행한다.   
+- 이걸 반복하다가 left == right 되는 순간이 답이다.
+- ?
+
+
+<details>
+
+```py
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        left, right = 0, len(arr) - k
+        while left < right:
+            mid = (left + right) // 2
+            if x - arr[mid] > arr[mid + k] - x:  # head 값이 tail 값보다 멀다면 시작점은 0~mid 가 될 수 없다.
+                left = mid + 1
+            else:
+                right = mid  # 아니라면 시작점은 0~mid 중 하나이다.
+        return arr[left:left + k]
+```
+
+</details>
+
+closest 에 대한 binary search 할 때는 `while left <= right: left = mid + 1 or right = mid - 1` 로 하는 게 복잡한 것 같다.   
+`while left < right: if A, left = mid + 1, else right = mid` 이런 식으로 하자. A는 0 ~ mid 가 답이 될 수 없는, 답에서 멀다는 조건이다. 
+
+
+
+<details><summary>brute force O(N)</summary>
+
+```py
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        # 전체를 놓고 양 쪽을 비교하면서 not closer 한 곳을 줄인다.
+        l, r = 0, len(arr) - 1
+        while r - l > k - 1:
+            if x - arr[l] <= arr[r] - x:  # 두 개가 같으면 right를 버려야한다. 값이 더 작은 게 우선이기 때문이다.
+                r -= 1
+            else:
+                l += 1
+        
+        return arr[l: r+1]
+```
+
+</details>
+
+
+
 
 
 ### 744. Find Smallest Letter Greater Than Target

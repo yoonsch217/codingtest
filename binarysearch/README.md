@@ -29,3 +29,12 @@ loop를 나오면 left = right + 1 의 위치에 있다.
 left가 오른쪽으로 옮겨져야할 조건인 if condition은, 그때의 mid보다 더 많이 먹으러 가야하는 상황이므로 다 먹지 못하는 경우일 것이다.    
 마지막에 if condition을 거쳤다면 mid는 x일 것이므로 left는 가장 왼쪽의 o가 된다.   
 마지막에 else condition을 거쳤다면 mid는 o일 것이므로 right는 가장 오른쪽의 x가 되고 left는 가장 왼쪽의 o가 된다.    
+
+
+### closest
+
+closest 에 대한 binary search 할 때는 `while left <= right: left = mid + 1 or right = mid - 1` 로 하는 게 복잡한 것 같다.   
+`while left < right: if A, left = mid + 1, else right = mid` 이런 식으로 하자. A는 0 ~ mid 가 답이 될 수 없는, 답에서 멀다는 조건이다. 
+
+예시: `658. Find K Closest Elements`
+
