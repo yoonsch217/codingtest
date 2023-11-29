@@ -267,19 +267,57 @@ https://leetcode.com/problems/find-smallest-letter-greater-than-target/
 `while left <= right` 로 binary search를 먼저 했다. target을 찾는 게 아니라 target보다 큰 최소를 찾는 거니까 `letters[mid] <= target` 이면 left를 옮기고 아니면 right를 옮기도록 했다.   
 while이 끝났을 때 left가 len 이상이면 못 찾고 끝난 거니까 letters[0]을 반환한다. 아니면 letters[left]를 반환한다. left가 condition을 만족하는 가장 작은 값이다.   
 
+README에 정리했는데, 다 끝나면 left는 condition을 만족하지 않는 것 중 가장 왼쪽에 존재한다. condition을 만족할 때마다 l을 오른쪽으로 옮기기 때문이다.
+
+
 
 
 ### 153. Find Minimum in Rotated Sorted Array
 
 https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
 
-문제: sorted array with unique integer가 주어진다. 한 군데를 기준으로 rotate 되어 있는데 그 array의 최솟값을 구하라. `ex) [3, 4, 5, 1, 2] ` 
+문제: sorted array with unique integer가 주어진다. 한 군데를 기준으로 rotate 되어 있는데 그 array의 최솟값을 구하라. `ex) [3, 4, 5, 1, 2] => return 1`
+
+
+데이터를 먼저 이해하자. mid가 각 상황일 때 어떤 의미인지를 충분히 생각하고 깔끔하게 분류한 걸 글로 정리한 뒤에 코드를 생각해보자.
 
 start < end면 rotated가 안 된거니까 그거에 대한 처리를 먼저 한다. rotated 된 경우에 대해서는 index 0의 value를 기준으로 잡는다.   
-`index 1 ~ rotated point`: index 0의 값보다 큰 값이다.   
-`rotated point ~ last`: index 0의 값보다 작은 값이다.    
-binary search를 써서 mid가 nums[0]보다 작았을 때, nums[mid-1]이 nums[0]보다 크거나 같으면 rotate 직후의 값이므로 nums[mid]를 반환한다. 아니면 left half를 탐색한다(right를 옮긴다). 이 때, mid는 항상 1보다 크므로 별도의 range check을 할 필요는 없다.   
-mid가 nums[0]보다 크면 right half를 탐색한다(left를 옮긴다).    
+아래와 같이 우선 데이터를 이해한다.
+- `[index 1, rotated point-1]`: index 0의 값보다 큰 값이다.   
+- `[rotated point, last]`: index 0의 값보다 작은 값이다.    
+
+이해한 데이터를 바탕으로 아래 로직으로 찾는다. Using binary search
+- nums[l] < nums[r] 라면 sorting 된 상태이기 때문에 nums[l] 반환
+- mid가 nums[l]보다 작다면 mid 위치는 `[rotated point, last]` 범위의 값이다.   
+  - nums[mid-1]이 nums[0]보다 크거나 같으면 nums[mid-1]은 `[rotated point, last]` 범위가 아니란 뜻이고, 즉 m위치는 `[rotated point, last]` 의 제일 왼쪽이라는 뜻이다. => nums[mid]를 반환    
+  - mid-1 이 out of index가 되려면 mid가 0이어야하는데 이런 상황은 발생하지 않는다. 이미 첫 번째 조건에서 반환되었을 것이기 때문이다.
+  - 위 조건이 아니라면 mid는 `[rotated point, last]` 범위 중간에 있다는 것이고 mid 왼쪽에 rotated point가 있기 때문에 left half를 탐색한다. `right = m - 1`
+- 위 조건이 아니라면 left half를 탐색한다. `left = m + 1`   
+
+
+<details>
+
+```py
+    def findMin(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            if nums[l] <= nums[r]:
+                return nums[l]
+            
+            m = (l + r) // 2
+            if nums[m] < nums[l]:
+                if nums[m-1] >= nums[l]:
+                    return nums[m]
+                r = m - 1
+            else:
+                l = m + 1
+            
+```
+
+</details>
+
+
+
 
 
 
