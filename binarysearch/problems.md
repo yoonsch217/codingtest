@@ -339,10 +339,49 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
   - right가 left보다 작다면 right half를 탐색한다. right가 left보다 큰 건 이미 처리했다.
   - right가 left와 같을 때만 남았는데 이 때는 linear하게 탐색을 한다.
 
-(solution) 비슷한데 훨씬 간단하다. right랑 비교하면 unrotated array에 대해 고려하지 않아도 되네? 왜지,
+
+(solution) 비슷한데 훨씬 간단하다. right랑 비교했는데 뭐가 달라지지? left 기준으로 해도 돌아가긴 한다.
+
+right를 기준으로 한 데이터 분석
+- `[0 ~ rotation point-1]`: right 보다 크거나 같아야한다.
+- `[rotation point ~ rightend-1]`: right보다 작거나 같아야한다.
+
+풀이
 - mid가 right보다 작으면 left half를 본다. left에서 mid 사이에 rotation point가 있어야한다.
 - mid가 right보다 크면 right half를 본다.
 - 아니면 right를 하나 줄임으로써 범위를 좁힌다.
+
+
+left 기준으로 보완한 내 풀이
+
+<details>
+
+```py
+def findMin(self, nums: List[int]) -> int:
+    l, r = 0, len(nums) - 1
+
+    while l <= r:
+        if r - l <= 1:
+            return min(nums[l], nums[r])
+        if nums[l] < nums[r]:
+            return nums[l]
+        mid = (l + r) // 2
+
+        if nums[mid] < nums[l]:
+            if nums[mid-1] > nums[mid]:
+                return nums[mid]
+            r = mid - 1
+        elif nums[mid] > nums[l]:
+            l = mid + 1
+        else:
+            l += 1
+```
+
+</details>
+
+
+
+
 
 
 ### 240. Search a 2D Matrix II
@@ -358,7 +397,7 @@ Time: O(M + N) / Space: O(1)
 
 <details>
 
-```pythoon
+```python
 def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
     m, n = len(matrix), len(matrix[0])
     row, col = 0, n - 1
