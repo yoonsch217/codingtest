@@ -77,7 +77,7 @@ def union(self, x, y):
 - rank가 낮은 vertices를 rank 높은 vertices 아래로 붙임으로써 height가 늘어나는 걸 막을 수 있다.
 - rank를 저장할 rank array를 하나 더 만들어야한다. rank에 그 root 아래에 몇 개가 있는지를 저장한다.
 - Time Complexity
-  - find: O(logN) 동일한 rank의 vertex끼리 계속 union되면 logN 높이의 그래프가 만들어진다. 왜 logN? 다 union 되면 height 2 아닌가?
+  - find: O(logN) 동일한 rank의 vertex끼리 계속 union되면 logN 높이의 그래프가 만들어진다. log의 밑이 뭔지는 모르겠지만 트리 구조니까 log N 이라고 표현하는 것 같다. binary라면 log2 N 이겠고.
   - union/connected: O(logN). 
   - find 작업에 dominant한 작업이다.
 
