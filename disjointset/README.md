@@ -132,9 +132,11 @@ def __init__(self, size):
     # Use a rank array to record the height of each vertex, i.e., the "rank" of each vertex.
     # The initial "rank" of each vertex is 1, because each of them is
     # a standalone vertex with no connection to other vertices.
+    # value가 index가 아니라 다른 값이라면 list 사용이 어려울 것 같고 dictionary를 사용하면 될 것 같다.
     self.rank = [1] * size
 
 # The find function here is the same as that in the disjoint set with path compression.
+# root array의 값과 자기의 값이 다르다면 recursive하게 올라가야한다. path compression이 된 상태면 한 번만 올라가면 된다.
 def find(self, x):
     if x == self.root[x]:
         return x
