@@ -35,15 +35,34 @@ https://leetcode.com/problems/word-break/
 
 문제: 문자열 s가 있고 word_dict이라는 문자열 리스트가 있다. word_dict에 있는 문자열들로 s를 만들 수 있는지 판단하라. leetcode, ['leet', 'code']
 
-dp(i): 문자열s의 i ~ end까지 substring에 대한 결과(0 ~ i로 해도 된다.)    
-dp(0)을 구하면 된다.   
-dp(i)에 대해 j를 i+1부터 끝까지 이동시키면서 s[i:j]가 word_dict에 있는지 확인하고 있으면 dp(j)를 반환하면 된다.   
-근데 substring 자르고 dp recursive하게 부를 때 index 설정하는 게 헷갈린다.   
+적당히 잘 쪼개는 게 중요하다.
+
+- dp(i): index i 까지의 substring이 word_dict 로 구성이 가능하면 True, 아니면 False    
+- dp(i) is True when: `s[0:i+1] in word_dict` or `s[j:i+1] in word_dict and dp(j-1) for any j in range(1, i)`   
+
+
+<details>
+
+```py
+def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+    wd_set = set()
+    for wd in wordDict:
+        wd_set.add(wd)
+    
+    n = len(s)
+    memo = [False] * (n+1)  # For memo[-1] = False
+    memo[-1] = True
+
+    for i in range(n):
+        for j in range(0, i+1):
+            if memo[j-1] and s[j:i+1] in wd_set:
+                memo[i] = True
+                break
+    return memo[n-1]
 ```
-dp(i): [0~i]까지의 substring에 대한 결과
-dp(i) = dp(i-j) and exists(s[i-j+1 : i+1]) for j in range(1, i+2), dp(음수) = True
-j range가 헷갈렸는데 dp(i-1) and exists(s[i:i+1]) 부터 dp(-1) and exists(s[0:i+1]) 가 나오도록 설정해야한다.
-```
+
+</details>
+
 
 O(N^2) /  O(N)
 
