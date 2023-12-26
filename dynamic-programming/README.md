@@ -58,15 +58,21 @@ array를 iterate하면서 각 index마다 이전까지의 결과를 갖고 갈�
 
 1. best = negative infinity
 2. current = 0
-3. for num in nums:
-    3.1. current = Max(current + num, num)
+3. for num in nums:   
+    3.1. current = Max(current + num, num)    
     3.2. best = Max(best, current)
 4. return best
 
-이게 모든 case를 다 cover할까? 
-i ~ j 의 범위가 답이라고 해보자. 그럼 ? ~ i-1과 j+1 ~ ? 는 음수일 것이다. 
+~이게 모든 case를 다 cover할까?    
+i ~ j 의 범위가 답이라고 해보자. 그럼 `?~i-1`과 `j+1~?` 는 음수일 것이다.    
 그렇다면 앞에서부터 iterate할 때 index가 i-1까지 가고 i에 도달하게 되면 지금까지의 답을 버리게 된다. 
-따라서 i ~ j 구간을 cover하게 된다.
+따라서 i ~ j 구간을 cover하게 된다.~
+
+점화식(recurrence relation)으로 보는 게 편하다.    
+f(i)를 `index i를 right end로 하는 subarray 중 가장 큰 sum 값` 이라고 하자.    
+f(i+1)은 이전의 값을 취하든가 버리든가 둘 중 하나이기 때문에 `max(nums[i+1], f(i) + nums[i+1])` 이 될 것이다.   
+
+
 
 https://leetcode.com/problems/maximum-sum-circular-subarray
 
