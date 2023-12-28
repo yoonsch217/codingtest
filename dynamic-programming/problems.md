@@ -72,14 +72,59 @@ O(N^2) /  O(N)
 
 https://leetcode.com/problems/maximal-square/
 
-문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형을 찾아라.
+문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형의 넓이를 반환하라.
+
+
+- 어떤 꼭지점 (i,j) 를 기준으로 왼쪽, 위, 왼쪽위 점들이 둘러싸는 점들이다.
+- 왼쪽 점 (i, j-1), 위쪽 점 (i-1, j) 이 겹치는 부분은 현재 점을 기준으로도 연장될 수가 있다.
+- 만약, 4, 4 라면 현재 점 기준으로 왼쪽 4개, 위쪽 4개를 더 포함할 수 있다는 건데, 제일 왼쪽 위 꼭지점은 아직 알 수 없다.
+- (i-1, j-1) 도 만약 4라면 제일 왼쪽 위 꼭지점도 포함한다는 뜻이다. 왜나하면 바로 왼쪽 점인 (i, j-1) 과 동일하게 왼쪽으로 뻗어나가는데 한 칸 위까지 뻗어나가기 때문이다.
 
 ```
-dp(i, j): matrix[i][j] 위치에서 왼쪽 위로 만들 수 있는 최대의 정사각형 크기라 정의한다.    
+dp(i, j): matrix[i][j] 위치를 오른쪽 아래 꼭지점으로 두어서 왼쪽 위로 만들 수 있는 최대의 정사각형의 한 변 길이    
 dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1)) + 1 
 ```
-먼저 dp(i-1, j), dp(i, j-1) 을 생각해서 겹치는 영역이 최대 정사각형의 후보이다. 두 개가 같은 경우는 모서리가 1인지 고려해야하는데 그 상황을 dp(i-1, j-1) 로 채운다고 접근하면 될 것 같다.   
+
 이렇게 하면 dp로 풀이는 가능하고, 공간 최적화를 하려면 직전 row의 정보만 보관하면 된다.
+
+
+<details>
+
+```py
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        n_row = len(matrix)
+        n_col = len(matrix[0])
+        
+        prev_row = [0] * n_col
+        cur_row = [0] * n_col
+
+        max_side = 0
+
+        for i in range(n_row):
+            for j in range(n_col):
+                if matrix[i][j] != '1':
+                    continue
+                if j == 0:
+                    cur_row[j] = 1  # 여기서 max_side 업데이트 하지 않고 continue로 넘어가버려서 틀렸었다. 
+                else:
+                    cur_row[j] = min(cur_row[j-1], prev_row[j], prev_row[j-1]) + 1
+                max_side = max(max_side, cur_row[j])
+            prev_row = cur_row  # 밑에서 cur_row가 바라보는 객체를 다시 만들어주니까 deepcopy 없이 그냥 prev_row가 바라보는 객체만 바꿔주면 된다.
+            cur_row = [0] * n_col
+        
+        return max_side * max_side
+```
+
+</details>
+
+prev_row, cur_row 두 개를 쓰는 게 아니라 prev_row, left_value 이렇게 두 개를 쓰려고 해봤다.    
+그런데 row를 오른쪽으로 이동하면서 prev_row의 자기 위치를 업데이트해야하는데 그렇게 하면 (i-1, j-1) 위치를 구하기가 어렵다.     
+왜냐하면 prev_row[j-1]은 left_value와 동일하기 때문이다.    
+그냥 row 두 개를 쓰자.   
+
+
+
+
 
 
 ### 152. Maximum Product Subarray
@@ -92,8 +137,49 @@ https://leetcode.com/problems/maximum-product-subarray/
 그 포인터 i가 오른쪽 끝일 때 가능한 contiguous subarray들 중 max와 min 값을 저장한다.   
 `dp(i) returns (that_max, that_min)`   
 그러면 i+1에 대해서 dp(i+1) 의 max는 `max(nums[i], dp(i)[0] * nums[i], dp(i)[1] * nums[i])` 가 된다.   
-nums[i]가 양수일지 음수일지 모르기 때문에 이전까지의 min, max 둘 다 신경을 써야한다. nums[i]가 양수인지 음수인지에 따라 분기를 나누면 더 빨라질 것 같긴 하다.    
-bottom up으로 하는 게 효율적이다.   
+nums[i]가 양수일지 음수일지 모르기 때문에 이전까지의 min, max 둘 다 신경을 써야한다.    
+bottom up으로 하는 게 효율적이다.
+
+```
+max_dp(i): i index가 오른쪽 끝인 subarray 중 product max
+min_dp(i): i index가 오른쪽 끝인 subarray 중 product min
+max_dp(i) = max(max_dp(i) * num, min_dp(i) * num, num)
+min_dp(i) = min(min(i) * num, min_dp(i) * num, num)
+
+```
+
+<details>
+
+```py
+    def maxProduct(self, nums: List[int]) -> int:
+        n = len(nums)
+        max_dp = [0] * n
+        min_dp = [0] * n
+
+        for i, num in enumerate(nums):
+            if i == 0:
+                max_dp[i] = num
+                min_dp[i] = num
+                continue
+            max_dp[i] = max(max(max_dp[i-1] * num, min_dp[i-1] * num), num)
+            min_dp[i] = min(min(max_dp[i-1] * num, min_dp[i-1] * num), num)
+        
+        return max(max_dp)
+```
+
+어차피 직전 값만 사용하니까 list 대신 prev_max, prev_min를 사용할 수도 있다.   
+근데 이 때는 prev_max를 업데이트할 때 new_max 라는 값을 만들어서 업데이트해준 뒤 마지막에 바꿔야한다.   
+prev_max = ...
+prev_min = ...
+이런 식으로 하면 prev_min 계산할 때 업데이트 된 prev_max, 즉 new_max를 사용해서 업데이트를 할 위험이 있다.
+
+</details>
+
+
+
+
+
+
 
 
 ### 279. Perfect Squares
@@ -102,16 +188,91 @@ https://leetcode.com/problems/perfect-squares/
 
 문제: 어떤 int n이 주어졌을 때 perfect square로만 합쳐서 n을 만들도록 할 때의 perfect square number의 최소의 개수를 구하라. perfect square는 정수의 제곱이다.
 
-my approach:   
-dp(i)를 최소 개수라고 할 때, `dp(i) = min(dp(j) + dp(i-j)) where 1 <= j < i/2, or 1 if i is a perfect square` 이다.   
-a + b = c라고 할 때 a를 이루는 최소 수가 dp(a)이고 b를 이루는 최소 개수가 dp(b)니까 그 두 개 합한 게 되기 때문이다.   
-그런데 이렇게 하면 TLE가 난다.    
 
-`dp(i) = min(dp(i-k)+1) for k in perfect square numbers below i` 로 할 수도 있는데 그래도 TLE가 난다.
+dp(i)를 최소 개수라고 할 때, 아래 두 가지로 정의해볼 수 있다.
 
-근데 dp 표현식은 저게 맞다. 내가 각 iteration마다 i가 perfect square 인지 체크하고 맞으면 1로 한 뒤 continue하는 코드를 넣었는데 이게 오히려 시간을 느리게 했나보다. 이 부분을 제외하니까 시간 내로 들어온다.   
-perfect square인 경우가 극히 드물텐데 그걸 위해 연산을 했으니 비효율적이었나보다.   
-Time Complexity: O(n sqrt(n))
+
+- `dp(i) = min(dp(j) + dp(i-j)) where 1 <= j < i/2, or 1 if i is a perfect square`
+- `dp(i) = min(dp(i-k)+1) for k in perfect square numbers below i` 이게 더 효율적이다.
+
+a + b = c라고 할 때 a를 이루는 최소 수가 dp(a)이고 b를 이루는 최소 개수가 dp(b)니까 dp(c) = dp(a) + dp(b)가 된다.   
+
+
+
+<details>
+
+```py
+    def numSquares(self, n: int) -> int:
+        dp = [float(inf)] * (n+1)
+
+        def helper(num):
+            if dp[num] is not float(inf):
+                return dp[num]
+            if sqrt(num) == int(sqrt(num)):
+                dp[num] = 1
+                return dp[num]
+            """
+            # approach 1
+            for i in range(1, num//2 + 1):
+                dp[num] = min(dp[num], helper(num-i) + helper(i))
+            """
+            # approach 2
+            for i in range(1, num):
+                if sqrt(i) == int(sqrt(i)):
+                    dp[num] = min(dp[num], 1 + helper(num-i))
+            return dp[num]
+
+        res = helper(n)
+        return res
+```
+
+
+둘 다 TLE가 난다. 파이썬의 한계인 것 같다.
+
+</details>
+
+
+
+BFS 로 풀면 TLE가 안 난다.
+
+- n 이하의 제곱수들을 구해서 저장한다.
+- BFS의 한 level을 리스트 혹은 set으로 정의를 한다.
+- 처음에는 root부터 시작이니까 {n} 가 초깃값이다.
+- level의 각 원소마다 돌면서 제곱수라면 그때의 level을 반환한다.
+- 제곱수가 아니라면 다음 level 리스트에 현재 보는 값에서 제곱수를 뺀 값을 넣어준다.
+- 그 level의 작업이 끝나면 다음 level에 대해 작업해준다.
+
+
+<details>
+
+```py
+    def numSquares(self, n: int) -> int:
+        if n < 2:
+            return n
+        lst = []
+        i = 1
+        while i * i <= n:
+            lst.append( i * i )
+            i += 1
+        cnt = 0
+        toCheck = {n}
+        while toCheck:
+            cnt += 1
+            temp = set()
+            for x in toCheck:
+                for y in lst:
+                    if x == y:
+                        return cnt
+                    if x < y:  # 처음에는 x 값이 lst의 최솟값인 1보다 클 것이다. 그러다가 x가 y보다 작아진다면 이후 y보다도 다 작을 것이므로 더 볼 필요가 없다.
+                        break
+                    temp.add(x-y)
+            toCheck = temp
+
+        return cnt
+```
+
+</details>
+
 
 greedy 방식을 사용할 수도 있다. `result = dp(n, k) for n in [i, .. n]` 이고 dp(n, k)는 k 개의 perfect square로 n을 만들 수 있으면 true를 반환하고 그게 그때의 최적의 답이다.   
 `dp(n, k) = dp(n-squarenum, k-1) + 1`      
@@ -121,6 +282,10 @@ n-ary tree로 생각할 수 있다. 어떤 parent node의 숫자를 기준으로
 
 greedy 방식을 n-ary tree로 생각할 때, 각 레벨을 BFS로 탐색하는 것으로 볼 수도 있다.    
 레벨이 곧 사용된 perfect square 숫자의 개수이기 때문이다.   
+
+
+
+
 
 
 ### 70. Climbing Stairs
