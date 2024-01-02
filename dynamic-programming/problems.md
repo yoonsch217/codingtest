@@ -1,3 +1,14 @@
+### 70. Climbing Stairs
+
+https://leetcode.com/problems/climbing-stairs/
+
+문제: n 개의 step을 올라가야하고 한 번에 한 개나 두 개의 계단을 오를 수 있다. 총 몇 개의 다른 방법으로 올라갈 수 있는지 구하라.
+
+dp(i)를 i개 올라가는 distinct way의 수라고 하자.   
+그러면 dp(i) = dp(i-2) + dp(i-1)이 된다.   
+어떤 계단에 가기 위해서는 한 계단 아래에서 한 계단 올라오든가 두 계단 아래에서 두 계단 올라와야 하기 때문이다.   
+
+
 ### Min Cost Climbing Stairs
 https://leetcode.com/problems/min-cost-climbing-stairs
 
@@ -288,16 +299,6 @@ greedy 방식을 n-ary tree로 생각할 때, 각 레벨을 BFS로 탐색하는 
 
 
 
-### 70. Climbing Stairs
-
-https://leetcode.com/problems/climbing-stairs/
-
-문제: n 개의 step을 올라가야하고 한 번에 한 개나 두 개의 계단을 오를 수 있다. 총 몇 개의 다른 방법으로 올라갈 수 있는지 구하라.
-
-dp(i)를 i개 올라가는 distinct way의 수라고 하자.   
-그러면 dp(i) = dp(i-2) + dp(i-1)이 된다.   
-어떤 계단에 가기 위해서는 한 계단 아래에서 한 계단 올라오든가 두 계단 아래에서 두 계단 올라와야 하기 때문이다.   
-
 
 ### 276. Paint Fence
 
@@ -305,11 +306,16 @@ https://leetcode.com/problems/paint-fence
 
 문제: n 개의 기둥과 k 개의 색깔이 있다. 연속해서 세 개의 기둥을 동일한 색으로 칠하지 않으면서 모든 기둥을 칠할 수 있는 방법의 수를 구하라.
 
+일반식을 생각하기 위해서는 케이스를 잘 쪼개야한다.   
 dp(i)를 i 개를 칠하는 방법의 수라고 하자.   
-i번째를 칠하는 방법의 수는 "i-1번째와 다른 색으로 칠하는 방법의 수"와 "i-1번째와 같은 색으로 칠하는 방법의 수"의 합이다.
+i번째를 칠하는 방법의 수는 "i-1번째와 다른 색으로 칠하는 방법의 수"와 "i-1번째와 같은 색으로 칠하는 방법의 수"의 합이다.   
 i-1번째와 다른 색으로 칠하는 방법의 수는, dp(i-1) * k-1이 된다.   
-i-1번째와 같은 색으로 칠하는 방법의 수는, i-2와 i-1이 서로 다른 색으로 칠하는 방법의 수와 같다. 따라서 dp(i-2) * (k-1)이 된다.
+i-1번째와 같은 색으로 칠하는 방법의 수는, i와 i-1이 같기 때문에 i-2는 달라야한다. 따라서 i-2와 i-1을 서로 다른 색으로 칠하는 방법의 수와 같다. 따라서 dp(i-2) * (k-1)이 된다.    
 따라서 dp(i) = (k-1) * (dp(i-1) + dp(i-2))이다.   
+
+
+
+
 
 
 ### 518. Coin Change II
@@ -318,19 +324,79 @@ https://leetcode.com/problems/coin-change-ii
 
 문제: coins 라는 리스트는 사용할 수 있는 coin 종류가 있고 amount라는 int가 있다. coins에 있는 coin으로 amount를 만드는 조합의 수를 구하라.
 
-내 풀이   
+
+dp(i)를 i 금액을 만들기 위한 방법 수라고 하자.    
+처음에 `dp(i) = sum of dp(i-coin) for coin in coins` 라고 생각했는데 이렇게 하면 동일한 조합도 순서가 다르면 다른 way로 처리를 한다.    
+
+knapsack problem이라고 한다.   
+일반식 구할 때 적절히 나누자.   
+
+내 풀이    
+dp(i, j)를 number of combinations to make up i with using coins[:j+1] 라고 하자.   
+dp(i, j)는 `coin[j]를 하나도 안 쓰고 만드는 법` + `coin[j]를 하나라도 쓰고 만드는 법` 으로 나눌 수 있다.   
+coin[j]를 하나도 안 쓰고 i를 만드는 법은 dp(i, j-1)이 된다.    
+coin[j]를 하나라도 쓰고 만드는 법은 `dp(i-coin[j], j-1) + dp(i-2*coin[j], j-1), ...`이다.   
+
+<details>
+
+```py
+    def change(self, amount: int, coins: List[int]) -> int:
+        @lru_cache(maxsize=None)
+        def helper(i, j):  # Number of ways to make up i with coins[:j+1]
+            if i == 0:
+                return 1
+            if i < 0 or j < 0:
+                return 0
+            res = helper(i, j-1)
+
+            cnt = 1  # number of coins[j] uses
+            while i - coins[j] * cnt >= 0:
+                res += helper(i - coins[j] * cnt, j-1)
+                cnt += 1
+            return res
+        
+        return helper(amount, len(coins)-1)
 ```
-dp(i, upper): Number of combinations to make up i with using coins not bigger than upper
-dp(i, upper) = dp(i-coin, coin) for k in coins not greater than upper
-dp(0) = 1
-dp(i) = 0 if i < 0
+
+accept은 되는데 너무 느리다. amount를 N, len(coins)를 M이라고 할 때 시간은 `O(MxNxN)`? recursion은 `MxN` 번 있고 recursion 안에서 iteration이 N번 있는 거 아닌가.   
+
+</details>
+
+
+Solution    
+dp(i, j)를 두 개로 나눈다.   
+`coins[j]를 쓰지 않고 make up 하는 방법` + `coins[j]를 쓰고 make up 하는 방법`   
+전자는 dp(i, j-1)이 된다.    
+후자는 `i-coin[j]` 까지 만들면 거기서 coin[j]만 추가하면 된다. `i-coin[j]`를 만들 땐 coin[j]를 써도 되니까 dp(i-coin[j], j) 이다.    
+
+
+<details>
+
+```py
+    def change(self, amount: int, coins: List[int]) -> int:
+        @lru_cache(maxsize=None)
+        def helper(i, j):  # Number of ways to make up i with coins[:j+1]
+            if i == 0:
+                return 1
+            if i < 0 or j < 0:
+                return 0
+            res = helper(i, j-1) + helper(i-coins[j], j)
+            return res
+        return helper(amount, len(coins)-1)
 ```
 
-number of coins = k 라고 할 때, O(k * (amount / min(coins))) 가 시간 복잡도 아닐까.    
-amount / min(coins) 만큼 recursion 함수가 호출되고 각 recursion마다 len(coins) 만큼 iterate하니까?   
+</details>
 
 
-solution은 훨씬 간단하다. solution도 복잡도는 O(len(coins) * amount) / O(amount) 인데 실제 수행 시간은 훨씬 빠르다.
+
+
+Optimized Solution     
+처음에 dp array는 모두 0으로 초기화한다.   
+어떤 특정 coin a로 갈 수 있는 위치를 미리 다 체크해놓고 이 coin은 다시 쓰지 않는다.    
+위치를 이동할 때 원래 있던 곳에서 a만큼 이동을 할텐데 `dp(i) += dp(i-a)`가 된다.    
+기존의 dp(i)는 coin a 없이 만들어진 값이기 때문에 dp(i-a)에서 coin a를 써서 i로 오는 방법은 기존의 dp(i)를 만들었던 값과 중복이 없다는 것이 보장된다.    
+이 작업을 모든 coin에 대해 다 해준다.   
+
 
 <details>
 
@@ -350,7 +416,14 @@ def change(self, amount: int, coins: List[int]) -> int:
     return dp[amount]
 ```
 
+Time: O(len(coins) * amount), Space: O(amount)
+
 </details>
+
+
+
+
+
 
 
 
