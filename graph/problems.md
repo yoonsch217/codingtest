@@ -1,3 +1,63 @@
+README에 포함된 각 개념의 대표 예시 문제
+
+
+
+### 743. Network Delay Time
+
+https://leetcode.com/problems/network-delay-time
+
+문제: n개의 노드가 주어지고 1번부터 n번까지 레이블이 되어 있다. times라는 리스트가 주어지는데 `times[i] = (u, v, w)` 로써 u 노드로부터 v 노드로 이동하는 데 w의 시간이 걸린다는 뜻이다. 노드 k에서 시작했을 때 모든 노드에 다 전파가 되는 데까지 걸리는 최소 시간을 구하라. 전파를 못 한다면 -1을 반환하라.
+
+Dijkstra's Algorithm 문제이다. source는 k가 되고 k로부터 각각 노드까지의 최소 거리를 구한 후 그 max를 구하면 된다.
+
+<details>
+
+```python
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        # Dijkstra's Algorithm으로 source로부터의 최소 cost를 다 구하고 그것들의 max를 구한다.
+        d = {}  # key: destination, value: distance, 만약 path가 필요하다면 (distance, previous) 이렇게 넣으면 된다.
+        for i in range(n):
+            d[i+1] = math.inf
+        #d = defaultdict(lambda: math.inf)  # 이렇게 초기화하면 마지막에 key를 직접 명시해서 접근해야한다. dict에 없는 게 있으면 unreachable이니까.
+        d[k] = 0
+
+        adj_matrix = [[] for _ in range(n+1)]  # (dest, cost)
+        for time in times:
+            src, dest, cost = time
+            adj_matrix[src].append((dest, cost))
+
+        heap = [(0, k, k)]  # (distance, next, previous)
+        
+        while True:
+            next_cost, next_vertex, prev_vertex = heapq.heappop(heap)
+            for dest, cost in adj_matrix[next_vertex]:
+                if d[dest] <= d[next_vertex] + cost:
+                    continue
+                d[dest] = d[next_vertex] + cost
+                heapq.heappush(heap, (cost, dest, next_vertex))
+            if len(heap) == 0:
+                break
+
+        res = max(map(lambda x: d[x], d))
+        return res if res != math.inf else -1
+```
+
+</details>
+
+
+
+
+
+---
+
+
+
+
+
+
+README에 없는 문제들
+
 ### 210. Course Schedule II
 
 https://leetcode.com/problems/course-schedule-ii/
@@ -73,47 +133,6 @@ O(N*K) / O(N*K)  => 각 노드마다 at most k번 방문한다. k 개의 다른 
 A* algorithm도 있다는데 이건 우선 skip
 
 
-### 743. Network Delay Time
-
-https://leetcode.com/problems/network-delay-time
-
-문제: n개의 노드가 주어지고 1번부터 n번까지 레이블이 되어 있다. times라는 리스트가 주어지는데 `times[i] = (u, v, w)` 로써 u 노드로부터 v 노드로 이동하는 데 w의 시간이 걸린다는 뜻이다. 노드 k에서 시작했을 때 모든 노드에 다 전파가 되는 데까지 걸리는 최소 시간을 구하라. 전파를 못 한다면 -1을 반환하라.
-
-Dijkstra's Algorithm 문제이다. source는 k가 되고 k로부터 각각 노드까지의 최소 거리를 구한 후 그 max를 구하면 된다.
-
-<details>
-
-```python
-class Solution:
-    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
-        # Dijkstra's Algorithm으로 source로부터의 최소 cost를 다 구하고 그것들의 max를 구한다.
-        d = {}  # value: distance, 만약 path가 필요하다면 (distance, previous) 이렇게 넣으면 된다.
-        for i in range(n):
-            d[i+1] = math.inf
-        d[k] = 0
-
-        adj_matrix = [[] for _ in range(n+1)]  # (dest, cost)
-        for time in times:
-            src, dest, cost = time
-            adj_matrix[src].append((dest, cost))
-
-        heap = [(0, k, k)]  # (distance, next, previous)
-        
-        while True:
-            next_cost, next_vertex, prev_vertex = heapq.heappop(heap)
-            for dest, cost in adj_matrix[next_vertex]:
-                if d[dest] <= d[next_vertex] + cost:
-                    continue
-                d[dest] = d[next_vertex] + cost
-                heapq.heappush(heap, (cost, dest, next_vertex))
-            if len(heap) == 0:
-                break
-
-        res = max(map(lambda x: d[x], d))
-        return res if res != math.inf else -1
-```
-
-</details>
 
 
 ### 787. Cheapest Flights Within K Stops
