@@ -60,7 +60,7 @@ shortest path를 찾으려면 path를 리스트 복사해가면서 저장해야�
 직사각형의 2d array를 대각선 단위로 탐색한다고 생각하면 된다. BFS를 진행하면서 큐의 최대 크기가 min(M, N)이 된다.
 (https://imgur.com/gallery/M58OKvB)
 
-![Alt text](image.png)
+<img src="image.png" alt="Alt text" width="200"/>
 
 ### Bidirectional search
 
@@ -128,7 +128,7 @@ Kruskal's algorithm은 edge를 추가하면서 mst를 확장하지만 Prim's alg
 
 BFS와 같은 방법은 모든 edge의 weight 가 같을 때 사용된다.   
 하지만 weight가 edge마다 다르다면 사용할 수 없다.   
-edge relaxation란, 다른 vertex를 거치더라도 더 weight 합이 작은 길을 찾는 것이다.   
+edge relaxation란, 다른 vertex를 거치더라도 더 weight 합이 작은 길을 찾는 것이다.(relax = 최단거리 업데이트)    
 
 하나의 source vertex를 두고 각 vertex까지 닿는 최소 path와 길이를 구하는 게 single source shortest path algorithm이다.
 
@@ -153,7 +153,7 @@ Greedy approach를 사용한다. 각 단계에서 갈 수 있는 vertex를 보�
 
 Proof skip...   
 
-만약 negative weight edge가 있다면 이 방법을 사용할 수 없다. 한 vertex에서 가장 weight가 작은 edge를 골라서 이동하더라도 그 distance가 최소임을 보장할 수 없기 때문이다.   
+만약 negative weight edge가 있다면 이 방법을 사용할 수 없다. 한 vertex에서 가장 weight가 작은 edge를 골라서 이동하더라도 그 distance가 최소임을 보장할 수 없기 때문에 greedy하게 선택하지 못 한다.   
 멀리 돌아오는데 큰 negative weight가 있다면 돌아오는 게 weight가 더 작다.   
 이동할 때마다 그때의 distance가 최소임을 보장하고 해당 vertex는 visited set에 넣고 끝내버려야하는데 그렇게 못 한다.
 
@@ -169,7 +169,7 @@ Proof skip...
 ### Bellman-Ford Algorithm
 
 모든 weighted directed graph에서 사용할 수 있다.   
-하지만 negative weight cycle이 있으면 답이 없다.
+하지만 negative weight cycle이 있으면 답이 없다.(negative weight edge는 있어도 되지만 negative weight cycle은 있으면 안 된다.)
 
 Basic Theorem
 - negative-weight cycle이 없는 그래프에서 어떤 두 노드의 shortest path는 최대 N-1개의 edge를 갖는다.    
@@ -185,14 +185,18 @@ Basic Theorem
   - `dp[k][u] = min(dp[k-1][v] + w(v, u) for v in [vertices that go directly to vertex u])`
 - k가 N-1일 때의 값들이 최종 결과이다.
 
+Bellman-Ford 알고리즘은 기본적으로 dp인데 최적화를 시킨 알고리즘이다.   
+dp matrix를 보면 모든 k에 대해 저장할 필요가 없다. 현재 k에 대한 row와 이전 k-1에 대한 row만 있으면 된다.   
+
+이 iteration을 k번 한다면 source에서 k번 움직여서 갔을 때의 결과값이다.   
+=> 작업에 k번의 제한이 있는 경우 Dijkstra 보다 Bellman-Ford가 편리하다. [787. Cheapest Flights Within K Stops
+](https://github.com/yoonsch217/codingtest/blob/main/graph/problems.md#787-cheapest-flights-within-k-stops)
+
 Complexity
 - Time Complexity: worst, avg O(VE) 모든 vertex가 서로 연결되어 있는 경우. best O(E)
   - dp의 모든 값을 만들긴 해야하지 않나? 그러면 총 dp matrix는 V x V가 될 거다. k는 1부터 N이고 u는 각 vertex니까 1부터 N이다. 각 iteration은 E. VxVxE?
 - Space Complexity: O(V^2) V*V matrix를 저장해야한다.
 
-Bellman-Ford 알고리즘은 기본적으로 dp인데 최적화를 시킨 알고리즘이다.   
-dp matrix를 보면 모든 k에 대해 저장할 필요가 없다. 현재 k에 대한 row와 이전 k-1에 대한 row만 있으면 된다.   
-이 iteration을 k번 한다면 source에서 k번 움직여서 갔을 때의 결과값이다.   
 
 조금의 최적화를 더 하자면, k를 1부터 N-1까지 순차적으로 늘려가면서 하지 않아도 된다.   
 res list를 inf로 초기화한 후, 한 번 작업할 때 모든 edge에 대해서 iterate하면서 `res[u] = min(res[u], res[v] + w(v, u))` 를 한다.
@@ -203,33 +207,40 @@ res list를 inf로 초기화한 후, 한 번 작업할 때 모든 edge에 대해
 ### SPFA Algorithm(The Shortest Path Faster Algorithm)
 
 Bellman-Ford 알고리즘의 비효율적인 부분이 있는데 이 부분을 큐를 사용하여 최적화시킨 알고리즘이다.    
+Bellman-Ford에서는 각 업데이트마다 모든 edge를 다 iterate했는데 그럴 필요 없이 업데이트 된 vertex에 연결된 edge만 iterate한다.(queue 이용)
 
 - 결과 리스트 `res` 를 생성한다. size N의 리스트이고 `res[src] = 0`, 나머지는 `math.inf`
 - `q` 큐를 생성한다. 처음에 src를 넣은 상태로 시작한다.
 - `is_queued` 리스트를 생성한다. node가 queue에 있다면 `is_queued[node] = True`
 - 큐에서 하나를 뽑는다. 뽑을 땐 `is_queued` 도 업데이트해줘야한다. 
 - 뽑힌 노드에서 나가는 모든 edge를 iterate하면서 도착지 노드의 res 값이 업데이트 되는지 확인한다.
-- 업데이트 된다면 그 노드는 다시 큐에 넣어야한다. 그 노드의 값이 업데이트되면 그 노드에서 나가는 edge들을 통해 업데이트할 게 남아있을 수 있기 때문이다. `is_queued` 에 있다면 넣지 안흔ㄴ다. 불필요한 중복을 막아준다.
+- 업데이트 된다면 그 노드는 다시 큐에 넣어야한다. 그 노드의 값이 업데이트되면 그 노드에서 나가는 edge들을 통해 업데이트할 게 남아있을 수 있기 때문이다. `is_queued` 에 있다면 넣지 않는다. 불필요한 중복을 막아준다.
 - 큐가 비게 되면 더 이상 업데이트할 게 없다는 뜻이므로 res를 반환한다.
 
+Dijkstra에서 heap 대신 queue를 사용한 느낌이다.
+
 Complexity
-- Time Complexity: 모든 노드에 대해 한 번씩은 작업하는데 모든 에지를 작업하므로 O(VE)가 된다.
+- Time Complexity: 모든 노드에 대해 한 번씩은 작업하는데 모든 에지를 작업하므로 worst O(VE), avg O(V+E)
 - Space Complexity: O(V)
 
 
 ## Kahn's Algorithm for Topological Sorting
 
-Directed Acyclic Graph에서 vertex 사이에 순서가 있을 때 linear sorting을 제공한다.
+Directed Acyclic Graph에서 vertex 사이에 순서가 있을 때 linear sorting을 제공한다.    
 Prerequisite가 있는 course를 듣는 순서를 정하는 상황이 하나의 예이다. cycle이 있으면 불가능하다.
 
 in-degree 라는 값이 있다. 해당 vertex에 대해 required vertex가 몇 개가 남았는지를 나타낸다. required vertex 중 하나가 처리되면 in-degree 값은 1 감소한다. 맨 처음 시작할 때는 in-degree 값이 0인 vertex를 찾아서 시작한다.    
-기본적으론 V 개의 vertex에 대해서 모든 E 만큼 반복해야하기 때문에 O(VE) 시간이 걸리고 O(V) 공간이 필요하다.   
 
-하지만 adjacency list를 만들어서 `adj_list[course]` 가 course에 dependent한 course를 저장한다면 O(V+E) time과 O(V+E) space가 필요하다. 처음 adj list 만들 때 O(E) 시간이 필요하고 그 이후에는 vertex 방문할 때마다 연결된 edge만 찾아서 in-degree를 줄여주면 된다. 연결된 edge만 방문하기 때문에 전체 작업을 수행하면 edge는 한 번씩만 방문된다. space의 경우는 adj list 만드는 데 O(E) 공간이 필요하고 in-degree 값 저장하는 데 O(V) 공간이 필요하다.
+- Time: O(V+E)
+- Space: O(V+E)
+
+adjacency list를 만들어서 `adj_list[course]` 가 course에 dependent한 course를 저장한다면 O(V+E) time과 O(V+E) space가 필요하다.    
+처음 adj list 만들 때 O(E) 시간이 필요하고 그 이후에는 vertex 방문할 때마다 연결된 edge만 찾아서 in-degree를 줄여주면 된다. 연결된 edge만 방문하기 때문에 전체 작업을 수행하면 edge는 한 번씩만 방문된다.    
+space의 경우는 adj list 만드는 데 O(E) 공간이 필요하고 in-degree 값 저장하는 데 O(V) 공간이 필요하다.
 
 DAG 에서만 가능하다. in-degree가 0인 vertex가 하나는 있어야 가능하다. 
 
-https://leetcode.com/problems/course-schedule-ii/
+[예시](https://github.com/yoonsch217/codingtest/blob/main/graph/problems.md#210-course-schedule-ii)
 
 
 
@@ -241,6 +252,7 @@ vertex를 white, gray, black으로 색칠하는 방법이 있다.
 작업이 시작되었지만 모든 descendants가 처리되진 않았다면 gray이다. 이동하다가 gray vertex를 만나게 되면 cycle이 있다는 것이다.   
 모든 descendant가 처리되면 black이 된다. black 처리가 되면 이후 traverse에서 black vertex로 가더라도 cycle이 만들어지지 않는다. 이미 다른 traverse가 시작된 것이기 때문이다.   
 
+DFS로 해야할 듯. BFS로 하면 cycle이 없어도 traverse 중 gray to gray 이동이 있을 것 같다.
 
 
 
@@ -254,4 +266,4 @@ vertex를 white, gray, black으로 색칠하는 방법이 있다.
 Shortest Path를 찾을 때
 - unweighted graph => BFS
 - weighted graph with positive weights => Dijkstra
-- weighted graph with negative weights => Bellman-Ford
+- weighted graph with negative weights => Bellman-Ford, SPFA
