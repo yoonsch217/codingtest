@@ -131,7 +131,12 @@ k번 iterate하면 k 번 hop했을 때의 결과를 알 수 있다.
 - edge에서 from vertex의 distance가 inf라면 아직 시작을 못 하는 상태니까 넘어간다. from vertex가 inf가 아니면 여기에 k+1 이내로 도달할 수 있다는 것이므로 그 상태에서 to_index의 distance 값을 체크한다. 더 줄일 수 있으면 줄이고 없으면 무시한다.
 - k+1번 iterate한 뒤에 dist[target] 값을 반환한다.
 
-Bellman Ford 알고리즘은 기본적으로 dp이다. dp(k)를 구하기 위한 bottom up 방식이라고 생각하면 되겠다.
+Bellman Ford 알고리즘은 기본적으로 dp이다. dp(k)를 구하기 위한 bottom up 방식이라고 생각하면 되겠다.    
+
+```
+dp(i): i번 iterate가 가능할 때 src에서 dst까지 가는 데 필요한 최소 비용
+dp(i) = dp(i-1)의 상황에서 각 노드에서 한 번씩 주변을 업데이트 했을 때의 비용. 기준 노드에서 모든 edge를 탐색해서 기준노드의 cost + edge cost 값이 도착지의 cost보다 작다면 도착지의 cost를 업데이트한다.
+```
 
 <details>
 
@@ -187,7 +192,8 @@ return -1 if dist[dst] == math.inf else dist[dst]
 </details>
 
 
-Bellman Ford를 최적화시킨 SPFA 알고리즘 => iteration마다 모든 edge를 탐색하는 게 아니라 영향을 줄 수 있는 edge만 저장해서 탐색한다.
+Approach 4: SPFA 알고리즘    
+Bellman Ford를 최적화시킨 알고리즘 => iteration마다 모든 edge를 탐색하는 게 아니라 영향을 줄 수 있는 edge만 저장해서 탐색한다.
 
 <details>
 
@@ -308,15 +314,88 @@ https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination
 
 문제: grid라는 2d matrix가 주어지는데 각 값은 0 혹은 1이다. 0이 의미하는 건 그 위치에 장애물이 없다는 거고 1은 있다는 것이다. k번 장애물을 부수고 갈 수 있을 때 왼쪽 위에서 오른쪽 아래로 가는 최단 경로를 구하라. 가능한 경로가 없다면 -1을 반환하라.
 
-처음엔 BFS로 했다. queue를 두고 각 node는 (row, col, remained, seen) 을 넣었다. 그러고는 매 iteration마다 모든 방향을 탐색한 뒤에 이동 가능하면 seen을 deepcopy하고 큐에 추가했다.    
+최적화된 BFS가 필요하다. BFS에서 상태를 deepcopy 해서 넘기는 건 웬만하면 틀렸다고 생각하자.    
+
+queue를 두고 각 node는 (row, col, remained, visited) 을 넣었다. 그러고는 매 iteration마다 모든 방향을 탐색한 뒤에 이동 가능하면 visited을 deepcopy하고 큐에 추가했다. (next_row, next_col) 이 목적지라면 len(visited)-1 만큼 이동한 것이다.    
 그런데 이렇게 하면 동작은 하는데 TLE 제한에 걸린다.      
 
-이 방법은 seen을 처리하는 데 비효율작이다. 매 iteration마다 deepcopy하는 데는 많은 비용이 든다.     
-모든 iteration이 공통으로 쓸 수 있는 seen을 생각해보면 seen에 (row, col, remained)라는 state를 넣어주는 방법이 있다. 대신 queue에 넣을 때 state와 steps까지 넣어줘야한다.        
+이 방법은 visited를 위해 매 iteration마다 deepcopy하는 데 많은 비용이 든다.     
+모든 iteration이 공통으로 쓸 수 있는 dict를 정의해서 (row, col, remained)라는 state를 넣어주는 방법이 있다. value는 steps이다.    
+대신 queue에 넣을 때 state와 steps까지 넣어줘야한다.        
 이렇게 하면 deepcopy의 비용도 줄일 수 있고, 서로 다른 iteration에서 같은 위치를 방문할 때 이전에 이미 동일한 state(row, col, remained)로 방문했다면 이번 iteration에서 방문하는 게 더 짧을 수 없기 때문에 불필요한 path 생성을 막아준다.    
 O(N*K) / O(N*K)  => 각 노드마다 at most k번 방문한다. k 개의 다른 state를 가질 수 있기 때문에.
 
-그리고 k 값이 Manhattan distance보다 크다면 최단 거리로 갈 수 있으므로 그런 case를 처음에 처리하는 것도 도움이 된다.  
+그리고 k 값이 Manhattan distance보다 크다면 최단 거리로 갈 수 있으므로 그런 case를 처음에 처리하는 것도 도움이 된다. => 시간 확 줄었다.  
+
+<details>
+
+```py
+    def shortestPath(self, grid: List[List[int]], k: int) -> int:
+        m, n = len(grid), len(grid[0])
+        directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        queue = deque([(0, 0, 0, k)])  # row, col, steps, remained
+        
+        if m == 1 and n == 1:
+            return 0
+        
+        if k >= (m + n - 2):
+            # if k is greater than or equal to Manhattan distance, return the minimum
+            return m + n - 2
+
+        """
+        loc_to_remained_and_steps 변수
+        key: (row, col), value: (remained, steps)
+        탐색하다가 (next_row, next_col)이 loc_to_remained_and_steps 안에
+          - 없으면 새로 넣는다.
+          - 있고 지금 계산하는 상태가 갖고 있는 remained, steps가 loc_to_remained에 있는 어떤 데이터의 remained 보다 작고 steps도 많다면 더 비효율적으로 접근하는 것이기 때문에 멈춘다.
+          - 아니라면 큐에 넣고 이후 작업을 계속 진행한다.
+        """
+        loc_to_remained_and_steps = defaultdict(list)
+        loc_to_remained_and_steps[(0, 0)].append((k, 0))
+
+        res = math.inf
+
+        while queue:
+            cur_row, cur_col, cur_steps, cur_remained = queue.popleft()
+
+            for d_row, d_col in directions:
+                next_row, next_col, next_remained = cur_row + d_row, cur_col + d_col, cur_remained
+
+                if not (0 <= next_row < m and 0<= next_col < n):
+                    # out of index
+                    continue
+                
+                if grid[next_row][next_col] == 1:
+                    # if encountered a block, reduce next_remained variable
+                    next_remained = cur_remained - 1
+                
+                if next_remained < 0:
+                    # cannot break block
+                    continue
+                
+                if next_row == m-1 and next_col == n-1:
+                    # arrived the target
+                    res = min(res, cur_steps + 1)
+                    continue
+                
+                is_visited = False
+                for _remained, _steps in loc_to_remained_and_steps[(next_row, next_col)]:
+                    if next_remained <= _remained and cur_steps+1 >= _steps:
+                        # previously visited in a more effective way => do not have to do further operations
+                        is_visited = True
+                        break
+                if is_visited:
+                    continue
+                    
+                queue.append((next_row, next_col, cur_steps + 1, next_remained))
+                loc_to_remained_and_steps[(next_row, next_col)].append((next_remained, cur_steps+1))
+
+        if res == math.inf:
+            return -1
+        return res
+```
+
+</details>
 
 A* algorithm도 있다는데 이건 우선 skip
 
