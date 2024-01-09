@@ -316,16 +316,20 @@ https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination
 
 최적화된 BFS가 필요하다. BFS에서 상태를 deepcopy 해서 넘기는 건 웬만하면 틀렸다고 생각하자.    
 
-queue를 두고 각 node는 (row, col, remained, visited) 을 넣었다. 그러고는 매 iteration마다 모든 방향을 탐색한 뒤에 이동 가능하면 visited을 deepcopy하고 큐에 추가했다. (next_row, next_col) 이 목적지라면 len(visited)-1 만큼 이동한 것이다.    
+처음에는 queue를 두고 각 node는 (row, col, remained, visited) 을 넣었다.    
+그러고는 매 iteration마다 모든 방향을 탐색한 뒤에 이동 가능하면 visited을 deepcopy하고 큐에 추가했다.    
+(next_row, next_col) 이 목적지라면 len(visited)-1 만큼 이동한 것이다.    
 그런데 이렇게 하면 동작은 하는데 TLE 제한에 걸린다.      
 
-이 방법은 visited를 위해 매 iteration마다 deepcopy하는 데 많은 비용이 든다.     
-모든 iteration이 공통으로 쓸 수 있는 dict를 정의해서 (row, col, remained)라는 state를 넣어주는 방법이 있다. value는 steps이다.    
-대신 queue에 넣을 때 state와 steps까지 넣어줘야한다.        
-이렇게 하면 deepcopy의 비용도 줄일 수 있고, 서로 다른 iteration에서 같은 위치를 방문할 때 이전에 이미 동일한 state(row, col, remained)로 방문했다면 이번 iteration에서 방문하는 게 더 짧을 수 없기 때문에 불필요한 path 생성을 막아준다.    
-O(N*K) / O(N*K)  => 각 노드마다 at most k번 방문한다. k 개의 다른 state를 가질 수 있기 때문에.
+매 iteration마다 deepcopy하는 데 많은 비용이 든다.     
+loc_to_remained_and_steps 라는 dict를 정의해서 key는 (row, col), value는 (remained, steps)로 둔다.    
+next location을 탐색할 때 `if (next_remained <= _remained and next_steps >= _steps) for any _remained, _steps in loc_to_remained_and_steps[(next_row, next_col)]` 이라면 이미 방문한 방법보다 무조건 비효율적일 수 밖에 없으므로 더 탐색을 하지 않아도 된다.    
 
 그리고 k 값이 Manhattan distance보다 크다면 최단 거리로 갈 수 있으므로 그런 case를 처음에 처리하는 것도 도움이 된다. => 시간 확 줄었다.  
+
+k 개의 다른 state를 가질 수 있기 때문에 각 노드마다 at most k번 방문한다. 
+- Time Complexity: O(NK)
+- Space Complexity: O(NK) 
 
 <details>
 
@@ -404,7 +408,7 @@ A* algorithm도 있다는데 이건 우선 skip
 
 
 
-1059. All Paths from Source Lead to Destination
+
 
 ### 1059.All Paths from Source Lead to Destination
 
