@@ -414,10 +414,13 @@ A* algorithm도 있다는데 이건 우선 skip
 
 https://leetcode.com/problems/all-paths-from-source-lead-to-destination
 
-문제: edges 라는 directed graph가 주어진다. edges[i] = [ai, bi] 는 ai에서 bi로 가는 edge가 있다는 걸 의미한다. source와 destination이 주어졌을 때 source에서 시작되는 path는 모두 destination으로 가는지를 구하라.
+문제: edges 라는 directed graph가 주어진다. edges[i] = [ai, bi] 는 ai에서 bi로 가는 edge가 있다는 걸 의미한다. source와 destination이 주어졌을 때 source에서 시작되는 모든 path는 destination으로 가는지를 구하라.
 
 
-내 처음 solution
+내 처음 solution => TLE    
+DFS를 사용하면 모든 path를 탐색할 수 있다. 하나의 일련의 recursion은 path를 만들게 된다.   
+recursion을 하면서 visited 변수를 사용해서 다음 노드가 visited 안에 있다면 이건 destination으로 못 가고 cycle이 생긴다는 뜻이므로 return false 한다.   
+recursion을 하면서 현재의 노드에서 더 이상 갈 곳이 없다면 현재 노드가 destination인지 확인하고 return true/false 한다.   
 
 <details>
 
@@ -455,10 +458,15 @@ TLE 실패
 
 solution
 
-cycle이 없어야하므로 tree라고 볼 수 있다. 따라서 leaf 노드가 destination이 되어야 한다.   
-근데 이게 왜 더 빠른 거지? traversing을 더 효과적으로 하나? coloring 하는 방식.   
-근데 이게 모든 path를 다 보장해주나? edge에 있는 순서대로 하는 건데, 그래도 보장을 해주나보네.    
-이게 차이인가보다. 내 방식은 너무 진짜 모든 path를 다 본다.   
+동일한 컨셉인데 visited set의 add/remove 대신 coloring을 사용했다.   
+DFS를 하면서 white, gray, black 세 가지의 색으로 상태를 칠한다.    
+
+- 처음에 모든 노드는 white 상태이다.
+- DFS를 하면서 지금 지나는 노드는 gray로 칠한다.
+- 어떤 노드에서 edge가 없다면 destination인지 아닌지 체크를 한다. destination이라면 true, 아니면 false를 반환한다.
+- 어떤 노드에서 자기의 edge들에 대해 탐색이 모두 true로 끝나면 자기 노드를 black으로 칠하고 return true한다. 아래 recursion에서도 black으로 칠하고 올라왔을 것이다.
+- 탐색을 하다가 black을 만나면 true를 반환한다. 그 노드에서는 이미 모두 destination으로 갔다는 걸 알기 때문이다. => 일종의 subproblem 느낌도 있네.
+- 탐색을 하다가 gray를 만나면 false를 반환한다. cycle이 생겼다는 뜻이기 때문이다.
 
 <details>
 
@@ -489,7 +497,7 @@ class Solution:
             
             # If we get a `false` from any recursive call on the neighbors, we short circuit and return from there.
             if not self.leadsToDest(graph, next_node, dest, states):
-                return False;
+                return False
         
         # Recursive processing done for the node. We mark it BLACK.
         states[node] = Solution.BLACK
@@ -506,7 +514,8 @@ class Solution:
 
 time: O(V), space: O(V+E)
 
-Time Complexity: Typically for an entire DFS over an input graph, it takes O(V+E)\mathcal{O}(V + E)O(V+E) where VVV represents the number of vertices in the graph and likewise, EEE represents the number of edges in the graph. In the worst case EEE can be O(V2)\mathcal{O}(V^2)O(V 2) in case each vertex is connected to every other vertex in the graph. However even in the worst case, we will end up discovering a cycle very early on and prune the recursion tree. If we were to traverse the entire graph, then the complexity would be O(V2)\mathcal{O}(V^2)O(V 2) as the O(E)\mathcal{O}(E)O(E) part would dominate. However, due to pruning and backtracking in case of cycle detection, we end up with an overall time complexity of O(V)\mathcal{O}(V)O(V).
+일반적인 DFS는 O(V+E)의 시간 복잡도를 갖는다. 모든 vertex끼리 연결되어 있는 경우 E는 (V^2)이다.    
+하지만 이 solution에서는 cycle detection을 pruning and backtracking 로 하기 때문에 O(V)에 할 수 있다.
 
 </details>
 
