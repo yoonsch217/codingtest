@@ -56,24 +56,27 @@ integer array가 주어졌을 때 maximum sum subarray를 구하는 알고리즘
 O(N) time, O(1) space만에 구할 수가 있다.   
 array를 iterate하면서 각 index마다 이전까지의 결과를 갖고 갈지 버릴지를 결정한다.
 
-1. best = negative infinity
-2. current = 0
-3. for num in nums:   
-    3.1. current = Max(current + num, num)    
-    3.2. best = Max(best, current)
-4. return best
 
-~이게 모든 case를 다 cover할까?    
-i ~ j 의 범위가 답이라고 해보자. 그럼 `?~i-1`과 `j+1~?` 는 음수일 것이다.    
-그렇다면 앞에서부터 iterate할 때 index가 i-1까지 가고 i에 도달하게 되면 지금까지의 답을 버리게 된다. 
-따라서 i ~ j 구간을 cover하게 된다.~
+```py
+best = negative infinity
+buffer = 0  # 현재 포인터 i 기준에서 i-1을 right end로 하는 subarray 중 최대의 sum
+for num in nums:
+  buffer = max(buffer+num, num)  # 현재의 값인 num은 항상 포함이 되어야 하고 이전의 subarray를 사용할지 안 사용할지를 정해야한다. num이 포함되지 않은 케이스는 이전 iteration에서 이미 반영이 됐다.
+  best = max(best, buffer)
+```
 
-점화식(recurrence relation)으로 보는 게 편하다.    
+이게 모든 case를 다 cover할까?    
+i ~ j 의 범위가 답이라고 해보자. 그럼 `? ~ i-1`과 `j+1 ~ ?` 는 음수일 것이다.    
+그렇다면 앞에서부터 iterate할 때 index가 i-1까지 가고 i에 도달하게 되면 지금까지의 답을 버리게 된다.    
+그러다가 index가 j를 넘어가는 순간 음수가 되므로 best는 업데이트 되지 못 한다.   
+따라서 i ~ j 구간을 cover하게 된다.
+
+점화식(recurrence relation)으로 볼 수도 있다.    
 f(i)를 `index i를 right end로 하는 subarray 중 가장 큰 sum 값` 이라고 하자.    
 f(i+1)은 이전의 값을 취하든가 버리든가 둘 중 하나이기 때문에 `max(nums[i+1], f(i) + nums[i+1])` 이 될 것이다.   
 
-
-
+[예시](https://github.com/yoonsch217/codingtest/blob/main/dynamic-programming/problems.md#918-maximum-subarray)   
+[예시](https://github.com/yoonsch217/codingtest/blob/main/dynamic-programming/problems.md#918-maximum-sum-circular-subarray)
 https://leetcode.com/problems/maximum-sum-circular-subarray
 
 ## 전략

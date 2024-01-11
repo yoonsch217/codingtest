@@ -1,3 +1,160 @@
+README 개념에 연결된 문제
+
+### 53. Maximum Subarray
+
+https://leetcode.com/problems/maximum-subarray
+
+문제: integer array nums가 주어졌을 때, subarray의 sum이 최대인 sum을 구하라.
+
+
+가장 기본적인 Kadane's algorithm이다.
+
+<details>
+
+```py
+def maxSubArray(self, nums: List[int]) -> int:
+    best, buffer = -math.inf, 0
+
+    for num in nums:
+        buffer = max(buffer+num, num)
+        best = max(best, buffer)
+    return best
+```
+
+</details>
+
+
+
+
+
+### 918. Maximum Sum Circular Subarray
+
+
+https://leetcode.com/problems/maximum-sum-circular-subarray
+
+문제: circular integer array nums가 있다. 동일한 위치의 element가 두 번 이상 나오지 않도록 했을 때의 maximum possible sum of a non-empty subarray를 구하라. 
+
+
+두 가지 case로 나눌 수가 있다. 아래 둘 중 큰 값이 답이다.
+- array 안에 포함되는 subarray 중 답이 있는 경우
+- for i > j, nums[i:] 와 nums[:j+1] 을 연결한 array 중 답이 있는 경우 
+
+두 번째는 또 여러 방식으로 풀 수 있다.    
+- `total sum - subarray의 합이 최소인 값`을 구하면 두 번째 case 중 가장 큰 sum을 구할 수 있다. subarray가 전체 array가 되어 버리면 empty array가 되므로 안 된다.
+- right_max[i]를 nums[i:] 중 subarray의 sum이 가장 큰 값이라고 하자. `best = max(best, prefix_sum[i] + right_max[i+1]) for i in range(n-1)`가 된다.
+
+
+<details>
+
+```py
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        n = len(nums)
+        total_sum = 0
+        max_best, min_best = -math.inf, math.inf
+        max_buffer = 0
+        min_buffer_left, min_buffer_right = 0, 0  # 각각 양 끝 중 하나가 포함되지 않은 subarray이다. 전체 array가 되면 답이 empty array가 되기 때문이다.
+
+        # Kadane's algorithm으로 각각의 max or min을 구한다.
+        for i, num in enumerate(nums):
+            total_sum += num
+            max_buffer = max(max_buffer+num, num)
+            max_best = max(max_best, max_buffer)
+            if i != n-1:
+                min_buffer_left = min(min_buffer_left+num, num)
+                min_best = min(min_best, min_buffer_left)
+            if i != 0:
+                min_buffer_right = min(min_buffer_right+num, num)
+                min_best = min(min_best, min_buffer_right)
+        
+        return max(max_best, total_sum - min_best)
+```
+
+O(N) time, O(1) space
+
+
+```python
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        n = len(nums)
+        
+        # Kadane's Algorithm for a single array answer
+        single_answer = -math.inf
+        cur = 0
+        for num in nums:
+            cur = max(num, cur+num)
+            single_answer = max(single_answer, cur)
+        
+        # Circular array answer
+        right_max = [-math.inf] * n
+        right_max[n-1] = nums[n-1]
+        postfix = nums[n-1]
+        for i in range(n-2, -1, -1):
+            num = nums[i]
+            postfix += num
+            right_max[i] = max(right_max[i+1], postfix)
+        
+        prefix = 0
+        circular_answer = -math.inf
+        for i in range(n-1):
+            num = nums[i]
+            prefix += num
+            circular_answer = max(circular_answer, prefix + right_max[i+1])
+        
+        return max(single_answer, circular_answer)
+```
+
+O(N) time, O(N) space
+
+
+</details>
+
+
+잘 생각해보면 두 번째 풀이의 코드를 좀 더 간단히 할 수 있다.
+
+
+- 만약 minSum이 arraySum과 같다면? 전체 array가 min sum subarray라면 그걸 뺀 subarray는 invalid하다.
+- 근데 arraySum == minSum 이라면 arraySum - minSum은 0이 된다. 
+  - `arraySum == minSum == 양수`라면, array에 최소 하나의 양수가 있다는 건데 array에 그 양수 하나 밖에 없어야한다. 
+  array에 음수가 있다면 그 음수만 골라도 min sum이 음수가 되기 때문에 min sum이 양수가 될 수가 없다. 
+  array에 다른 양수가 있다면 덜 합치는 게 minSum이 돼야한다. 양수가 하나만 있다면 그건 normal answer에서 다뤄지니까 linked answer는 무시할 수 있다. 
+  - `arraySum == minSum == 음수`라면, minSum이 동일하려면 그 array에는 양수가 없어야한다. 
+  양수가 있다면 minSum은 그 양수를 포함하지 않을테고 그러면 arraySum != minSum이 되기 때문이다. 
+  다 음수라면 그 값은 normal answer보다 클 수가 없다. normal answer은 그 중에서 가장 작은 값 하나만 골랐을 것이기 때문이다. normal answer이 음수가 되고 linked answer이 0이 되기 때문에 단순히 max(normal answer, linked answer) 하면 안 된다. 따라서 이 case에 대한 예외 처리를 해줘야한다.
+
+<details>
+
+```py
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        max_sum = -math.inf
+        min_sum = math.inf
+
+        total_sum = 0
+        max_cur = min_cur = 0
+        for num in nums:
+            max_cur = max(max_cur + num, num)
+            min_cur = min(min_cur + num, num)
+            total_sum += num
+
+            max_sum = max(max_sum, max_cur)
+            min_sum = min(min_sum, min_cur)
+        
+        if min_sum == total_sum:
+            return max_sum
+        return max(max_sum, total_sum - min_sum)
+```
+
+</details>
+
+
+
+
+---
+
+REAME에 없는 문제
+
+
 ### 70. Climbing Stairs
 
 https://leetcode.com/problems/climbing-stairs/
@@ -431,23 +588,15 @@ Time: O(len(coins) * amount), Space: O(amount)
 
 https://leetcode.com/problems/decode-ways/description/
 
-문제: 숫자 1부터 26은 각각 A부터 Z까지 매핑될 수 있다. 숫자로 이루어진 문자열이 주어졌을 때 치환할 수 있는 알파벳 문자열의 종류를 구하라. 06으로 묶는 건 불가능하다. 
+문제: 숫자 1부터 26은 각각 A부터 Z까지 매핑될 수 있다. 숫자로 이루어진 문자열이 주어졌을 때 치환할 수 있는 알파벳 문자열의 종류를 구하라. 06과 같이 묶는 건 안 된다. 
 
-언제나 dp(i)에 대한 일반식을 구하는 게 먼저이다.   
-dp(i)는, 
-- tmp = 0
-- if s[i] is valid, tmp += dp(i-1)
-- if s[i-1:i+1] is valid, tmp += dp(i-2)
-- dp(k) = 1, where k < 0
-- if tmp == 0, break and return 0
 
-어떤 문자열에서 하나가 추가됐을 때, 유효하다면 그 결과는 바뀌지 않고 이전 결과가 그대로 된다. 
-왜냐하면 추가됐을 때 valid한 조건이 그대로 유지되는 거지 뭔가가 경우의 수가 증가한 게 아니기 때문이다.   
-이런 개념에서, dp(i)는 뒤에서부터 하나씩 짤라가며 s[i-k : i+1] 가 valid하면 dp(i-k-1)을 추가해준다.   
-그런데 뒤에서부터 자를 때 세 개 이상 자르면 valid할 수가 없다. 최대 두자릿수이기 때문이다.   
-그리고 0이 나오면 바로 break하도록 했는데 0이 나온 뒤에는 뭘 붙여도 valid할 수가 없기 때문이다.   
-
-조금 설명하면서도 이상하긴한데.. 논리는 맞았다.
+"""
+dp(i): s[:i+1] 까지의 substring에 대한 결과
+dp(i) = dp(i-1) if s[i] is valid + dp(i-2) if s[i-1:i+1] is valid
+지금 보는 포인트 기준으로, 현재 문자(s[i])가 유효하다면 dp[i-1] 을 만들 때 고려한 case들에서 그대로 연장할 수 있다. 
+두 문자가 유효하다면(s[i-1:i+1]) dp[i-2] 에서 연장할 수 있다.
+"""
 
 
 <details>
@@ -455,168 +604,49 @@ dp(i)는,
 ```python
 def numDecodings(self, s: str) -> int:
     n = len(s)
-    memo = [0] * (n+2)
-    memo[-1] = 1
-    memo[-2] = 1
+    dp = [0] * (n+1)
+    dp[-1] = 1  # 이 값을 1로 해줘야한다. dp[1] += dp[-1] if s[0:2] is valid 할 때 사용된다.
 
-    def is_valid(target: str) -> bool:
-        if len(target) not in [1, 2]:
-            return False
-        if target[0] == '0':
-            return False
-        target_int = int(target)
-        if target_int > 26:
-            return False
-        return True
+    if 1 <= int(s[0]) <= 9:
+        dp[0] = 1
 
-    for i in range(n):
-        tmp = 0
-        if is_valid(s[i]):
-            tmp += memo[i-1]
-        if i > 0 and is_valid(''.join(s[i-1:i+1])):
-            tmp += memo[i-2]
-        if tmp == 0:
-            break
-        memo[i] = tmp
-        print(tmp)
+    for i in range(1, n):
+        if 1 <= int(s[i]) <= 9:
+            dp[i] += dp[i-1]
+        if 10 <= int(''.join(s[i-1:i+1])) <= 26:
+            dp[i] += dp[i-2]
     
-    return memo[n-1]
+    return dp[n-1]
 ```
 
-근데 constant space로도 할 수 있겠다. 최근 것만 쓰니까.
+근데 최근 두 개만 쓰니까 constant space로도 할 수 있겠다.
 
 솔루션은 같은 논리인데 코드가 더 간단한다.
 
 ```python
-        if s[0] == "0":
-            return 0
+def numDecodings(self, s: str) -> int:
+    if s[0] == "0":
+        return 0
+
+    two_back = 1
+    one_back = 1
+    for i in range(1, len(s)):
+        current = 0
+        if s[i] != "0":
+            current = one_back
+        two_digit = int(s[i - 1: i + 1])
+        if two_digit >= 10 and two_digit <= 26:
+            current += two_back
+        two_back = one_back
+        one_back = current
     
-        two_back = 1
-        one_back = 1
-        for i in range(1, len(s)):
-            current = 0
-            if s[i] != "0":
-                current = one_back
-            two_digit = int(s[i - 1: i + 1])
-            if two_digit >= 10 and two_digit <= 26:
-                current += two_back
-            two_back = one_back
-            one_back = current
-        
-        return one_back
+    return one_back
 ```
 
 </details>
 
 
 
-
-
-### 918. Maximum Sum Circular Subarray
-
-
-https://leetcode.com/problems/maximum-sum-circular-subarray
-
-문제: circular integer array nums가 있다. 동일한 위치의 element가 두 번 이상 나오지 않도록 했을 때의 maximum possible sum of a non-empty subarray를 구하라. 
-
-Kadane's Algorithm
-
-두 가지로 나눌 수가 있다.
-- array 안에 포함되는 subarray
-- for i < j, index i에서부터 끝까지의 subarray 와 처음부터 j까지의 subarray를 연결한 array
-
-첫 번째는 Kadane's algorithm으로 구할 수 있다.
-
-두 번째는 또 여러 step으로 이루어진다. subarray를 이루는 두 개의 subarray가 하나는 맨 왼쪽이 index 0이고 하나는 맨 오른쪽이 index n-1임을 이용한다.
-- rightMax(i)를 시작이 i 이후이고 끝이 n-1인 subarray들 중에 가장 sum이 큰 값으로 정의한다.
-- ~leftMax(i)를 시작이 0이고 끝이 i 이전인 subarray들 중에 가장 sum이 큰 값으로 정의한다.~
-- ~그러면 두 번째 케이스에 대해서는, i를 1부터 n-1까지 이동하면서 leftMax(i-1) + rightMax(i) 들 중 가장 큰 값이 된다.~
-- leftMax를 할 필요가 없이 그냥 prefixSum으로 하는 게 더 간단하다. 
-- i를 0부터 n-2까지 증가하면서 prefixSum을 업데이트한다. sepcialSum(i) = max(specialSum(i-1), prefixSum(i) + rightMax(i+1))
-
-이렇게 첫 번째 case와 두 번째 case 의 결과 중 큰 값이 정답이다.   
-O(N) time, O(N) space
-
-<details>
-
-```python
-class Solution:
-    def maxSubarraySumCircular(self, nums: List[int]) -> int:
-        n = len(nums)
-        
-        # Kadane's Algorithm for a single array answer
-        single_answer = -math.inf
-        cur = 0
-        for num in nums:
-            cur = max(num, cur+num)
-            single_answer = max(single_answer, cur)
-        
-        # Circular array answer
-        right_max = [-math.inf] * n
-        right_max[n-1] = nums[n-1]
-        postfix = nums[n-1]
-        for i in range(n-2, -1, -1):
-            num = nums[i]
-            postfix += num
-            right_max[i] = max(right_max[i+1], postfix)
-        
-        prefix = 0
-        circular_answer = -math.inf
-        for i in range(n-1):
-            num = nums[i]
-            prefix += num
-            circular_answer = max(circular_answer, prefix + right_max[i+1])
-        
-        return max(single_answer, circular_answer)
-```
-
-이게 내 solution인데 앞에서부터 iterate하는 건 Kadane's algorithm이랑 circular 작업에서랑 둘 다 존재하고 있다.
-이 두 작업을 같은 iteration에서 하는 게 더 효과적이다.
-
-
-
-</details>
-
-O(N) time, O(1) space를 사용하는 풀이법도 있다.
-
-이 문제를 다시 생각해보면 하나의 array에서 max sum subarray를 찾는 건데 그게 한번에 이어져있든, 끝과 처음을 통해 이어져있든 상관 없는 것이다.   
-한번에 이어진 경우는 여전히 기본 Kadane's algorithm으로 구할 수 있다.   
-끝과 처음을 통해 이어진 경우를 다른 방식으로 풀 수 있는데, 전체 array에서 가운데 subarray를 뺀 것이라고 생각하면 된다.   
-그러면 전체 array sum에서 minimum sum subarray를 구해서 그 부분을 빼면 된다.
-
-- Kadane's algorithm을 통해 normal answer 구하기
-- 전체를 더한 arraySum 구하기
-- Kadane's algorithm을 변형하여 minimum sum subarray를 구하기
-- arraySum - minSum 이 linked answer가 된다. 
-- 그런데 만약 minSum이 arraySum과 같다면? 전체 array가 min sum subarray라면 그걸 뺀 subarray는 invalid하다. 그런 경우는 normal answer를 반환하면 된다.
-- 근데 arraySum == minSum 이라면 arraySum - minSum은 0이 될 테지. 
-arraySum이 양수라면, array에 최소 하나의 양수가 있다는 거다. 그런데 minSum이 동일하려면 그 양수 하나밖에 없어야한다. 음수가 있다면 그게 min sum이 될 테고, 다른 양수가 있다면 덜 합치는 게 minSum이 돼야한다. 양수가 하나만 있다면 그건 normal answer에서 다뤄지니까 linked answer는 무시할 수 있다. 
-arraySum이 음수라면, minSum이 동일하려면 그 array에는 양수가 없어야한다. 왜냐하면 양수가 있다면 minSum은 그 양수를 포함하지 않을테고 그러면 arraySum != minSum이 되기 때문이다. 다 음수라면 그 값은 normal answer보다 클 수가 없다. normal answer은 그 중에서 가장 작은 값 하나만 골랐을 것이기 때문이다. normal answer이 음수가 되고 linked answer이 0이 되기 때문에 단순히 max(normal answer, linked answer) 하면 안 된다. 따라서 이 case에 대한 예외 처리를 해줘야한다.
-
-<details>
-
-```python
-class Solution:
-    def maxSubarraySumCircular(self, nums: List[int]) -> int:
-        max_sum = -math.inf
-        min_sum = math.inf
-
-        total_sum = 0
-        max_cur = min_cur = 0
-        for num in nums:
-            max_cur = max(max_cur + num, num)
-            min_cur = min(min_cur + num, num)
-            total_sum += num
-
-            max_sum = max(max_sum, max_cur)
-            min_sum = min(min_sum, min_cur)
-        
-        if min_sum == total_sum:
-            return max_sum
-        return max(max_sum, total_sum - min_sum)
-```
-
-</details>
 
 
 
