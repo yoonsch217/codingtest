@@ -198,6 +198,8 @@ dp(i)를 i-th step의 위치까지 올라갈 수 있는 상태가 되는 데까�
 
 
 
+
+
 ### Word Break
 https://leetcode.com/problems/word-break/
 
@@ -234,61 +236,6 @@ def wordBreak(self, s: str, wordDict: List[str]) -> bool:
 
 O(N^2) /  O(N)
 
-
-
-### Maximal Square
-
-https://leetcode.com/problems/maximal-square/
-
-문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형의 넓이를 반환하라.
-
-
-- 어떤 꼭지점 (i,j) 를 기준으로 왼쪽, 위, 왼쪽위 점들이 둘러싸는 점들이다.
-- 왼쪽 점 (i, j-1), 위쪽 점 (i-1, j) 이 겹치는 부분은 현재 점을 기준으로도 연장될 수가 있다.
-- 만약, 4, 4 라면 현재 점 기준으로 왼쪽 4개, 위쪽 4개를 더 포함할 수 있다는 건데, 제일 왼쪽 위 꼭지점은 아직 알 수 없다.
-- (i-1, j-1) 도 만약 4라면 제일 왼쪽 위 꼭지점도 포함한다는 뜻이다. 왜나하면 바로 왼쪽 점인 (i, j-1) 과 동일하게 왼쪽으로 뻗어나가는데 한 칸 위까지 뻗어나가기 때문이다.
-
-```
-dp(i, j): matrix[i][j] 위치를 오른쪽 아래 꼭지점으로 두어서 왼쪽 위로 만들 수 있는 최대의 정사각형의 한 변 길이    
-dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1)) + 1 
-```
-
-이렇게 하면 dp로 풀이는 가능하고, 공간 최적화를 하려면 직전 row의 정보만 보관하면 된다.
-
-
-<details>
-
-```py
-    def maximalSquare(self, matrix: List[List[str]]) -> int:
-        n_row = len(matrix)
-        n_col = len(matrix[0])
-        
-        prev_row = [0] * n_col
-        cur_row = [0] * n_col
-
-        max_side = 0
-
-        for i in range(n_row):
-            for j in range(n_col):
-                if matrix[i][j] != '1':
-                    continue
-                if j == 0:
-                    cur_row[j] = 1  # 여기서 max_side 업데이트 하지 않고 continue로 넘어가버려서 틀렸었다. 
-                else:
-                    cur_row[j] = min(cur_row[j-1], prev_row[j], prev_row[j-1]) + 1
-                max_side = max(max_side, cur_row[j])
-            prev_row = cur_row  # 밑에서 cur_row가 바라보는 객체를 다시 만들어주니까 deepcopy 없이 그냥 prev_row가 바라보는 객체만 바꿔주면 된다.
-            cur_row = [0] * n_col
-        
-        return max_side * max_side
-```
-
-</details>
-
-prev_row, cur_row 두 개를 쓰는 게 아니라 prev_row, left_value 이렇게 두 개를 쓰려고 해봤다.    
-그런데 row를 오른쪽으로 이동하면서 prev_row의 자기 위치를 업데이트해야하는데 그렇게 하면 (i-1, j-1) 위치를 구하기가 어렵다.     
-왜냐하면 prev_row[j-1]은 left_value와 동일하기 때문이다.    
-그냥 row 두 개를 쓰자.   
 
 
 
@@ -591,12 +538,12 @@ https://leetcode.com/problems/decode-ways/description/
 문제: 숫자 1부터 26은 각각 A부터 Z까지 매핑될 수 있다. 숫자로 이루어진 문자열이 주어졌을 때 치환할 수 있는 알파벳 문자열의 종류를 구하라. 06과 같이 묶는 건 안 된다. 
 
 
-"""
+```
 dp(i): s[:i+1] 까지의 substring에 대한 결과
 dp(i) = dp(i-1) if s[i] is valid + dp(i-2) if s[i-1:i+1] is valid
 지금 보는 포인트 기준으로, 현재 문자(s[i])가 유효하다면 dp[i-1] 을 만들 때 고려한 case들에서 그대로 연장할 수 있다. 
 두 문자가 유효하다면(s[i-1:i+1]) dp[i-2] 에서 연장할 수 있다.
-"""
+```
 
 
 <details>
@@ -650,63 +597,77 @@ def numDecodings(self, s: str) -> int:
 
 
 
-### 62. Unique Paths
 
-https://leetcode.com/problems/unique-paths/description/
+## Grid Problems
 
-문제: robot이 m x n grid의 제일 왼쪽 위에 놓여져있고 오른쪽이나 아래로만 움직일 수 있다. grid의 제일 오른쪽 아래에 갈 수 있는 경로의 수를 구하라.
+### 63. Unique Paths II
+
+https://leetcode.com/problems/unique-paths-ii/
+
+문제: robot이 m x n matrix의 제일 왼쪽 위에 놓여져있고 오른쪽이나 아래로만 움직일 수 있다. matrix[i][j]의 값이 1이라면 그 곳은 로봇이 움직일 수 없다. grid의 제일 오른쪽 아래에 갈 수 있는 경로의 수를 구하라.
 
 
-내 solution: top down
+```
+dp(i, j): Number of the unique paths from (0, 0) to (i, j)
+dp(i, j) is 
+- 0 if (i, j) is out of the grid
+- 0 if (i, j) is an obstacle
+- 1 if (i, j) is the top-left corner
+- dp(i-1, j) + dp(i, j-1) otherwise
+```
 
-- starts from (0, 0), ends at (m-1, n-1)
-- dp(i, j): Number of possible ways to reach the end when the robot is at (i, j) position.
-- dp(i, j) = 0 if (i, j) is out of the grid, 1 if (i, j) is the target, dp(i+1, j) + dp(i, j+1) otherwise.
+
 
 <details>
 
+top down
+
 ```python
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+        if  obstacleGrid[0][0] == 1:  # 이 부분을 빠뜨리지 말자. 답도 틀리고 수행 시간도 길어진다.
+            return 0
+
         @lru_cache(maxsize=None)
-        def getUniquePaths(i, j):
-            if i == m-1 and j == n-1:
+        def getPathHelper(i, j):
+            if i == 0 and j == 0:
                 return 1
-            if not 0 <= i < m or not 0 <= j < n:
+            if not (0 <= i < m and 0 <= j < n):
                 return 0
-            return getUniquePaths(i+1, j) + getUniquePaths(i, j+1)
-        
-        return getUniquePaths(0, 0)
+            if obstacleGrid[i][j] == 1:
+                return 0
+            return getPathHelper(i-1, j) + getPathHelper(i, j-1)
+        return getPathHelper(m-1, n-1)
 ```
 
-</details>
-
-
-내 solution: bottom up
-
-- The answer for (i, j) position is the sum of the answer of (i+1, j) and the answer of (i, j+1)
-- The answer for (m-1, n-1) position is 1.
-- Starting from (m-1, n-1) position, moving left and when it reaches the leftend, go to the upper rightend and moving left again, it gets the current answer from the previous answer.
-
-
-<details>
+bottom up
 
 ```python
-prev_row = [0] * n
-prev_row[-1] = 1
-cur = 0
-for i in range(m-1, -1, -1):
-    for j in range(n-1, -1, -1):
-        if j == n-1:
-            cur = prev_row[j]
-        else:
-            cur += prev_row[j]
-        prev_row[j] = cur
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+        if  obstacleGrid[0][0] == 1:  # 이 부분을 빠뜨리지 말자. 답도 틀리고 수행 시간도 길어진다.
+            return 0
 
-return cur
+        prev_row = [0] * n
+        prev_row[0] = 1
+
+        for i in range(m):
+            cur_row = [0] * n
+            for j in range(n):
+                if obstacleGrid[i][j] == 1:
+                    cur_row[j] = 0
+                    continue
+                cur_row[j] = cur_row[j-1] + prev_row[j]
+            prev_row = cur_row
+        
+        return prev_row[n-1]
 ```
 
 </details>
 
-https://leetcode.com/problems/unique-paths-ii/description/ 이 문제도 있는데 obstacle만 추가된 문제이다. out of grid 조건에 is_obstacle 조건만 추가하면 된다.
+
+
+
 
 
 
@@ -719,42 +680,126 @@ https://leetcode.com/problems/minimum-path-sum/description/
 문제: m x n grid에서 non-negative 숫자로 채워져있다. top left에서 right bottom으로 가야하는데 오른쪽 혹은 아래로만 움직일 수 있다. 가는 길에 있는 숫자의 합이 최소가 되도록 가라.
 
 
-top down: recursion 방식. O(mn) / O(mn)
+
 
 ```
-dp(i, j): i-th row, j-th col 에서 right bottom으로 가는 최단 cost
-dp(i, j) = grid[i, j] + min(dp(i, j+1), dp(i+1, j))
-dp(i, j) = inf if (i, j) is out of range, grid[i, j] if i == len(grid) - 1 and j == len(grid[0]) - 1
+dp(i, j): The minimum sum of costs to reach (i, j) from the top left corner
+dp(i, j) is 
+ - grid[i][j] if i == 0 and j == 0
+ - inf if (i, j) is out of the grid
+ - min(dp(i-1, j), dp(i, j-1)) + grid[i][j] otherwise
 ```
 
-iterative하게 하려면 하나의 row를 저장하면서 하는 방법이 있다. O(mn) / O(n)
+- top down: recursion 방식. O(mn) / O(mn)    
+- bottom up: iterative하게 하려면 하나의 row를 저장하면서 하는 방법이 있다. O(mn) / O(n)    
+- optimization on space: bottom up을 하면서 original matrix에 업데이트하는 방법도 있다. O(mn) / O(1)
 
 <details>
 
-```python
-class Solution:
+top down
+
+```py
     def minPathSum(self, grid: List[List[int]]) -> int:
-        n_row = len(grid)
-        n_col = len(grid[0])
+        m, n = len(grid), len(grid[0])
 
-        prev_row = [math.inf] * n_col
-
-        for i in range(n_row - 1, -1, -1):
-            for j in range(n_col - 1, -1, -1):
-                if j == n_col - 1:
-                    if i == n_row - 1:
-                        prev_row[j] = grid[i][j]
-                    else:
-                        prev_row[j] = grid[i][j] + prev_row[j]
-                    continue
-                prev_row[j] = grid[i][j] + min(prev_row[j], prev_row[j+1])
+        @lru_cache(maxsize=None)
+        def getPathHelper(i, j):
+            if i == 0 and j == 0:
+                return grid[i][j]
+            if not (0 <= i < m and 0 <= j < n):
+                return math.inf
+            return min(getPathHelper(i-1, j), getPathHelper(i, j-1)) + grid[i][j]
         
-        return prev_row[0]
+        return getPathHelper(m-1, n-1)
+```
+
+bottom up with updating the original grid
+
+```py
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        m, n = len(grid), len(grid[0])
+
+        for i in range(m):
+            for j in range(n):
+                if i == 0 and j == 0:
+                    continue
+                elif i == 0:
+                    grid[i][j] = grid[i][j-1] + grid[i][j]
+                elif j == 0:
+                    grid[i][j] = grid[i-1][j] + grid[i][j]
+                else:
+                    grid[i][j] = min(grid[i-1][j], grid[i][j-1]) + grid[i][j]
+        return grid[m-1][n-1]
+```
+
+
+
+</details>
+
+
+
+
+
+
+
+
+
+
+### 221. Maximal Square
+
+https://leetcode.com/problems/maximal-square/
+
+문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형의 넓이를 반환하라.
+
+
+- 어떤 꼭지점 (i,j) 를 기준으로 왼쪽, 위, 왼쪽위 점들이 둘러싸는 점들이다.
+- 왼쪽 점 (i, j-1), 위쪽 점 (i-1, j) 이 겹치는 부분은 현재 점을 기준으로도 연장될 수가 있다.
+- 만약, 4, 4 라면 현재 점 기준으로 왼쪽 4개, 위쪽 4개를 더 포함할 수 있다는 건데, 제일 왼쪽 위 꼭지점은 아직 알 수 없다.
+- (i-1, j-1) 도 만약 4라면 제일 왼쪽 위 꼭지점도 포함한다는 뜻이다. 왜나하면 바로 왼쪽 점인 (i, j-1) 과 동일하게 왼쪽으로 뻗어나가는데 한 칸 위까지 뻗어나가기 때문이다.
+
+```
+dp(i, j): matrix[i][j] 위치를 오른쪽 아래 꼭지점으로 두어서 왼쪽 위로 만들 수 있는 최대의 정사각형의 한 변 길이    
+dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1)) + 1 
+```
+
+이렇게 하면 dp로 풀이는 가능하고, 공간 최적화를 하려면 직전 row의 정보만 보관하면 된다.
+
+
+<details>
+
+```py
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        n_row = len(matrix)
+        n_col = len(matrix[0])
+        
+        prev_row = [0] * n_col
+        cur_row = [0] * n_col
+
+        max_side = 0
+
+        for i in range(n_row):
+            for j in range(n_col):
+                if matrix[i][j] != '1':
+                    continue
+                if j == 0:
+                    cur_row[j] = 1  # 여기서 max_side 업데이트 하지 않고 continue로 넘어가버려서 틀렸었다. 
+                else:
+                    cur_row[j] = min(cur_row[j-1], prev_row[j], prev_row[j-1]) + 1
+                max_side = max(max_side, cur_row[j])
+            prev_row = cur_row  # 밑에서 cur_row가 바라보는 객체를 다시 만들어주니까 deepcopy 없이 그냥 prev_row가 바라보는 객체만 바꿔주면 된다.
+            cur_row = [0] * n_col
+        
+        return max_side * max_side
 ```
 
 </details>
 
-혹은 original matrix에 업데이트하는 방법도 있다. 이렇게 하면 O(1)인 것 같다.
+prev_row, cur_row 두 개를 쓰는 게 아니라 prev_row, left_value 이렇게 두 개를 쓰려고 해봤다.    
+그런데 row를 오른쪽으로 이동하면서 prev_row의 자기 위치를 업데이트해야하는데 그렇게 하면 (i-1, j-1) 위치를 구하기가 어렵다.     
+왜냐하면 prev_row[j-1]은 left_value와 동일하기 때문이다.    
+그냥 row 두 개를 쓰자.   
+
+
 
 
 

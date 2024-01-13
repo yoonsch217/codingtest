@@ -108,3 +108,7 @@ https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/ 문제는 최�
 이전 작업으로 k 값이 바뀌는 것 뿐이다.   
 이럴 때는 iterate 할 방향을 바라보도록 i를 잡는다.
 
+
+### optimization on space(in grid problems)
+
+grid 문제를 풀 때, grid 자체를 업데이트하면서 진행할 수 있으면 O(1)의 space complexity를 갖는다.
