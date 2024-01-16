@@ -23,6 +23,12 @@ https://www.geeksforgeeks.org/heapq-with-custom-predicate-in-python/
 
 ### bisect
 
+`from bisect import bisect_left, bisect_right`
+
+- bisect_left(list, data): 리스트에 데이터를 삽입할 가장 왼쪽 인덱스를 찾는 함수
+- bisect_right(list, data): 리스트에 데이터를 삽입할 가장 오른쪽 인덱스를 찾는 함수
+
+리스트 nums가 `[1 2 3 3 4 5]` 로 주어졌을 때, bisect_left(nums, 3)은 3을 넣을 수 있는 가장 왼쪽 index이므로 2가 되고 bisect_right(nums, 3)은 4가 된다.
 
 ### dict
 

@@ -150,6 +150,30 @@ class Solution:
 
 
 
+# 309. Best Time to Buy and Sell Stock with Cooldown
+
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/
+
+문제: prices 라는 리스트가 주어진다. 주식을 사거나 팔 수 있는데 팔고나면 하루 동안 cool down이 필요해서 아무것도 못 한다. 주식을 동시에 두 개 이상 갖고 있을 순 없다. 최대로 만들 수 있는 수익을 구하라. 팔고난 뒤가 아니라도 cool down이 가능하다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 REAME에 없는 문제
@@ -597,8 +621,174 @@ def numDecodings(self, s: str) -> int:
 
 
 
+### 198. House Robber
+
+https://leetcode.com/problems/house-robber
+
+문제: nums라는 리스트에 각 집에 저장되어 있는 돈의 양이 저장되어 있다. adjacent house를 털면 안 된다는 조건이 있을 때 최대로 털 수 있는 돈의 양을 구하라.
+
+```
+dp(i): nums[i] 까지 범위에서 최대한 얻을 수 있는 돈의 양
+dp(i) = max(dp(i-1), dp(i-2) + nums[i])
+```
+
+<details>
+
+```py
+    def rob(self, nums: List[int]) -> int:
+        n = len(nums)
+        dp = [0] * (n+1)
+        dp[0] = nums[0]
+
+        for i in range(1, n):
+            dp[i] = max(dp[i-1], nums[i] + dp[i-2])
+
+        return dp[n-1]
+```
+
+직전 값들만 저장함으로써 공간 최적화를 할 수 있다.
+
+</details>
+
+
+
+
+
+
+
+
+### 740. Delete and Earn
+
+https://leetcode.com/problems/delete-and-earn
+
+문제: 숫자 리스트가 있고 거기서 x를 뽑으면 그 값을 얻는다. 대신 그 x 하나를 지우고 모든 x+1와 모든 x-1를 지운다. 이 작업을 반복했을 때 얻을 수 있는 최대 sum은?
+예시로, nums가 `[3,4,2]`면 답은 6, nums가 `[2,2,3,3,3,4]` 면 답은 9이다.
+
+문제에 대한 이해도를 높여보자.    
+어떤 값을 고르게 되면 그 양 옆은 아예 못 쓰게 된다. 그 말인 즉, 골랐던 값이 지워질 일은 없다는 뜻이기도 하다.    
+그러면 문제를 house robber 로 재구성할 수 있다. x를 취하게 되면 모든 x를 취하게 되고, 모든 x-1와 모든 x+1를 버리게 되므로 x의 합을 index x의 값으로 둘 수 있다.    
+그렇게 했을 때 그 리스트에서 연속으로 두 개를 고를 수 없을 때 최대의 sum을 구하는 문제가 된다.
+
+<details>
+
+```py
+    def deleteAndEarn(self, nums: List[int]) -> int:
+        targets = [0] * (max(nums) + 1)
+        for num in nums:
+            targets[num] += num
+    
+        # dp(i) = max(dp(i-1), dp(i-2) + targets[i])
+        one_before, two_before = 0, 0
+        for i in range(len(targets)):
+            cur = max(one_before, two_before + targets[i])
+            one_before, two_before = cur, one_before
+        return max(one_before, two_before)
+
+```
+
+</details>
+
+
+
+
+
+
+
+### 300. Longest Increasing Subsequence
+
+https://leetcode.com/problems/longest-increasing-subsequence
+
+문제: Given an integer array nums, return the length of the longest strictly increasing subsequence. 리스트 안에서 연속되지 않아도 된다. 오른쪽으로 가는 순서대로만 있으면 된다. 
+
+TLE 각오하고 그냥 짰는데 beat 63% 나왔다. 근데 이게 dp solution이었다.   
+memo라는 리스트를 만들어서 1로 초기화한다. memo[i]는 nums[:i+1]의 범위에서 nums[i]가 골라졌을 때의 longest increasing subsequence 길이다.   
+그러면 왼쪽부터 차례대로 이동하면서 memo[i]를 `(0~i-1의 memo 값 중 최대) + 1`로 업데이트하면서 간다. 이 때, nums[j]가 nums[i]보다 작지 않으면 무시해야한다.   
+
+O(N^2) / O(N)
+
+<details>
+
+```py
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        n = len(nums)
+        memo = [1] * n
+
+        for i, num in enumerate(nums):
+            tmp = -math.inf
+            for j in range(i):
+                if nums[j] >= num:
+                    continue
+                tmp = max(tmp, memo[j])
+            memo[i] = max(tmp + 1, memo[i])
+        
+        return max(memo)
+```
+
+</details>
+
+
+greedy with binary search    
+이 방법은 볼 때마다 새롭다.   
+왼쪽부터 차례대로 subsequence를 만든다. 계속 이어가다가 다음 숫자 x가 subsequence의 last element보다 작다면 x를 더 붙일 수 없다.   
+그 상황에서 새로운 array를 만들어서 기존 subsequence에서 x보다 작은 부분을 넣고 그 다음에 x를 넣을 수 있다.   
+이런 식으로 뒤에 못 붙이는 수가 나올 때마다 array를 새로 만들어가다가 다 끝나면 그 중 가장 긴 array 길이를 반환할 수 있다.
+
+하지만 이 방법은 최적화가 가능하다. 최대한 길게 만들어야하고 길이만 중요하니까 하나의 array를 같이 쓸 수 있다.   
+새로운 x가 나왔는데 array 뒤에 못 붙인다면 x를 array에서 맞는 자리로 넣어준다.   
+array는 sorted 상태이기 때문에 binary search를 사용할 수 있다.   
+이렇게 하나의 array를 업데이트한 뒤 마지막에는 그 array의 길이를 반환하면 된다.    
+
+
+<details>
+
+```py
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        n = len(nums)
+        res = [nums[0]]
+        for i in range(1, n):
+            num = nums[i]
+            if num > res[-1]:
+                res.append(num)
+                continue
+            target_idx = bisect_left(res, num)
+            res[target_idx] = num
+        return len(res)
+            
+```
+
+O(N logN) / O(1)    
+기존 list를 업데이트하면 O(1)도 가능하다.   
+
+근데 bisect_right하면 왜 실패하는지 모르겠다. bisect_right를 하면 예시 코드 돌리다가 res가 빈 list가 되어 버리는데 디버깅을 해봐도 모르겠다.
+
+
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Grid Problems
+
+
+
+
 
 ### 63. Unique Paths II
 
@@ -814,18 +1004,38 @@ https://leetcode.com/problems/minimum-falling-path-sum/description/
 문제: n x n matrix가 있을 때 falling path 중 minimum sum을 구하라. falling path란 제일 윗 row에서 제일 밑 row 까지 내려오는데 내려올 때 바로 아래나 대각선 아래로만 내려오는 path를 의미한다.
 
 
-recursion 
 
 ```
-dp(i, j): (i, j) 부터 시작해서 바닥까지 가는 minimum sum
-dp(i, j) = matrix[i][j] + min(dp(i+1, j-1), dp(i+1, j), dp(i+1, j+1))
-dp(i, j) = inf if (i, j) out of range, matrix[i][j] if i == n_row - 1
-return max(dp(0, j))
+dp(i, j): minimum falliing path sum to get to matrix[i][j]
+dp(i, j) = matrix[i][j] + min(dp(i-1, j-1), dp(i-1, j), dp(i-1, j+1)))
 ```
 
-참고로 out of range를 먼저 처리해줘야한다.
+grid 문제를 연속으로 푸니까 기본 문제는 똑같은 틀에서 벗어나질 않네.
+
 
 이것도 마찬가지로 bottom up으로 할 수 있는데 O(N) space로 할 수 있다. 그냥 밑에 row부터 차례대로 올라오는 것이다. 결국 row 0 의 결괏값만 알면 되는 건데 이는 row 1의 결괏값만 필요하다.
+
+<details>
+
+```py
+    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
+        n = len(matrix)
+
+        @lru_cache(maxsize=None)
+        def helper(i, j):
+            if not (0 <= i < n and 0 <= j < n):
+                return math.inf
+            if i == 0:
+                return matrix[i][j]
+            return matrix[i][j] + min(helper(i-1, j-1), min(helper(i-1, j), helper(i-1, j+1)))
+        
+        res = math.inf
+        for j in range(n):
+            res = min(res, helper(n-1, j))
+        return res
+```
+
+</details>
 
 
 ---
@@ -833,16 +1043,7 @@ return max(dp(0, j))
 
 
 
-https://leetcode.com/problems/delete-and-earn/solution/ 740
-숫자 리스트가 있고 거기서 x를 뽑으면 그 값을 얻는데 대신 그 x 하나를 지워야하고 x+1전부와 x-1 전부를 지워야한다. 최대>로 얻을 수 있는 sum은?
-dp 일반식을 세우고 싶었는데 dp(i)가 뭘 의미해야할지 몰랐었다. i를 뽑는 개수라고 하기는 i, i+1의 관계가 안 만들어지고.
-근데 i를 1~i 까지의 답이라고 생각하면 나온다. house robber의 살짝 변형. 한칸 두칸의 살짝 변형.
 
-https://leetcode.com/problems/longest-increasing-subsequence/solution/
-dp 일반식 찾기 어려우면 직접 다 예시를 써보면서 해본다. 좀 긴 것 같아도 겁먹지말고 다 써본다. 다 iterate해야하는 거일 수 있다.
-
-
-https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/
 
 
 

@@ -95,6 +95,15 @@ min cost climbing stairs 문제에서 한 번에 두 칸이 아니라 k 칸이�
 각 step마다 특정 상황에 따라 액션을 취할 때가 있고 아무것도 안 하고 다음 step으로 넘어갈 때도 있다.   
 예를 들어 buy and sell stock 문제에서, stock을 구매한 상태라면 dosomething은 파는 거고 donothing은 다음 index로 넘어가는 것이다.   
 
+
+### 여러 state를 갖는 문제
+
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown
+
+가능한 state를 모두 구하고 각 state마다의 dp 식을 구한다.   
+bottom up으로 모든 state를 같이 update하고 마지막에는 답을 구한다.   
+
+
 ### i의 방향 정하기
 
 https://leetcode.com/problems/maximal-square 문제에서 dp(i,j)는 (i,j)에서 왼쪽 위를 바라본 최대 사각형이어야한다.   
