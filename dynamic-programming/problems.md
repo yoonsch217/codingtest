@@ -156,10 +156,45 @@ https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/
 
 문제: prices 라는 리스트가 주어진다. 주식을 사거나 팔 수 있는데 팔고나면 하루 동안 cool down이 필요해서 아무것도 못 한다. 주식을 동시에 두 개 이상 갖고 있을 순 없다. 최대로 만들 수 있는 수익을 구하라. 팔고난 뒤가 아니라도 cool down이 가능하다.
 
+state가 복잡할 때는 각각을 나누고 서로의 상관관계를 구하라.
+결국에는 얼마나 복잡하든 특정 상태의 i 시점에 대해 과거와의 점화식을 구하는 문제인 것이다.
 
+There can exist three states:   
+- Not having any stock   
+- Having a stock   
+- Just after selling a stock   
 
+no_stock can be turned into: no_stock or have_stock   
+have_stock can be turned into: have_stock or after_sell   
+after_sell can be turned into: no_stock   
 
+```
+s[i]: Maximum profit for the state at the time i. When buying a stock, the profit is decreased by the amount of the price
+no_stock[i] = max(no_stock[i-1], after_sell[i-1])
+have_stock[i] = max(have_stock[i-1], no_stock[i-1] - prices[i])
+after_sell[i] = have_stock[i-1] + prices[i]
+```
 
+<details>
+
+```py
+    def maxProfit(self, prices: List[int]) -> int:
+        n = len(prices)
+        no_stock = [0] * n
+        have_stock = [0] * n
+        after_sell = [0] * n
+
+        have_stock[0] = -prices[0]
+
+        for i in range(1, n):
+            no_stock[i] = max(no_stock[i-1], after_sell[i-1])
+            have_stock[i] = max(have_stock[i-1], no_stock[i-1] - prices[i])
+            after_sell[i] = have_stock[i-1] + prices[i]
+        
+        return max(no_stock[n-1], max(have_stock[n-1], after_sell[n-1]))
+```
+
+</details>
 
 
 
@@ -372,13 +407,16 @@ a + b = c라고 할 때 a를 이루는 최소 수가 dp(a)이고 b를 이루는 
 
 
 
-BFS 로 풀면 TLE가 안 난다.
+BFS 로 풀 수 있다. 이걸 Greedy라고 보기도 하는 것 같다.
 
-- n 이하의 제곱수들을 구해서 저장한다.
-- BFS의 한 level을 리스트 혹은 set으로 정의를 한다.
-- 처음에는 root부터 시작이니까 {n} 가 초깃값이다.
-- level의 각 원소마다 돌면서 제곱수라면 그때의 level을 반환한다.
-- 제곱수가 아니라면 다음 level 리스트에 현재 보는 값에서 제곱수를 뺀 값을 넣어준다.
+root가 target이라고 할 때 tree 구조로 내려오는 걸 생각해본다. 각 child node로 내려올 때마다 square만큼 빼고 남은 값이 된다. 즉, tree의 한 level을 내려올 때마다 square 하나를 사용한 것이다.   
+각 node에서 사용할 수 있는 square가 여러 종류가 있다. 각각에 대해 child node를 만들면서 내려오다가 child node의 값이 square 중 하나라면 그 때의 level의 답이 된다.    
+
+- n 이하의 제곱수들을 구해서 저장한다. n을 구성하는 square 후보들이다.
+- BFS의 한 level을 리스트로 정의 한다.
+- 처음에는 root부터 시작이니까 [n] 가 초깃값이다.
+- 현재 level의 tree node마다 돌면서 제곱수라면 그때의 level을 반환한다. root에서 그 tree node까지의 edge 수는 level이고, level 만큼 square를 사용한 것이다.
+- 제곱수가 아니라면 다음 child node로 현재 보는 값에서 제곱수를 뺀 값을 넣어준다.
 - 그 level의 작업이 끝나면 다음 level에 대해 작업해준다.
 
 
@@ -388,24 +426,24 @@ BFS 로 풀면 TLE가 안 난다.
     def numSquares(self, n: int) -> int:
         if n < 2:
             return n
-        lst = []
+        usable_squares = []
         i = 1
-        while i * i <= n:
-            lst.append( i * i )
+        while i*i <= n:
+            usable_squares.append(i*i)
             i += 1
         cnt = 0
-        toCheck = {n}
-        while toCheck:
+        targets = {n}
+        while targets:
             cnt += 1
-            temp = set()
-            for x in toCheck:
-                for y in lst:
-                    if x == y:
+            next_targets = set()
+            for target in targets:
+                for square in usable_squares:
+                    if target == square:
                         return cnt
-                    if x < y:  # 처음에는 x 값이 lst의 최솟값인 1보다 클 것이다. 그러다가 x가 y보다 작아진다면 이후 y보다도 다 작을 것이므로 더 볼 필요가 없다.
+                    if square > target:  # 처음에는 x 값이 usable_squares 최솟값인 1보다 클 것이다. 그러다가 x가 y보다 작아진다면 이후 y보다도 다 작을 것이므로 더 볼 필요가 없다.
                         break
-                    temp.add(x-y)
-            toCheck = temp
+                    next_targets.add(target - square)
+            targets = next_targets
 
         return cnt
 ```
@@ -413,15 +451,46 @@ BFS 로 풀면 TLE가 안 난다.
 </details>
 
 
-greedy 방식을 사용할 수도 있다. `result = dp(n, k) for n in [i, .. n]` 이고 dp(n, k)는 k 개의 perfect square로 n을 만들 수 있으면 true를 반환하고 그게 그때의 최적의 답이다.   
+더 빠른 답   
+greedy 방식을 사용할 수도 있다. 근데 아래 방식은 dp 아닌가?   
+
+```
+dp(target, k): target을 k개의 square로 만들 수 있으면 True
+dp(target, k) = dp(target-num, k-1) for num in square_nums
+이렇게 하면 정답은 dp(target, k)를 만족하는 최소의 k 값이다.
+```
+
+ `result = dp(n, k) for n in [i, .. n]` 이고 dp(n, k)는 k 개의 perfect square로 n을 만들 수 있으면 true를 반환하고 그게 그때의 최적의 답이다.   
 `dp(n, k) = dp(n-squarenum, k-1) + 1`      
 이걸 증명하는 건 contradiction을 이용할 수 있다. dp(n, i)가 있고 그 뒤에 dp(n, j)가 나왔고 dp(n, j)가 더 작은 수라고 하자. dp(n, j)의 답은 j인데 이는 i보다 작아야한다. 그런데 먼저 수행된 i가 더 작아야하므로 모순이다.   
 Time Complexity: O(n^(h/2)) where h is the maximal number of recursion that could happen   
+
+<details>
+
+```python
+    def numSquares(self, n: int) -> int:
+        square_nums = [i**2 for i in range(1, int(sqrt(n))+1)]
+        
+        @lru_cache(maxsize=None)
+        def is_divided(target, k):
+            if k == 1:
+                return target in square_nums
+            for num in square_nums:
+                if is_divided(target-num, k-1):
+                    return True
+            return False
+        
+        for i in range(1, n+1):
+            if is_divided(n, i):
+                return i
+```
+
 n-ary tree로 생각할 수 있다. 어떤 parent node의 숫자를 기준으로, 그 숫자보다 작은 square number를 뺀 node들을 child node로 갖는다.   
 
 greedy 방식을 n-ary tree로 생각할 때, 각 레벨을 BFS로 탐색하는 것으로 볼 수도 있다.    
 레벨이 곧 사용된 perfect square 숫자의 개수이기 때문이다.   
 
+</details>
 
 
 
@@ -759,13 +828,53 @@ array는 sorted 상태이기 때문에 binary search를 사용할 수 있다.
 O(N logN) / O(1)    
 기존 list를 업데이트하면 O(1)도 가능하다.   
 
-근데 bisect_right하면 왜 실패하는지 모르겠다. bisect_right를 하면 예시 코드 돌리다가 res가 빈 list가 되어 버리는데 디버깅을 해봐도 모르겠다.
-
-
+근데 bisect_right하면 왜 실패하는지 모르겠다.
 
 </details>
 
 
+
+
+
+
+
+
+
+### 322. Coin Change
+
+https://leetcode.com/problems/coin-change/
+
+문제: coins 라는 리스트에는 서로 다른 종류의 coin이 있다. amount라는 값이 주어졌을 때 coins의 coin으로 amount를 make up할 수 있는 최소의 coin 수를 구하라.
+
+x라는 양은 x-coin에서 coin 하나를 더 쓰면 만들 수 있다. 이 관계를 이용하여 len(coins) 번 iterate한다.
+
+```
+dp[i]: Minimum number of coins to make up to i
+dp[i] = min(dp[i-k] for k in coins)
+```
+
+Time Complexity: amount * len(coins)
+
+<details>
+
+
+```py
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        dp = [math.inf] * (amount+1)
+        dp[0] = 0
+
+        for i in range(amount+1):
+            for coin in coins:
+                if i-coin < 0:
+                    continue  # coins를 맨 처음에 sort하고 여기서는 break 해버리면 조금 최적화가 된다.
+                dp[i] = min(dp[i], dp[i-coin] + 1)
+        
+        if dp[amount] == math.inf:
+            return -1
+        return dp[amount]
+```
+
+</details>
 
 
 
@@ -1047,6 +1156,3 @@ grid 문제를 연속으로 푸니까 기본 문제는 똑같은 틀에서 벗�
 
 
 
-### 322. Coin Change
-
-https://leetcode.com/problems/coin-change/

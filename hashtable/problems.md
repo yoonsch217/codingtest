@@ -12,6 +12,25 @@ ord() 함수로 count를 증가시킨 다음에 마지막에 counts list를 hash
 이 때, 나는 map(str, counts) 한 뒤에 '.'.join(counts)를 했는데 이러면 너무 느리다.   
 대신 tuple(counts)를 하면 빠른 시간에 hashable key 생성이 된다.
 
+<details>
+
+```py
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        ans = []
+        d = defaultdict(list)
+        for s in strs:
+            cur = [0] * 26  # only lowercases
+            for c in s:
+                cur[ord(c)-ord('a')] += 1
+            d[tuple(cur)].append(s)
+
+        for k in d:
+            ans.append(d[k])
+        return ans
+```
+
+</details>
+
 
 Complexity
 - Time Complexity: O(NK) where N is the length of `strs`, and K is the maximum length of a string in `strs`.

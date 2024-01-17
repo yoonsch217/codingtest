@@ -101,7 +101,7 @@ min cost climbing stairs 문제에서 한 번에 두 칸이 아니라 k 칸이�
 https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown
 
 가능한 state를 모두 구하고 각 state마다의 dp 식을 구한다.   
-bottom up으로 모든 state를 같이 update하고 마지막에는 답을 구한다.   
+초기 상태에 대한 세팅을 한 뒤 bottom up으로 매 iteration마다 각 state를 update하고 마지막에는 답을 구한다.   
 
 
 ### i의 방향 정하기

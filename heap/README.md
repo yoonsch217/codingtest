@@ -1,7 +1,7 @@
 ## 개념
 
 정렬된 순서가 아닌, 최댓값 혹은 최솟값만 필요한 경우 사용한다.   
-priority queue라는 개념이 있는데 이는 abstract dat type이고 실제 자료 구조는 아니다.   
+priority queue라는 개념이 있는데 이는 abstract data type이고 실제 자료 구조는 아니다.   
 priority queue를 구현하는 방법에 linked list, heap 등이 있는 것이다.   
 
 linked list의 경우 insertion, deletion에 대해 O(1)의 시간이 걸리지만 검색에는 O(N)의 시간이 걸린다.   
@@ -56,13 +56,15 @@ heapq.nlargest(k, count.keys(), key=count.get)
 heapify의 complexity   
 O(N) time, O(N) space   
 O(NlogN)으로 생각할 수 있는데 O(N)이다. 각 노드의 heapify는 O(h)의 시간이 들고 h의 높이를 갖는 노드는 n/pow(2, h+1) 만큼 있다.   
-따라서 T(N) = sigma(0 to logN) n/pow(2, h+1) * O(h) = O(n * sigma(0 to logN) h/pow(2, h)) = O(N)    
 https://www.geeksforgeeks.org/time-complexity-of-building-a-heap/   
 
+![image](image.png)
+
+big O notation이니까 n을 infinity로 보낸 것 이하의 시간이 걸려야한다.
 
 ## 전략
 
-top k problems / k-th largest element   
+**top k problems / k-th largest element**   
 size k의 min heap을 만들고 k+1개째 부터는 넣어야할 값을 root와 비교해서 크면 root를 빼고 넣는다.   
 전체 값들에 대해 완료했을 때 root가 k-th largest element이고 heap의 리스트가 top k elements이다.   
 O(Nlogk) / O(k) => 처음 k minheap 만드는 시간 k, 그 이후 작업 (N-k) * logk
