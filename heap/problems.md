@@ -86,7 +86,8 @@ Time: O(M * N * logk), Space: O(k)
 
 
 Complexity
-- Time: O((M+N) * logD) for D difference between max and min. logD는 binary search하는 시간이고, count_less_or_equal이 O(M+N)? O(M*N) 아닌가?
+- Time: O((M+N) * logD) for D difference between max and min. 
+   - logD는 min에서 max 사이를 binary search하는 시간이다. count_less_or_equal은 O(M+N)이다. top-right corner부터 시작해서 가로로 최대 N번, 세로로 최대 M번 이동할 때까지 찾기 때문이다.
 - Space: O(1) 
 
 

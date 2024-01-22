@@ -11,65 +11,41 @@ diagonal과 anti-diagonal이 조금 독특한데 diagonal position에 있으려�
 따라서 row-col 을 보관하는 diagonal set과 row+col 을 보관하는 anti-diagonal set을 갖고 비교하면 된다.   
 recursion으로 row를 늘려가면서 invalid한 순간 멈추고 backtracking하여 다음 candidate를 검증하면 된다.   
 
-혹은 내 방식으로는, occupied 리스트를 만들어서 각 순간마다 is_valid를 판단한다.   
-각 recursion마다 row를 증가시키니까 row validity는 건너뛰고 column validity는 `cur_col in occupied` 로 비교한다.   
-diagonal or anti-diagonal의 경우는 `abs(cur_row - compare_row) == abs(cur_col - compare_col)` 으로 할 수 있다.   
-recursion이 끝날 때마다 occupied.pop() 을 해줘서 불필요한 copy를 막음으로써 시간 복잡도를 줄인다.   
 
 <details>
-    
+
 ```python
-class Solution:
     def totalNQueens(self, n: int) -> int:
-        self.cnt = 0
-        self.occupied = []
+        def get_valid_positions(row, diag_set, anti_diag_set, col_set):
+            if row == n:  # base case 잊지 말기
+                return 1
+            res = 0
+            for i in range(n):
+                cur_diag = row - i
+                cur_anti_diag = row + i
+                if i not in col_set and cur_diag not in diag_set and cur_anti_diag not in anti_diag_set:
+                    col_set.add(i)
+                    diag_set.add(cur_diag)
+                    anti_diag_set.add(cur_anti_diag)
+                    res += get_valid_positions(row+1, diag_set, anti_diag_set, col_set)
+                    col_set.remove(i)
+                    diag_set.remove(cur_diag)
+                    anti_diag_set.remove(cur_anti_diag)
+            
+            return res
+        
+        res = 0
+        for i in range(n):
+            diag_set = set()  # stores row-col values
+            anti_diag_set = set()  # stores row+col values
+            col_set = set()
 
-        def is_valid(cur_row, cur_col):
-            for i in range(len(self.occupied)):
-                compare_row = i
-                compare_col = self.occupied[i]
-                if cur_col == compare_col:
-                    return False
-                if abs(cur_row - compare_row) == abs(cur_col - compare_col):
-                    return False
-            return True
+            diag_set.add(-i)
+            anti_diag_set.add(i)
+            col_set.add(i)
+            res += get_valid_positions(1, diag_set, anti_diag_set, col_set)
+        return res
 
-        def helper(row):
-            if row == n:
-                self.cnt += 1
-                return
-            for i in range(0, n):
-                if is_valid(row, i):
-                    self.occupied.append(i)
-                    helper(row+1)
-                    self.occupied.pop()
-
-        helper(0)
-        return self.cnt
-```
-
-```python
-# solution
-def get_valid_positions(row, col):
-    if col in cols or (row - col) in diagonals or (row + col) in anti_diagonals:
-        return 0
-    if row+1 >=n:  # 이 base case를 잘못 둬서 고생했다. 처음에는 row >= n 일 때 return 1을 하도록 했는데 이렇게 하면 n=4일 때 (4,0),(4,1),(4,2),(4,3) 모두 1을 return 하니까 n배 큰 답이 나온다.
-        return 1
-
-    cols.add(col)
-    diagonals.add(row-col)
-    anti_diagonals.add(row+col)
-    tmp = 0
-    for i in range(n):                
-        tmp += get_valid_positions(row+1, i)
-    cols.remove(col)
-    diagonals.remove(row-col)
-    anti_diagonals.remove(row+col)
-    return tmp
-
-res = 0
-for i in range(n):
-    res += get_valid_positions(0, i)
 ```
     
 </details>
@@ -90,6 +66,9 @@ robot 객체에는 move, turnRight, turnLeft, clean 네 가지의 함수가 있�
 이 네 가지 함수를 사용하여 주어진 2차원 matrix의 방을 다 청소하는 함수를 짜라. 방 matrix는 주어지지 않는다.
 
 방문한 곳은 다시 방문하지 않는 것이 좋다. 따라서 visited set을 만들어서 들고 다닌다. 네 방향 다 살펴봤을 때 더이상 갈 곳이 없다면 처음의 위치로 backtracking을 한다. 이렇게 함으로써 맨 처음 기준으로 네 방향을 다 탐색할 수가 있다.
+
+DFS 랑 비슷하다. DFS에서는 child 두 개 중 하나를 골라서 끝까지 갔다가 backtracking해서 나머지 하나로 또 끝까지 간다. robot clean의 경우는 child가 네 개인 상황으로 생각하면 된다. 
+하나 방향을 끝까지 탐색해서 더 갈 곳이 없으면 backtrack해서 원래 자리로 돌아온 뒤 다른 child로 가야한다.
 
 <details>
     
@@ -131,16 +110,27 @@ https://leetcode.com/problems/powx-n/
 
 문제: x의 n제곱을 구하라.
 
-n의 최대 범위는 2^32-1 이다. 그러면 2진법으로 생각했을 때 32개의 숫자로 표현할 수 있는 거다.   
-n은 1, 2, 4, 8, ... 로 표현할 수 있다. 각각은 0으로도 쓸 수 있고. 그러면 pow(2, n)은 `pow(2, 0) * pow(2, 1) * pow(2, 2) * pow(2, 4) * pow(2, 8) * ...` 로 표현할 수 있다. (각각은 1로도 쓸 수 있고)
-pow(x, 1), pow(x, 2), pow(x, 4), pow(x, 8) 이렇게 2의 거듭제곱으로 지수를 올리면서 n에 제일 가깝게 올라간다.   
-그리고 그 각각의 값들을 dict에 저장한다.   
-최대한 올라간 지수를 cur_pow라고 하면 `n-cur_pow` 에 대한 문제라고 생각할 수 있다.    
-이렇게 특정 지수 target_power에 대해 2의 거듭제곱으로 증가하면서 넘기 직전까지 가는 recursive 함수를 구한 뒤 그걸 사용한다.   
-base case는 target_power가 0 혹은 1일 때이다.   
+`x^n = x^(n//2) * x^(n//2) * x^(n%2)`  => base case는 exponent가 0 혹은 1일 때이다.
 
 
+<details>
 
+```py
+def myPow(self, x: float, n: int) -> float:
+    def get_pow(base, exponent):
+        if exponent == 0:
+            return 1
+        elif exponent % 2 == 0:
+            return get_pow(base * base, exponent // 2)
+        else:
+            return base * get_pow(base * base, (exponent - 1) // 2)
+
+    f = get_pow(x, abs(n))
+    
+    return float(f) if n >= 0 else 1/f
+```
+
+</details>
 
 
 
@@ -244,6 +234,66 @@ backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack �
         
         backtrack(0, 3)
         return ans
+```
+
+</details>
+
+내 솔루션. 어떻게 풀긴 풀었네. 80%
+
+<details>
+
+```py
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        if len(s) < 4:
+            return []
+        
+        def is_valid(target):
+            if len(target) == 1:
+                return True
+            if len(target) == 2 and target[0] != '0':
+                return True
+            if len(target) == 3 and target[0] != '0' and int(target) < 256:
+                return True
+            return False
+        
+        def get_ip(raw_str, dots):
+            tmp = []
+            prev = 0
+            for dot in dots:
+                tmp.append(raw_str[prev:dot+1])
+                prev = dot + 1
+            tmp.append(raw_str[prev:])
+            return '.'.join(tmp)
+
+
+        def get_possible_ips(cur_idx, dots, res):
+            # if last_dot_idx is i, it means that there's a dot just after i-th character
+            if len(dots) > 3:
+                return
+            if len(dots) == 0:  
+                # initial condition
+                last_dot_idx = -1
+            else:
+                last_dot_idx = dots[-1]
+
+            if cur_idx == len(s):
+                # when reached the right end, add to the result if the last section is valid
+                if len(dots) == 3:
+                    if is_valid(s[last_dot_idx+1:]):
+                        res.append(get_ip(s, dots))
+                return
+
+            if cur_idx - last_dot_idx > 3:
+                return
+            if is_valid(s[last_dot_idx+1:cur_idx+1]):
+                get_possible_ips(cur_idx+1, dots, res)
+                dots.append(cur_idx)
+                get_possible_ips(cur_idx+1, dots, res)
+                dots.pop()
+        
+        res = []
+        get_possible_ips(0, [], res)
+        return res
 ```
 
 </details>

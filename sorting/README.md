@@ -59,9 +59,10 @@ min heap 도 사용할 수 있지만 max heap이 더 편하다.
    - array를 arr[0]가 root인 binary tree로 볼 수 있다.
    - 목적은 arr[0]에 최댓값이 들어가게 하는 것이다.
    - arr[i]의 left child는 arr[2 * i + 1] 이고 right child는 arr[2 * i + 2] 가 된다.
-   - 맨 뒤의 node부터 앞으로 차례대로 오면서 각자의 child node가 자기보다 더 값이 크다면 swap을 한다. swap하고도 더 큰 child가 있다면 또 swap해준다. 이렇게 함으로써 각 subtree들도 max heap을 만족하게 되는 것 같다.
+   - 맨 뒤의 node부터 앞으로 차례대로 오면서 각자의 child node가 자기보다 더 값이 크다면 swap을 한다. swap하고도 더 큰 child가 있다면 또 swap해준다. 이렇게 함으로써 각 subtree들도 max heap을 만족하게 된다.
 2. arr[0]가 최댓값을 갖는다. arr[0]와 arr[len - 1] 를 swap한다. arr의 맨 마지막에는 최댓값이 들어가게 된다.
 3. arr[0:len-1] 에 대해 동일하게 heapify한다. 이 때는 a[0]에 대해서만 위치를 찾아주면 된다. 왜나하면 이미 a[1]과 a[2]는 각각을 root로 하는 subtree의 max 값이기 때문이다.
+   - heapify 할 때는 먼저 root에 대해 양 child와 비교한다. 그 중 right가 크다면 right와 swap한 뒤 그 right로 내려간 root 값에 대해 또 양 child와 비교한다. 이 과정을 swap이 일어나지 않을 때까지 반복한다.
 4. arr[0:len-1] 의 max가 arr[0]에 오게 되면 그 값을 arr[len-2]와 swap 한 뒤에 arr[0:len-2]에 대해 동일하게 작업을 해준다.
 
 대부분의 다른 comparison based sort보다 빠르다.   
@@ -75,6 +76,7 @@ def heap_sort(self, lst: List[int]) -> None:
     Mutates elements in lst by utilizing the heap data structure
     """
     def max_heapify(heap_size, index):
+        # index에 대해서 양 child와 비교한다.
         left, right = 2 * index + 1, 2 * index + 2
         largest = index
         if left < heap_size and lst[left] > lst[largest]:
@@ -82,6 +84,8 @@ def heap_sort(self, lst: List[int]) -> None:
         if right < heap_size and lst[right] > lst[largest]:
             largest = right
         if largest != index:
+            # 양 child가 없거나 양 child보다 내가 더 크면 거기서 작업은 끝나게 된다.
+            # 작업이 안 끝난다면 내려간 곳에서 또 양 child에 대한 작업을 하게 되는 것이다.
             lst[index], lst[largest] = lst[largest], lst[index]
             max_heapify(heap_size, largest)
 
