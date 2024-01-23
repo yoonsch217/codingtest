@@ -196,6 +196,9 @@ backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack �
 <details>
 
 ```python
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        n = len(s)
+        ans = []
         @lru_cache(maxsize=None)
         def get_valid_seq_or_none(start_idx, end_idx):
             if end_idx - start_idx >= 3 or end_idx >= n:

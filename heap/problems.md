@@ -92,3 +92,73 @@ Complexity
 
 
 
+
+
+
+
+
+
+
+
+### 1834. Single-Threaded CPU
+
+https://leetcode.com/problems/single-threaded-cpu/description/
+
+문제: You are given n​​​​​​ tasks labeled from 0 to n - 1 represented by a 2D integer array tasks, where tasks[i] = [enqueueTimei, processingTimei] means that the i​​​​​​th​​​​ task will be available to process at enqueueTimei and will take processingTimei to finish processing.    
+You have a single-threaded CPU that can process at most one task at a time and will act in the following way:    
+- If the CPU is idle and there are no available tasks to process, the CPU remains idle.
+- If the CPU is idle and there are available tasks, the CPU will choose the one with the shortest processing time. If multiple tasks have the same shortest processing time, it will choose the task with the smallest index.
+- Once a task is started, the CPU will process the entire task without stopping.
+- The CPU can finish a task then start a new one instantly.    
+Return the order in which the CPU will process the tasks.
+
+
+beat 99.29%!!
+
+- 모든 task에 대해서 enqueue 시간 순서대로 먼저 정렬을 한다.
+- current time을 초기화한다. 0으로 해도 되고 가장 빠른 task enqueue 시간으로 해도 된다. 방어 로직이 있다.
+- sorted tasks에 대해 index를 두고 `while i < n` 조건으로 iterate한다.
+- sorted tasks에서 current time 이하의 task를 heap에 넣는다. 넣을 땐 (process time, task id) 순서로 넣는다.
+- 만약 current time보다 작은 task enqueue가 없다면(heap이 비어있다면) index를 증가시키고 다시 iterate한다.
+- heap에 데이터가 있다면 heappop을 한다. 가장 process time이 작은 task가 나올 것이다.
+- current time을 업데이트하고 다음 iterate를 진행한다.
+- task index가 n이 됐다면(모든 task가 heap에 들어갔다면) heap 순서대로 뽑으면 된다.
+
+<details>
+
+```py
+    def getOrder(self, tasks: List[List[int]]) -> List[int]:
+        heap, res = [], []
+        n = len(tasks)
+
+        for i in range(n):
+            tasks[i].append(i)  # add task id
+        tasks.sort()
+
+        i = 0
+        cur_time = tasks[0][0]
+        while i < n:
+            while i < n and tasks[i][0] <= cur_time:
+                heapq.heappush(heap, (tasks[i][1], tasks[i][2], tasks[i][0]))
+                i += 1
+            if not heap:
+                """
+                이게 있어야 empty heap에 대해 대응할 수 있다. 
+                처음에는 두 while 사이에 넣었는데 그러면 안 된다. 
+                proc_time으로 시간이 잘 흘렀는데 heap에 넣기 전에 다시 과거로 돌아갈 수도 있기 때문이다. 
+                여기에 넣어야 heap에 넣으려고 시도해봤는데도 empty heap이 되는 경우만 다음 task로 건너뛰어준다.
+                """
+                cur_time = tasks[i][0]  
+                continue
+            proc_time, task_id, _ = heapq.heappop(heap)
+            res.append(task_id)
+            cur_time += proc_time
+
+        while heap:
+            res.append(heapq.heappop(heap)[1])
+        
+        return res
+
+```
+
+</details>

@@ -21,6 +21,19 @@ stable 하지 않은 sorting이다.
 
 O(N^2) / O(1)
 
+<details>
+
+```py
+	def selectionSort(self, nums):
+		for i in range(len(nums)):
+			_min = min(nums[i:])
+			min_index = nums[i:].index(_min)
+			nums[i + min_index] = nums[i]
+			nums[i] = _min
+		return nums
+```
+
+</details>
 
 
 ### Bubble Sort
@@ -31,6 +44,20 @@ O(N^2) / O(1)
 동일한 값끼리는 바꾸지 않기 때문에 stable한 sorting이다.   
 
 O(N^2) / O(1)
+
+<details>
+
+```py
+    def bubbleSort(self, nums):
+        n = len(nums)
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                if nums[j] > nums[j + 1]:
+                    nums[j], nums[j + 1] = nums[j + 1], nums[j]
+                    
+```
+
+</details>
 
 
 
@@ -45,6 +72,21 @@ inversion이 적을 때 유리한 방법이다. best case는 O(N) 일 것 같은
 또한 작은 array의 경우에 더 효과적이다(empirical observation). sorting function은 array size를 계산한 뒤에 특정 size 미만이면 insertion sort를 사용하기도 한다.(신기하다..)   
 
 O(N^2) / O(1)
+
+<details>
+
+```py
+    def insertionSort(self, nums): 
+        for i in range(1, len(nums)): 
+            key = nums[i]
+            j = i-1
+            while j >= 0 and key < nums[j] : 
+                    nums[j + 1] = nums[j] 
+                    j -= 1
+            nums[j + 1] = key
+```
+
+</details>
 
 
 
@@ -70,13 +112,15 @@ min heap 도 사용할 수 있지만 max heap이 더 편하다.
 그리고 실제로는 bad cache locality 때문에 O(N log N) 보다 느린 것으로 알려졌다. locations in heaps 를 기반으로 swap을 하는데 이는 무작위로 정렬된 곳에서 index를 접근하기 위해 많은 read operation이 필요하여서 cache miss가 발생한다.   
 
 
+<details>
+
 ```py
 def heap_sort(self, lst: List[int]) -> None:
     """
     Mutates elements in lst by utilizing the heap data structure
     """
     def max_heapify(heap_size, index):
-        # index에 대해서 양 child와 비교한다.
+        # index에 대해서 양 child와 비교한다. 현재 index에 대해서만 작업한다.
         left, right = 2 * index + 1, 2 * index + 2
         largest = index
         if left < heap_size and lst[left] > lst[largest]:
@@ -101,14 +145,154 @@ def heap_sort(self, lst: List[int]) -> None:
         max_heapify(i, 0)
 ```
 
+</details>
+
 
 
 
 
 ### Merge Sort
 
+divide and conquer   
+
+- pointer들을 움직이면서 계속 절반씩 쪼갠다. 
+- 하나만 남으면 sort된 상태이니까 하나 남을 때까지 쪼갠다.
+- 쪼갠 거를 합치는데 각각의 subarray마다 포인터를 놓아서 비교해가며 채운다. O(N)
+
+
+Time: O(N logN)
+
+메모리가 많이 든다.
+
+stable
+
+
+<details>
+
+```py
+# Merges two subarrays of arr[].
+# First subarray is arr[l..m]. Second subarray is arr[m+1..r]
+
+def merge(arr, l, m, r):
+    n1 = m - l + 1
+    n2 = r - m
+ 
+    # create temp arrays
+    L = [0] * (n1)
+    R = [0] * (n2)
+ 
+    # Copy data to temp arrays L[] and R[]
+    for i in range(0, n1):
+        L[i] = arr[l + i]
+ 
+    for j in range(0, n2):
+        R[j] = arr[m + 1 + j]
+ 
+    # Merge the temp arrays back into arr[l..r]
+    i = 0     # Initial index of first subarray
+    j = 0     # Initial index of second subarray
+    k = l     # Initial index of merged subarray
+ 
+    while i < n1 and j < n2:
+        if L[i] <= R[j]:
+            arr[k] = L[i]
+            i += 1
+        else:
+            arr[k] = R[j]
+            j += 1
+        k += 1
+ 
+    # Copy the remaining elements of L[], if there are any
+    while i < n1:
+        arr[k] = L[i]
+        i += 1
+        k += 1
+ 
+    # Copy the remaining elements of R[], if there are any
+    while j < n2:
+        arr[k] = R[j]
+        j += 1
+        k += 1
+ 
+# l is for left index and r is right index of the sub-array of arr to be sorted
+ 
+ 
+def mergeSort(arr, l, r):
+    if l < r:
+        # Same as (l+r)//2, but avoids overflow for large l and h
+        m = l+(r-l)//2
+ 
+        # Sort first and second halves
+        mergeSort(arr, l, m)
+        mergeSort(arr, m+1, r)
+        merge(arr, l, m, r)
+```
+
+</details>
+
+
+
 
 
 
 ### Quick Sort
 
+divide and conquer   
+
+- 어떤 array 안에서 pivot을 정한다. 
+- pivot의 자기 위치를 찾아가며 그 값보다 작은 원소들은 left subarray로, 큰 원소들은 right subarray로 보낸다. 
+- recursive하게 진행을 한다.   
+
+특징   
+- unstable sort
+- 메모리를 많이 쓰지 않는다.    
+- cache hit 측면에서 merge sort보다 효과적이다.   
+- worst case는 pivot이 최소이거나 최대일 때이다. 따라서 배열이 이미 정렬/역정렬 되어 있다면 정렬이 n-1번 수행되어 최악의 경우이다.    
+- Best O(N logN), worst O(N^2)
+
+<details>
+
+```py
+def partition(array, low, high):
+    # Choose the rightmost element as pivot
+    pivot = array[high]
+ 
+    # All elements that are on the left of i is less than or equal to pivot
+    # i is the first index of the element that is greater than pivot.
+    # i.e. After all the iterations, i will be the right next value of pivot.
+    i = low
+
+    # Traverse through all elements compare each element with pivot
+    for j in range(low, high):
+        if array[j] <= pivot:
+            # Swapping element at i with element at j
+            array[i], array[j] = array[j], array[i]
+            i += 1
+ 
+    # Swap the pivot element with the greater element specified by i
+    array[i], array[high] = array[high], array[i]
+ 
+    # Return the position from where partition is done
+    return i
+ 
+
+def quicksort(array, low, high):
+    if low < high:
+        # The element at pi index is at the right position.
+        # All the elements in the left subarray are less than or equal to pi. Right subarray vice versa.
+        pi = partition(array, low, high)
+ 
+        # Recursive call on the left of pivot
+        quicksort(array, low, pi - 1)
+ 
+        # Recursive call on the right of pivot
+        quicksort(array, pi + 1, high)
+```
+
+</details>
+
+
+# 전략
+
+보통은 array 문제로 나온다.   
+그리고 built-in function을 주로 써서 이걸 직접 구현할 일은 잘 없을 것 같다.
