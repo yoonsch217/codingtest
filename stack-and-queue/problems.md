@@ -1,3 +1,46 @@
+### 150. Evaluate Reverse Polish Notation
+
+https://leetcode.com/problems/evaluate-reverse-polish-notation
+
+문제: reverse polish notation으로 표현된 string인 tokens에 대해서 그 계산값을 반환하라. 
+operator는 `+, -, *, /` 를 사용한다. 나누기는 소수를 버리고 정수만 남는다.    
+ex) `tokens = ["4","13","5","/","+"]` => `(4 + (13 / 5)) = 6`
+
+간단하다. 쭉 iterate하면서 연산자가 아니면 stack push하고 연산자면 최근 두 개 pop 한 뒤 계산하면 된다.
+
+lambda를 쓰면 다르게 풀 수도 있다.   
+
+<details>
+  
+```python
+def evalRPN(self, tokens: List[str]) -> int:
+        
+    operations = {
+        "+": lambda a, b: a + b,
+        "-": lambda a, b: a - b,
+        "/": lambda a, b: int(a / b),
+        "*": lambda a, b: a * b
+    }
+    
+    stack = []
+    for token in tokens:
+        if token in operations:
+            number_2 = stack.pop()
+            number_1 = stack.pop()
+            operation = operations[token]
+            stack.append(operation(number_1, number_2))
+        else:
+            stack.append(int(token))
+    return stack.pop()
+```
+
+</details>
+
+
+
+
+
+
 ### 739. Daily Temperatures
 
 https://leetcode.com/problems/daily-temperatures
@@ -5,8 +48,11 @@ https://leetcode.com/problems/daily-temperatures
 문제: temperatures라는 리스트가 있는데 하루 간격의 기온이 저장되어 있다. 각 날짜에서 더 따뜻한 날이 올 때까지 기다려야하는 일수를 저장한 리스트를 반환하라. 더 따뜻한 날이 이후에 없다면 0을 저장하면 된다.
 
 decreasing monotonic stack을 사용한다.   
-리스트를 iterate하면서 stack에는 index만 저장을 하게 되는데 현재 기온이 stack의 마지막보다 높다면 현재 기온보다 높은 날이 나올 때까지 pop을 한다.   
-pop하는 원소는 그 index와 현재 index의 차이만큼 기다리면 현재 기온을 만나게 되는 것이므로 answer 리스트에는 그 index 차이를 저장한다.   
+stack에는 아직 더 따뜻한 날을 못 만난 day가 저장되어 있다. 그러면 bottom에서 top으로 갈수록 덜 따뜻하다.   
+리스트를 iterate하면서 지금 보는 기온이 top보다 낮으면 그냥 push한다.   
+top보다 높으면 더 높은 top이 나올 때까지 pop하면서 pop된 날짜에 대해 답을 넣어준다.
+답은 현재 보는 index와 pop된 날짜의 차이이다.
+
 각 원소에 대해 한 번씩만 작업을 하게 되므로 O(N) 시간이 걸리게 되고 stack을 위한 O(N) 공간이 필요하게 된다.   
 
 <details>
@@ -54,10 +100,9 @@ class Solution:
                 hottest = cur
                 continue
             comp_idx = i + 1
-            ans[i] += 1
             while cur >= temperatures[comp_idx]:
-                ans[i] += ans[comp_idx]
                 comp_idx += ans[comp_idx]
+            ans[i] = comp_idx - i
         
         return ans
 
@@ -72,8 +117,53 @@ https://leetcode.com/problems/trapping-rain-water/
 
 문제: integer array가 주어지고 각 index의 값들은 그 index 위치에서의 bar 높이이다. 얼만큼의 물이 고일 수 있는지 구하라.
 
-아이디어가 중요하다. brute force한 방법 먼저 생각해보자. 내가 처음 생각했던 건, 각 bar 기준으로 오른쪽으로 닿을 때까지 간 뒤에 닿게 되면 그만큼 물을 채우는 것이었다. 그런데 이렇게 하면 hole이 많아서 복잡해진다.   
+내 brute force한 방법   
+- 앞에서부터 iterate하면서 left wall로 생각을 한다. 
+- 각 left wall마다 오른쪽을 보면서 left wall 이상인 right wall을 찾는다. 그러면 그 사이는 물이 채워진다.
+- left wall 이상인 게 없다면 그중 가장 높은 wall을 찾는다. 그러면 그 사이가 물이 채워진다.
+- right wall을 찾으러 갈 때 각 right wall 후보와 left wall 사이에 얼만큼이 벽으로 채워져있는지 계산해놓는다.
+- 그러면 마지막에 `width x min(left wall, right wall) - occupied` 를 하면 된다.
+- 다음 iteration은 right wall이 left wall로 되는 상황부터 하면 된다.
 
+이러면 O(N^2)의 시간이 소요돼서 느리다.
+
+이걸 최적화하려면 `739. Daily Temperatures` 문제처럼 미리 각 left wall마다 그거보다 높은 wall이 처음으로 나오는 위치를 저장한 array, 
+그 이후의 wall 중 가장 높은 높이를 저장한 array 두 개를 O(N) 시간에 만들어 놓으면 이후 작업도 O(N)에 가능할 것이다.    
+
+
+<details>
+
+```py
+    def trap(self, height: List[int]) -> int:
+        n = len(height)
+        left = 0
+        ans = 0
+        while left < n-1:
+            if height[left] == 0:  # If the height of left wall is 0, it cannot trap water.
+                left += 1
+                continue
+            right = tallest_right = left + 1
+            occupied, occupied_dict = 0, {}
+            while right < n:
+                occupied_dict[right] = occupied
+                if height[right] >= height[left]:
+                    break
+                if height[right] > height[tallest_right]:
+                    tallest_right = right
+                occupied += height[right]
+                right += 1
+            if right == n:
+                right = tallest_right
+            width = right - left - 1
+            ans += (width * min(height[left], height[right]) - occupied_dict[right])
+            left = right
+        return ans
+```
+
+</details>
+
+
+아이디어를 생각하기 어려웠다.    
 현재 위치 i에서 물이 차려면 i 기준 왼쪽과 오른쪽 둘 다에 i보다 높은 bar가 있어야한다.    
 `cur_trapped_water = min(left_max, right_max) - cur_height`
 각 위치 i 기준으로 왼쪽에서 가장 높은 bar의 높이가 저장된 left_maxs와 오른쪽으로 한 결과인 right_maxs를 만든 뒤 답을 구한다.   
@@ -106,10 +196,11 @@ O(N) / O(N)
 
 </details>
 
-위의 방법은 두 번 iterate해야하는데 stack을 쓰면 한 번의 iterate로 가능하다.    
-decreasing monotonic stack을 만들면서 오른쪽으로 이동하는 것이다. 
-그러다가 pop해야할 상황, 즉 현재 높이가 더 큰 상황이 발생하게 되고 pop 하고도 stack에 값이 남아있다면 pop하는 위치 기준으로 left bar와 right bar(current bar)가 존재한다는 의미이다.   
-또한 left bar와 right bar 사이에 popped bar보다 높은 건 없고 popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다. 따라서 left bar에서 right bar까지는 popped bar 높이로 평평하다고 가정할 수 있다. 
+위의 방법은 두 번 iterate해야하는데 decreasing monotonic stack을 쓰면 한 번의 iterate로 가능하다.    
+decreasing monotonic stack를 만들다가 pop해야할 상황, 즉 현재 높이가 더 큰 상황이 발생하게 되고 pop 하고도 stack에 값이 남아있다면 pop하는 위치 기준으로 left bar와 right bar(current bar)가 존재한다는 의미이다.   
+또한 left bar와 right bar 사이에 popped bar보다 높은 건 없고 popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다.    
+따라서 left bar에서 right bar까지는 popped bar 높이로 평평하다고 가정할 수 있다.    
+신박하다.
 
 <details>
 
