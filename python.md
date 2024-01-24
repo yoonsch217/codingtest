@@ -93,3 +93,45 @@ immutable 객체의 경우는 shallow copy를 하든 deep copy를 하든 상관�
 `==` 로 비교할 때, immutable은 값이 같은지를 확인한다.   
 mutable은 reference를 확인한다. 값이 같아도 주소가 같아야한다.   
 
+
+
+### Variable Scope
+
+함수 안에 또 함수를 정의했을 때,
+
+```py
+class MyClass:
+    def func1(self):
+        a = 1
+
+        def func2():
+            # unlocal a 라고 먼저 선언하면 사용할 수 있다.
+            a += 1
+
+        # func2를 호출하지 않으면 exception이 발생하지 않는다.
+        # func2를 호출하면 UnboundLocalError: local variable 'a' referenced before assignment 에러가 발생한다.
+        func2()  
+        print(a)
+
+mc = MyClass()
+mc.func1()
+```
+
+func2에서 똑같은 이름의 변수명을 argument로 받게 되었을 때,
+
+```py
+class MyClass:
+    def func1(self):
+        a = 1
+
+        def func2(a):
+            a += 1
+            print(f"func2: {a}")  # 101
+
+        func2(100)
+        print(f"func1: {a}")  # 1
+
+mc = MyClass()
+mc.func1()
+```
+

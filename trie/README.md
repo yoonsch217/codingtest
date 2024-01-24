@@ -33,6 +33,10 @@ struct TrieNode {
 };
 ```
 
+어떤 node의 map에 어떤 key가 있다는 건, 그 문자를 고를 수 있다는 것이다.
+그 문자를 고르면 그에 해당하는 TrieNode로 가게 된다. 이제 그 node의 map에 있는 key가 다음으로 갈 수 있는 후보들이다.   
+만약 leaf node라면 해당 노드는 비어있는 map을 갖게 된다.   
+
 
 ### Basic Operations
 
@@ -57,6 +61,12 @@ search
 5.   cur = cur.children[c]
 6. search successes
 ```
+
+단순히 search 말고 특정 단어가 존재하는지를 물어볼 때도 있다.   
+예를 들어, binary 라는 문자가 저장되어 있는 trie에서 bin이 있는지를 찾는다면 bin이라는 path까지는 존재한다.   
+여기서 n이 어떤 단어의 마지막인지에 대한 정보가 있어야한다.   
+isEnd와 같은 flag를 사용할 수 있다.   
+
 
 
 

@@ -4,61 +4,9 @@ https://leetcode.com/problems/implement-trie-prefix-tree/description/
 
 문제: Trie의 insert, search, startsWith 메소드를 구현하라.
 
-search의 경우는 해당 단어가 이전에 insert 됐어야 true인 것이다.   
-따라서 일반 trie 구조로 하려면 is_end 와 같은 bool flag가 있어야한다.   
-이 flag가 True라면 그 노드에서 끝난 word가 있다는 것이다.   
-
-나는 좀 더 메모리 써서 했다.
-
-<details>
-
-```py
-class Trie:
-    def __init__(self):
-        self.children = {}
-        self.words = set()
-        
-
-    def insert(self, word: str) -> None:
-        self.words.add(word)
-        
-        first_c = word[0]
-        if first_c not in self.children:
-            self.children[first_c] = Trie()
-        self.children[first_c].insert_helper(word, 1)
-    
-    def insert_helper(self, word: str, idx: int) -> None:
-        if idx == len(word):
-            return
-        head = word[idx]
-        if head not in self.children:
-            self.children[head] = Trie()
-        self.children[head].insert_helper(word, idx+1)
-
-    def search(self, word: str) -> bool:
-        return word in self.words
-
-    def startsWith(self, prefix: str) -> bool:        
-        first_c = prefix[0]
-        if first_c not in self.children:
-            return False
-        return self.children[first_c].startsWith_helper(prefix, 1)
-    
-    def startsWith_helper(self, prefix: str, idx: int) -> bool:
-        if idx == len(prefix):
-            return True
-        head = prefix[idx]
-        if head not in self.children:
-            return False
-        return self.children[head].startsWith_helper(prefix, idx+1)
-```
-
-`word[1:]` 이렇게 slice해서 넘기다가 index로 넘기니까 더 빨라졌다.   
-
-</details>
 
 
-반면에 Trie는 그냥 커다란 트리로 두고 node 객체를 따로 만드는 방법도 있는데 이게 더 빠르고 좋아보인다.
+Trie는 그냥 커다란 트리로 두고 node 객체를 따로 만드는 방법도 있는데 이게 빠르고 좋아보인다.
 
 ```py
 class TrieNode:
@@ -68,7 +16,6 @@ class TrieNode:
         self.isEnd = False
 
 class Trie:
-
     def __init__(self):
         self.root = TrieNode()
 
@@ -103,6 +50,82 @@ class Trie:
             cur = cur.children[c]
         return True
 ```
+
+
+
+
+
+
+
+
+
+### 140. Word Break II
+
+문제: Given a string s and a dictionary of strings wordDict, add spaces in s to construct a sentence where each word is a valid dictionary word. Return all such possible sentences in any order.
+
+Input: s = "catsanddog", wordDict = ["cat","cats","and","sand","dog"]   
+Output: ["cats and dog","cat sand dog"]
+
+
+- word dict의 단어들로 Trie를 만든다.
+- s를 iterate하면서 Trie를 따라간다. 
+- matching하는 단어를 찾았으면 두 분기로 나눈다.
+   - 그곳에 space를 넣고 이후 탐색은 다시 Trie root부터 시작
+   - space를 넣지 않고 Trie를 계속 내려가면서 탐색
+- s의 마지막 시점에 TrieNode에 is_end=True 가 만족해야 올바른 word break가 된다.
+
+포인트가 두 개 있는 것 같다.    
+- Trie를 어떻게 light-weight로 구현할 것인가. 
+   - multi-depth dict로 구현을 했다. 클래스를 만드는 것 보다 간편하고 가볍다.
+- ans array를 어떻게 업데이트할 것인가.
+   - list 하나를 계속 사용했다. backtracking인가 이게? DFS로 쭉 갔다가 나올 때는 list에서 pop 하면서 나왔다. 덕분에 메모리도 아끼고 리스트 복사하는 시간도 아꼈다.
+
+
+<details>
+
+```py
+    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+        trie = {}
+
+        def insert_into_trie(d, w, i):
+            c = w[i]
+            if c not in d:
+                d[c] = {}
+            if i == len(w)-1:
+                d[c]['is_end'] = True
+                return
+            insert_into_trie(d[c], w, i+1)
+
+        for word in wordDict:
+            insert_into_trie(trie, word, 0)
+
+        ans = []
+
+        def get_answer(s, i, ans, trie, d, tmp_ans):
+            if i == len(s):
+                return
+            c = s[i]
+            if c not in d:
+                return
+            if 'is_end' in d[c]:
+                tmp_ans.append(c)
+                tmp_ans.append(' ')
+                if i == len(s)-1:
+                    ans.append(''.join(tmp_ans).strip())
+                get_answer(s, i+1, ans, trie, trie, tmp_ans)
+                tmp_ans.pop()
+                tmp_ans.pop()
+            
+            tmp_ans.append(c)
+            get_answer(s, i+1, ans, trie, d[c], tmp_ans)
+            tmp_ans.pop()
+        
+        get_answer(s, 0, ans, trie, trie, [])
+        return ans
+
+```
+
+</details>
 
 
 

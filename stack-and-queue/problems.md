@@ -228,19 +228,61 @@ decreasing monotonic stack를 만들다가 pop해야할 상황, 즉 현재 높�
 </details>
 
 
+
+
+
+
 ### 856. Score of Parentheses
 
 https://leetcode.com/problems/score-of-parentheses/
 
-문제: balanced parentheses string s가 주어졌을 때 점수를 구하라. () 형태로 붙어 있는 짝이 1점이고 (A) 처럼 감싸고 있으면 A*2이다. AB처럼 연속되어 있으면 A+B이다.
+문제: balanced parentheses string s가 주어졌을 때 점수를 구하라. () 형태로 붙어 있는 짝이 1점이다.
+A와 B를 각각 subpart의 점수라고 할 때 (A) 처럼 감싸고 있으면 A*2이고 AB처럼 연속되어 있으면 A+B이다.
 
-먼저 들었던 생각은 recursion하게 푸는 것이었다. 맨 처음은 left parenthesis일테니까 그 ( 에 대응하는 )로 한번 자른다. `helper(s) = 2*helper(s[1:k]) + helper([k+1:])`     
-인덱스가 하나 차이난다면 1점을 return한다. 인덱스가 하나 넘게 차이난다면 안에 더 있는 거니까 helper(left+1, right-1) * 2 를 return한다.   
-본 작업 전에 linear하게 훑으면서 각 괄호에 매칭하는 괄호 인덱스를 저장하면 O(N) 시간에 풀 수 있다.   
-그런데 이 방법은 예외 처리가 조금 필요하다. 
 
-stack을 사용해서 풀 수도 있다. 각 뎁스마다 값을 저장하는 것이다.   
-left parenthesis 나올 때마다 depth가 늘어나니까 stack에 추가하고 right parenthesis 나올 때마다 depth 하나 탈출하니까 pop을 하면서 이전 depth의 값에 추가해준다.   
+stack을 사용해서 풀 수 있다.   
+string을 iterate하면서 괄호 혹은 계산된 숫자를 stack에 넣는다. 
+그러면 제일 마지막에는 결괏값 하나만 stack에 존재하게 된다.
+
+<details>
+
+```py
+    def scoreOfParentheses(self, s: str) -> int:
+        stack = []
+        for c in s:
+            if c == '(':
+                # left paranthesis면 stack에 추가만 한다.
+                stack.append('(')
+            if c == ')':
+                # right paranthesis면 계산을 해야한다.
+                left = stack.pop()
+                if left == '(':
+                    # stack의 제일 위에 open이 있었다면 현재의 close와 합쳐서 1을 넣는다.
+                    stack.append(1)
+                else:
+                    # 숫자가 있었다면 그 숫자를 두 배한다. 
+                    # stack에는 연속된 숫자가 없음이 보장되므로 그 다음의 pop은 open일 것이다. 합쳐서 2배해서 넣는다.
+                    stack.pop()
+                    stack.append(left * 2)
+            # 각 iteration마다 stack의 top들에 연속된 숫자가 없도록 압축해준다.
+            while stack and stack[-1] != '(':
+                tmp = stack.pop()
+                if stack and stack[-1] != '(':
+                    tmp += stack.pop()
+                    stack.append(tmp)
+                else:
+                    stack.append(tmp)
+                    break
+        return stack[0]
+```
+
+</details>
+
+
+stack의 다른 방법도 있다. 각 뎁스마다 값을 저장하는 것이다.   
+left parenthesis 나올 때마다 depth가 늘어나니까 stack에 추가하고 right parenthesis 나올 때마다 depth 하나 탈출한다.    
+depth 줄일 때마다 stack을 pop 한다. 
+이전 depth의 값에 추가해준다.   
 
 ```python
 def solve(s: str) -> int:
@@ -263,18 +305,53 @@ def solve(s: str) -> int:
 그러면 왼쪽부터 linear하게 탐색하면서 열릴 때마다 depth를 증가시킨다. 닫힐 때 depth를 확인해서 pow(2, depth)를 결과에 더해준다. 바로 붙어있는 괄호들에 대해서만 처리하면 되는 듯.
 
 
+
+
+
+
 ### 155. Min Stack
 
 https://leetcode.com/problems/min-stack
 
-문제: minStack이라는 클래스의 메소드를 구현하라. 일반 stack의 메소드들에 더해서 get_min 이라는 메소드를 갖는데 스택에 있는 최솟값을 반환한다. 모든 메소드는 O(1) 시간에 수행돼야한다.
+문제: minStack이라는 클래스의 메소드를 구현하라. 일반 stack의 메소드들에 더해서 get_min 이라는 메소드를 갖는데 스택에 있는 최솟값을 반환한다. 모든 메소드는 O(1) 시간에 수행돼야한다.   
+MinStack의 member function: `push`, `pop`, `top`, `getMin`
 
 스택은 계속해서 위로 쌓이는 자료구조이다. 어떤 최솟값이 있고 그 이후로 그보다 작은 값이 없다면 그 위의 모든 값들에 대해서는 get_min이 그 최솟값이다.   
-따라서 stack에 (cur_val, min_so_far) 의 tuple을 넣어주면 된다. 
+따라서 stack에 (cur_val, prev_min) 의 tuple을 넣어주면 된다.   
+push할 때와 pop할 때 self.min을 업데이트 해주면 된다.   
+push할 때는 현재와 비교해서 더 작으면 min이 업데이트 되는 것이고, pop할 때는 pop값이 min하고 똑같으면 prev_min으로 업데이트 해야하는 것이다.
 
 위 방법대로 하면 중복된 값이 많이 저장될 수 있다. 메모리 효율을 위해서 스택을 두 개 관리하는 방법도 있다. 하나는 그냥 스택, 다른 하나는 min 값이 바뀔 때만 저장하는 스택이다.   
 따라서 pop을 할 때는 min stack의 위에 있는 값과 같으면 둘 다 pop을 하는 식으로 한다.   
 
+<details>
 
+```py
+class MinStack:
+
+    def __init__(self):
+        self.min = math.inf
+        self.stack = []
+
+
+    def push(self, val: int) -> None:
+        self.stack.append((val, self.min))  # min 업데이트 전에 넣어야 prev_min이 된다.
+        self.min = min(self.min, val)
+        
+
+    def pop(self) -> None:
+        val, prev_min = self.stack.pop()
+        self.min = max(prev_min, self.min)
+        
+
+    def top(self) -> int:
+        return self.stack[-1][0]
+        
+
+    def getMin(self) -> int:
+        return self.min
+```
+
+</details>
 
 

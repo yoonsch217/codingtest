@@ -10,3 +10,4 @@ https://leetcode.com/problems/parallel-courses-iii/description/
 https://leetcode.com/problems/minimum-time-to-complete-all-tasks/description/
 https://leetcode.com/problems/russian-doll-envelopes/description/
 https://leetcode.com/problems/meeting-rooms-iii/description/
+https://leetcode.com/problems/maximum-xor-with-an-element-from-array
