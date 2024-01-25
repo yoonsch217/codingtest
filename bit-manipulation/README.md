@@ -1,16 +1,23 @@
 ## 개념
 
-### 배경 지식
+### Base-X Number
 
 base-X number 란 X만큼 증가했을 때 carry가 생기는 걸 말한다.   
 
 decimal은 base-10인데 decimal value를 non-decimal base-X value로 변환할 때는 X로 계속 나누면 된다.   
 몫이 0이 아닐 때까지 계속 X로 나눈다. 그러면 각각의 나누기에서 나온 나머지(remainder)들을 거꾸로 읽으면 된다.   
-소수점 자리의 경우(fractional part)는 X로 곱하면서 나온 값에서 interger part를 순서대로 읽으면 된다.   
+소수점 자리의 경우(fractional part)는 X로 곱하면서 나온 값에서 interger part를 순서대로 읽으면 된다.    
+ex) 11을 2진법으로: divisor 2로 계속 나누면, quotient 5 remainder 1, quotient 2 remainder 1, quotient 1 remainder 0, quotient 0 remainder 1   
+=>  remainder를 거꾸로 나열하면 1011   
+ex) 3/8을 2진법으로: divisor 2로 계속 곱하면, whole number part 0 fractional part 3/4, whole number 1 fractional 1/2, whole number 1 fractional 0   
+=> whole number part를 순서대로 나열하면 0.011
 
 non decimal 인 두 base 의 수끼리 convert하는 경우는 decimal을 거친 뒤 가는 방법이 있다.   
 그러나 base-2 와 base-8의 수 사이의 convert의 경우는 굳이 decimal로 거치지 않아도 된다.   
 base-2의 숫자 세 개마다 base-8의 숫자로 바뀌게 된다.
+
+
+### 8-bit Signed Integer
 
 8bit signed integer의 경우 가장 높은 자리는 부호를 나타낸다.   
 -2의 경우는 machine number로 10000010 로 나타낼 수 있다.   
