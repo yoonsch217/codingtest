@@ -204,21 +204,40 @@ dp[skills] = skills를 만족하기 위한 최소 인원의 team
 
 ```py
     def smallestSufficientTeam(self, req_skills: List[str], people: List[List[str]]) -> List[int]:
-        n, m = len(req_skills), len(people)
-        skill_index = {v: i for i, v in enumerate(req_skills)}  # key: skill, value: index
-        dp = {0: []}
-        for i, p in enumerate(people):
-            cur_skill = 0
-            for skill in p:
-                if skill in skill_index:
-                    cur_skill |= 1 << skill_index[skill]
-            for prev_skills, prev_team in dict(dp).items():
-                comb = prev_skills | cur_skill  # 이전과 지금을 합친 state
-                if comb == prev_skills: continue  
-                if comb not in dp or len(dp[comb]) > len(prev_team) + 1:  # p를 넣는 게 이득이라면
-                    dp[comb] = prev_skills + [i]  # 이렇게 greedy하게 덮어써도 된다는 걸 어떻게 보이지?
+        skill_to_idx = {}
+        for i, s in enumerate(req_skills):
+            skill_to_idx[s] = i
+        
+        skills_to_team = {}  # key: bit masked skill list, value: smallest team(list of people)
+        """
+        0에 대해 초기화를 하지 않고 `if cur_skills not in {}: 추가`로 했는데 그러면 corner case에 걸린다. 
+        0을 만드는 최소 team은 [] 여야하는데 cur_skills가 0인 사람이 있다면 최소 team이 한 명이 된다.
+        그렇게 되면 모든 dict를 iterate할 때 처음 보는 cur_skills에 대해 그 team을 기준으로 expand하게 된다.
+        """
+        skills_to_team[0] = []  
 
-        return dp[(1 << n) - 1]  # 전체 skill에 대한 값을 반환한다.
+        for p_idx, p_skills in enumerate(people):
+            cur_skills = 0
+            # construct bit masked skill for this person
+            for skill in p_skills:
+                if skill not in skill_to_idx:
+                    continue
+                skill_bit = (1 << skill_to_idx[skill])
+                cur_skills |= skill_bit
+            
+            if cur_skills not in skills_to_team:  # skills_to_team[0] = [] 넣음으로써 필요없어졌다.
+                skills_to_team[cur_skills] = [p_idx]
+            
+            for prev_skills, prev_team in dict(skills_to_team).items():  # dict 원본을 쓰면 size가 변해서 에러나니까 복사해서 iterate한다.
+                updated_skills = prev_skills | cur_skills  # 이전과 지금을 합친 state
+                if updated_skills == prev_skills:  # 바뀐 게 없다면 무시한다. 지금 p를 안 넣는 게 이득
+                    continue
+                if updated_skills not in skills_to_team:
+                    skills_to_team[updated_skills] = prev_team + [p_idx]
+                if len(skills_to_team[updated_skills]) > len(prev_team) + 1:
+                    skills_to_team[updated_skills] = prev_team + [p_idx]
+        
+        return skills_to_team[(1 << len(req_skills)) - 1]  # 전체 skill에 대한 값을 반환한다.
 ```
 
 - Time O(people * 2^skill)
@@ -227,45 +246,6 @@ dp[skills] = skills를 만족하기 위한 최소 인원의 team
 </details>
 
 
-내 코드 => corner case가 있는지 37번째 case fail한다.
-
-<details>
-
-```py
-    def smallestSufficientTeam(self, req_skills: List[str], people: List[List[str]]) -> List[int]:
-        skill_to_idx = {}
-        for i, s in enumerate(req_skills):
-            skill_to_idx[s] = i
-        
-        skills_to_team = {}  # key: bit masked skill list, value: smallest team(list of people)
-        for p_idx, p_skills in enumerate(people):
-            cur_skills = 0
-            # construct bit masked skill for this person
-            for skill in p_skills:
-                if skill not in skill_to_idx:
-                    continue
-                skill_bit = (1 << skill_to_idx[skill])
-                cur_skills += skill_bit
-            
-            if cur_skills not in skills_to_team:
-                skills_to_team[cur_skills] = [p_idx]
-            
-            tmp_copy = deepcopy(skills_to_team)
-            
-            for prev_skills, prev_team in tmp_copy.items():
-                updated_skills = prev_skills | cur_skills
-                if updated_skills == prev_skills:
-                    continue
-                if updated_skills not in skills_to_team:
-                    skills_to_team[updated_skills] = prev_team + [p_idx]
-                elif len(skills_to_team[updated_skills]) > len(prev_team) + 1:
-                    skills_to_team[updated_skills] = prev_team + [p_idx]
-        
-        return skills_to_team[(1 << len(req_skills)) - 1]
-            
-```
-
-</details>
 
 
 
