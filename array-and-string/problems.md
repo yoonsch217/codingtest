@@ -165,3 +165,77 @@ def totalFruit(self, fruits: List[int]) -> int:
 
 </details>
 
+
+
+
+
+
+### 128. Longest Consecutive Sequence
+
+https://leetcode.com/problems/longest-consecutive-sequence/description/
+
+문제: Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
+ You must write an algorithm that runs in O(n) time.
+
+
+Approach 1. set
+
+- 모든 값들을 set에 넣는다.
+- nums를 iterate하면서 현재 num에서 +1 씩 expand 하면서 nums set에 존재하는지 확인한다.
+- 존재한다면 cnt를 1씩 증가시키고 ans를 업데이트하면서 이동한다.
+
+같은 O(N) 이라도 최적화 시키는 게 중요했다. 어떤 값 num에 대해서 num-1이 set에 존재한다면 무시해도 된다. 이렇게 하면 한번 expand 했던 리스트에 있던 값들은 다시 expand하지 않게 된다.
+
+
+
+```py
+    def longestConsecutive(self, nums: List[int]) -> int:
+        num_set = set(nums)
+        best = 0
+        for num in num_set:  # for num in nums로 하면 느려진다. why?
+            if num - 1 in num_set:
+                continue
+            tmp = num + 1
+            cnt = 1
+            while tmp in num_set:
+                tmp += 1
+                cnt += 1
+            best = max(best, cnt)
+        return best
+        
+```
+
+
+Approach 2. Hash Map
+
+- 각 위치에 대해서 최대로 expand할 수 있는 길이를 저장하는 hash map을 사용한다.   
+- 어떤 값 num에 대해 
+   - `d[num]`이 존재한다면 이미 작업한 값이므로 넘어간다.
+   - `d[num-1]`이  존재한다면 num-1로부터 왼쪽으로 `d[num-1]` 만큼 값이 있다는 것이다. 없다면 left로는 0만큼 expand할 수 있다.
+   - `d[num+1]`이  존재한다면 num+1로부터 왼쪽으로 `d[num+1]` 만큼 값이 있다는 것이다. 있다면 right로는 0만큼 expand할 수 있다.
+   - `d[num] = left + right + 1`이 되고 `ans = max(ans, d[num])`이 된다.
+   - `d[num-left]` 값도 `d[num]` 값과 동일하게 된다. num-left부터 오른쪽으로 `d[num]`만큼 확장시킬 수 있다.
+    이제 `d[num-left]`를 사용할 값은 num-left-1이 된다. 
+   - num-left+1은 어떻게 filter out되지?
+
+```py
+    def longestConsecutive(self, nums: List[int]) -> int:
+        ans = 0
+        d = {}
+
+        for num in nums:
+            if num not in d:
+                left = d[num-1] if num-1 in d else 0
+                right = d[num+1] if num+1 in d else 0
+                cur_len = left + right + 1
+                d[num] = cur_len
+                ans = max(ans, cur_len)
+
+                d[num-left] = cur_len
+                d[num+right] = cur_len
+            else:
+                continue
+        
+        return ans
+
+```
