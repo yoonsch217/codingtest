@@ -355,3 +355,55 @@ class MinStack:
 </details>
 
 
+
+
+
+
+
+
+
+### 84. Largest Rectangle in Histogram
+
+https://leetcode.com/problems/largest-rectangle-in-histogram/description/
+
+문제: Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in the histogram.
+
+
+내 solution: TLE    
+- stack을 두고 (i, h) 값을 넣는다. 인덱스 i 이후부터 지금까지 가장 낮은 wall의 높이는 h인 것을 보장한다. 
+- i가 늘어났는데 h가 작아진다면 의미가 없다. 따라서 stack은 monotonic stack으로서 h 값이 점점 커져야한다.
+- 리스트를 traverse하면서 right end는 현재 index로 잡는다. 
+- 현재 높이가 stack에 있는 높이보다 작다면 stack에서 현재 높이보다 큰 값들을 다 pop한다. right end 높이보다 큰 값들은 더 이상 쓰이지 못 하기 때문이다. 
+- stack을 구성하면 그 stack을 iterate하면서 `ans = max(ans, (right_end - stack_index) x stack_height )` 로 계산한다. 현재 자리(right_end) 기준으로 stack_index까지 중 가장 높은 공통 높이는 stack_height이기 때문이다.
+
+
+Time Complexity: O(N^2). 최악의 경우 increasing stack이 만들어질 수 있다.
+
+
+<details>
+
+```py
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        """
+        From index idx, it is guaranteed that height is the shortest.
+        If idx becomes larger, heigh with shorter value is no need. Only looks for higher value.
+        """
+        stack = []  # (idx, height), 
+        ans = 0
+        for i, height in enumerate(heights):
+            last_idx = i
+            while stack and height <= stack[-1][1]:
+                last_idx, _ = stack.pop()
+            stack.append((last_idx, height))
+
+            for _idx, _height in stack:
+                ans = max(ans, (i + 1 - _idx) * _height)
+        
+        return ans
+```
+
+</details>
+
+
+
+
