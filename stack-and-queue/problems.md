@@ -405,5 +405,60 @@ Time Complexity: O(N^2). 최악의 경우 increasing stack이 만들어질 수 �
 </details>
 
 
+two pointer를 두자.   
+어떤 지점 i를 기준으로, 해당 bar를 높이로 갖는 최대 rectangle을 구해보자. 그러면 해당 bar에서 왼쪽으로 봤을 때 처음으로 낮은 bar가 나오는 곳이 left index가 되고 반대가 right index가 된다.   
+이렇게 각 i를 대상으로 하게 되면 모든 rectangle을 구할 수 있다.   
+
+left_barriers를 생성한다. O(N). 739. Daily Temperatures 문제 생각하면 된다.   
+right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
+
+
+<details>
+
+```py
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        n = len(heights)
+        """
+        # left_barrieres
+        For each index i, left_barrieres[i] is the index of the nearest wall 
+        that appears shorter than heights[i] on the left side.
+        If not exist, -1
+        """
+        left_barriers = [-1] * n
+        right_barriers = [n] * n
+
+        for i in range(n):
+            cur_h = heights[i]
+            cmp_idx = i - 1
+            while cmp_idx != -1 and heights[cmp_idx] >= cur_h:
+                cmp_idx = left_barriers[cmp_idx]
+            left_barriers[i] = cmp_idx
+        
+        for i in range(n-1, -1, -1):
+            cur_h = heights[i]
+            cmp_idx = i + 1
+            while cmp_idx != n and heights[cmp_idx] >= cur_h:
+                cmp_idx = right_barriers[cmp_idx]
+            right_barriers[i] = cmp_idx
+        
+        ans = 0
+        for i in range(n):
+            cur_h = heights[i]
+            left, right = left_barriers[i], right_barriers[i]
+            ans = max(ans, (right - left - 1) * cur_h)
+        
+        return ans
+```
+
+약간의 최적화
+- shortest 라는 변수 넣어서 shortest보다 작거나 같다면 shortest 업데이트하고 바로 넘어가기(옆 index랑 비교할 필요 없이)
+- 오른쪽 iterate loop를 합치기
+
+</details>
+
+
+
+
+
 
 

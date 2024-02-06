@@ -47,7 +47,8 @@ list를 traverse 하면서 지금까지의 합을 저장하는 prefix_sum_list�
 ### Two pointers
 
 Brute force하게 2 depth iteration을 해야해서 O(N^2) 시간이 걸리는 상황에서 최적화를 고민할 때 two poitner를 생각해보자.   
-양 쪽에 pointer를 두고 greedy한 로직을 생각하면 one pass로 할 수도 있다.   
+양 쪽에 pointer를 두고 greedy한 로직을 생각하면 one pass로 할 수도 있다.    
+O(N^2) 이 나올 거 같으면 O(2N), O(3N) 등으로 할 수 있을지 생각해본다.
 
 ex) https://leetcode.com/problems/container-with-most-water
 
