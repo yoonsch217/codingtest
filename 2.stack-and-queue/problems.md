@@ -119,8 +119,8 @@ https://leetcode.com/problems/trapping-rain-water/
 
 내 brute force한 방법   
 - 앞에서부터 iterate하면서 left wall로 생각을 한다. 
-- 각 left wall마다 오른쪽을 보면서 left wall 이상인 right wall을 찾는다. 그러면 그 사이는 물이 채워진다.
-- left wall 이상인 게 없다면 그중 가장 높은 wall을 찾는다. 그러면 그 사이가 물이 채워진다.
+- 각 left wall마다 오른쪽을 보면서 left wall 이상인 right wall을 찾는다. 그러면 물은 그 right wall을 넘지 못 하고 그 사이를 채운다.
+- left wall 이상인 게 없다면 오른쪽 중 가장 높은 wall을 찾는다. 그러면 그 사이가 물이 채워진다.
 - right wall을 찾으러 갈 때 각 right wall 후보와 left wall 사이에 얼만큼이 벽으로 채워져있는지 계산해놓는다.
 - 그러면 마지막에 `width x min(left wall, right wall) - occupied` 를 하면 된다.
 - 다음 iteration은 right wall이 left wall로 되는 상황부터 하면 된다.
@@ -164,6 +164,7 @@ https://leetcode.com/problems/trapping-rain-water/
 
 
 아이디어를 생각하기 어려웠다.    
+적분하듯이 쪼개서 각 위치에서의 물 양을 구한 뒤에 합하는 걸로 생각해보자.    
 현재 위치 i에서 물이 차려면 i 기준 왼쪽과 오른쪽 둘 다에 i보다 높은 bar가 있어야한다.    
 `cur_trapped_water = min(left_max, right_max) - cur_height`
 각 위치 i 기준으로 왼쪽에서 가장 높은 bar의 높이가 저장된 left_maxs와 오른쪽으로 한 결과인 right_maxs를 만든 뒤 답을 구한다.   
@@ -197,9 +198,13 @@ O(N) / O(N)
 </details>
 
 위의 방법은 두 번 iterate해야하는데 decreasing monotonic stack을 쓰면 한 번의 iterate로 가능하다.    
-decreasing monotonic stack를 만들다가 pop해야할 상황, 즉 현재 높이가 더 큰 상황이 발생하게 되고 pop 하고도 stack에 값이 남아있다면 pop하는 위치 기준으로 left bar와 right bar(current bar)가 존재한다는 의미이다.   
-또한 left bar와 right bar 사이에 popped bar보다 높은 건 없고 popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다.    
-따라서 left bar에서 right bar까지는 popped bar 높이로 평평하다고 가정할 수 있다.    
+- 오른쪽으로 iterate하면서 decreasing monotonic stack을 만든다. 그러면 stack에는 left wall 후보들이 남게 된다.
+- stack 만들다가 pop해야할 상황, 즉 현재 높이가 stack의 top보다 높다면 pop을 한다. 그 pop된 위치의 bar는 자기보다 높은 left wall과 right wall이 있는 것이다.
+- stack이 비게 된다면 left wall이 없으므로 무시한다.
+- stack에 값이 남아있다면 stack의 top 값이 left wall이 된다. right wall은 current bar이다.
+- left bar와 right bar 사이에 popped bar보다 높은 건 없으므로 popped bar 높이 윗부분인 `min(left bar, right bar) - popped bar * width` 만큼 물이 찰 수 있다.
+- popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다.    
+
 신박하다.
 
 <details>
@@ -237,7 +242,9 @@ decreasing monotonic stack를 만들다가 pop해야할 상황, 즉 현재 높�
 https://leetcode.com/problems/score-of-parentheses/
 
 문제: balanced parentheses string s가 주어졌을 때 점수를 구하라. () 형태로 붙어 있는 짝이 1점이다.
-A와 B를 각각 subpart의 점수라고 할 때 (A) 처럼 감싸고 있으면 A*2이고 AB처럼 연속되어 있으면 A+B이다.
+A와 B를 각각 subpart의 점수라고 할 때 (A) 처럼 감싸고 있으면 A*2이고 AB처럼 연속되어 있으면 A+B이다.   
+`"(())"` => 2점, `"()()"` => 2점
+
 
 
 stack을 사용해서 풀 수 있다.   
@@ -264,15 +271,14 @@ string을 iterate하면서 괄호 혹은 계산된 숫자를 stack에 넣는다.
                     # stack에는 연속된 숫자가 없음이 보장되므로 그 다음의 pop은 open일 것이다. 합쳐서 2배해서 넣는다.
                     stack.pop()
                     stack.append(left * 2)
-            # 각 iteration마다 stack의 top들에 연속된 숫자가 없도록 압축해준다.
-            while stack and stack[-1] != '(':
+            # 각 iteration마다 stack의 top들에 연속된 숫자가 없도록 압축해준다. 
+            if stack and stack[-1] != '(':
                 tmp = stack.pop()
                 if stack and stack[-1] != '(':
                     tmp += stack.pop()
                     stack.append(tmp)
                 else:
                     stack.append(tmp)
-                    break
         return stack[0]
 ```
 
@@ -283,6 +289,8 @@ stack의 다른 방법도 있다. 각 뎁스마다 값을 저장하는 것이다
 left parenthesis 나올 때마다 depth가 늘어나니까 stack에 추가하고 right parenthesis 나올 때마다 depth 하나 탈출한다.    
 depth 줄일 때마다 stack을 pop 한다. 
 이전 depth의 값에 추가해준다.   
+
+<details>
 
 ```python
 def solve(s: str) -> int:
@@ -300,6 +308,8 @@ def solve(s: str) -> int:
 
     return s2[-1]
 ```
+
+</details>
 
 마지막 방법은 power로 생각하는 것이다. 특정 depth에 있는 ()는 밖으로 나올 때마다 2가 곱해진다.   
 그러면 왼쪽부터 linear하게 탐색하면서 열릴 때마다 depth를 증가시킨다. 닫힐 때 depth를 확인해서 pow(2, depth)를 결과에 더해준다. 바로 붙어있는 괄호들에 대해서만 처리하면 되는 듯.
@@ -331,7 +341,7 @@ class MinStack:
 
     def __init__(self):
         self.min = math.inf
-        self.stack = []
+        self.stack = []  # list of (current value, min value before getting current value)
 
 
     def push(self, val: int) -> None:
@@ -341,7 +351,7 @@ class MinStack:
 
     def pop(self) -> None:
         val, prev_min = self.stack.pop()
-        self.min = max(prev_min, self.min)
+        self.min = max(prev_min, self.min)  # pop 된 값이 있기 전의 최솟값이 prev_min이다. 이 값이 현재의 min보다 크다면 이 popped value가 push될 때 min이 업데이트 된 거니까 pop할 때도 업데이트가 된다.
         
 
     def top(self) -> int:

@@ -176,6 +176,7 @@ https://leetcode.com/problems/longest-consecutive-sequence/description/
 
 문제: Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
  You must write an algorithm that runs in O(n) time.
+ `[100,4,200,1,3,2]` => 4
 
 
 Approach 1. set
@@ -183,8 +184,10 @@ Approach 1. set
 - 모든 값들을 set에 넣는다.
 - nums를 iterate하면서 현재 num에서 +1 씩 expand 하면서 nums set에 존재하는지 확인한다.
 - 존재한다면 cnt를 1씩 증가시키고 ans를 업데이트하면서 이동한다.
+- 어떤 값 num에 대해서 num-1이 set에 존재한다면 무시하고 continue한다.
 
-같은 O(N) 이라도 최적화 시키는 게 중요했다. 어떤 값 num에 대해서 num-1이 set에 존재한다면 무시해도 된다. 이렇게 하면 한번 expand 했던 리스트에 있던 값들은 다시 expand하지 않게 된다.   
+같은 O(N) 이라도 최적화 시키는 게 중요했다.     
+num-1이 있는 경우 num을 continue 하면 한번 expand 했던 리스트에 있던 값들은 다시 expand하지 않게 된다.   
 어떤 sequence의 시작점은 left value를 갖지 않는다는 특징이 있다. 따라서 num-1이 존재한다면 무시해도 되는 것이다.
 
 
@@ -254,43 +257,6 @@ Approach 2. Hash Map
 
 
 
-
-### 11. Container With Most Water
-
-https://leetcode.com/problems/container-with-most-water/description/
-
-문제: You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
-Find two lines that together with the x-axis form a container, such that the container contains the most water.
-Return the maximum amount of water a container can store.
-
-Greedy한 접근을 생각해본다.   
-너비와 높이가 중요하고, 하나를 포기하게 되면 다른 하나는 더 좋아져야한다.   
-너비를 가장 넓게 시작을 해본다. 그러면 left와 right를 양 끝으로 잡는다.    
-거기서 left와 right를 가운데로 움직이면 height는 무조건 높아져야한다.    
-left와 right 중 낮은 wall을 갖는 걸 옮겨야한다. 높은 wall을 갖는 걸 옮겨봤자 height = min(left, right)이기 때문에 이 값이 높아질 수가 없다.   
-
-
-<details>
-
-
-```py
-    def maxArea(self, height: List[int]) -> int:
-        left, right = 0, len(height) - 1
-        ans = 0
-        while left < right:
-            l_height, r_height = height[left], height[right]
-            cur = (right - left) * min(l_height, r_height)
-            ans = max(cur, ans)
-            if l_height > r_height:
-                right -= 1
-            else:
-                left += 1
-        
-        return ans
-```
-
-
-</details>
 
 
 

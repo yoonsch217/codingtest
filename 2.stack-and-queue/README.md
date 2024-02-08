@@ -24,7 +24,7 @@ FIFO
 queue의 대표적인 함수들: add(item), remove(), peek(), isEmpty()   
 
 마찬가지로 linked list로 구현할 수 있다.   
-stack과 다르게 멤버 변수로 first와 last를 둘 다 알고 있어야 한다.   
+stack과 다르게 멤버 변수로 first와 last 위치를 둘 다 알고 있어야 한다.   
 peek, remove는 first를 보고 add는 last 뒤에 추가한다.   
 stack은 top만 알고 있으면 된다.   
 
