@@ -4,11 +4,37 @@ https://leetcode.com/problems/koko-eating-bananas
 
 문제: piles 라는 리스트가 있고 각 원소는 바나나의 개수이다. 감시자가 h 시간동안 떠나있을 때, 시간당 k의 속도로 바나나를 먹는다. 한번에 하나의 pile만 먹을 수 있다. 전체 바나나를 다 먹기 위한 최소의 k를 구하라.
 
+<details>
+
 각 pile 먹는 속도는 math.ceil(pile/k) 이다. 따라서 총 걸리는 시간은 `sum of math.ceil(pile/k) for each pile in piles` 이 된다.    
 전체 바나나를 다 먹을 수 있는 속도라면 possible, 못 먹으면 impossible이라고 하자.   
 최대의 impossible k 보다 하나 크면 최소의 possible k가 되고, 그게 답이 된다.   
 따라서 binary search로 풀 수 있다.    
 left와 right를 정해야하는데 최소는 1이 되고 최대는 max(piles)가 된다.   
+
+x x x o o o 형태이고 left condition(왼쪽 파트, 즉 x로 인식되는 조건))은 `k가 작아서 총 걸리는 시간이 h보다 클 때` 이다.   
+while loop을 나왔을 때 답은 left가 된다.   
+
+
+```py
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        def get_total_hour(piles, k):
+            total_hour = 0
+            for pile in piles:
+                total_hour += ceil(pile / k)
+            return total_hour
+        
+        l, r = 1, max(piles)
+        while l <= r:
+            m = (l+r) // 2
+            if get_total_hour(piles, m) > h:
+                l = m + 1
+            else:
+                r = m - 1
+        return l
+```
+
+</details>
 
 
 
@@ -18,13 +44,16 @@ https://leetcode.com/problems/furthest-building-you-can-reach
 
 문제: heights, bricks, ladders 가 주어진다. 건물들을 왼쪽부터 이동하는데 높은 건물로 갈 때는 높이 차이만큼 brick을 쓰든가 ladder 하나를 써야한다. 가장 멀리 갈 수 있는 건물을 찾아라.
 
-Heap    
+
+<details>
+
+**Heap**    
 ladders 개수 L 을 크기로 갖는 힙을 생성하고 앞에서부터 높이 차를 넣으면서 힙을 채운다. 즉, 사다리로만 올라가되 그 높이차를 기록해놓는 것이다.   
 사다리를 다 썼을 땐 이제 벽돌을 써야한다. 벽돌 써야하는 상황 왔을 때, 현재 필요한 벽돌과 힙에 있는 최소의 높이차를 비교한다.     
 현재 필요한 벽돌 수가 더 적으면 벽돌 소진하면 되는 것이고, 힙에 있는 최솟값이 더 작으면 예전에 썼던 사다리를 지금 쓰고 예전 작업은 벽돌로 하면 된다.   
 이렇게 해서 벽돌 수가 음수가 되면 더이상 못 가는 것이다.   
 
-<details>
+
 
 ```py
 class Solution:
@@ -56,14 +85,58 @@ class Solution:
 
 ```
     
+
+
+**Binary Search**    
+
+특정 위치까지 갈 수 있나 없나는 판단할 수 있다. 그 구간의 height diffs를 받아서 정렬한 뒤 min부터 벽돌 사용하도록 하면 판단이 된다.    
+`0~threshold` 까지는 reachable 이고 `threshold+1 ~ end` 는 unreachable이다.    
+이 특성을 이용해서 binary search를 사용할 수 있다.    
+o o o x x x    => Get right pointer    
+
+
+```py
+    def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:
+        n = len(heights)
+        l, r = 0, n-1
+
+        def is_reachable(idx, bricks, ladders):
+            h_diffs = []
+            prev = 0
+            for cur in range(1, idx+1):
+                if heights[cur] > heights[prev]:
+                    h_diffs.append(heights[cur] - heights[prev])
+                prev = cur
+            h_diffs.sort()
+            for h_diff in h_diffs:
+                bricks -= h_diff
+                if bricks < 0:
+                    ladders -= 1
+                if ladders < 0:
+                    return False
+            return True
+
+        while l <= r:
+            m = (l + r) // 2
+            if is_reachable(m, bricks, ladders):
+                l = m + 1
+            else:
+                r = m - 1
+        
+        return r
+```
+
+매번 정렬을 하면 너무 cost가 크기 때문에 한번 정렬해서 height diff마다 position을 붙여놓는다. 그러고는 linear하게 iterate하면서 현재 찍은 기준 position보다 낮은 index를 가진 경우만 벽돌이나 사다리에서 차감한다. => 이건 다음에 구현해보자.   
+
+O(N logN)
+
+
 </details>
 
-Binary Search    
-특정 위치까지 갈 수 있나 없나는 판단할 수 있다. 그 구간의 height diffs를 받아서 정렬한 뒤 min부터 벽돌 사용하도록 하면 판단이 된다.    
-0 ~ threshold 까지는 reachable 이고 threshold+1 ~ end 는 unreachable이다.   
-이 특성을 이용해서 binary search를 사용할 수 있다.    
-다만 매번 정렬을 하면 너무 cost가 크기 때문에 한번 정렬해서 height diff마다 position을 붙여놓는다. 그러고는 linear하게 iterate하면서 현재 찍은 기준 position보다 낮은 index를 가진 경우만 벽돌이나 사다리에서 차감한다.
-NlogN
+
+
+
+
 
 
 ### 162. Find Peak Element
@@ -72,32 +145,23 @@ https://leetcode.com/problems/find-peak-element/
 
 문제: 서로 다른 값을 갖는 integer array가 주어졌을 때 peak의 위치를 반환하라. peak란 주변보다 strictly greater한 값을 가지는 곳을 말하며 `nums[-1] = nums[n] = -math.inf` 으로 간주한다. O(log n) 의 알고리즘을 구하라.
 
-left, right를 초기화하고 nums에 -math.inf 를 append한다. 이렇게 함으로써 `nums[-1] = nums[n] = -math.inf`를 자연스럽게 적용시킬 수 있다.
-mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. -1은 -inf이고 cur보다 cur-1이 더 크기 때문이다.
-0 ~ cur-2 중에 peak가 있든가 혹은 cur-1이 peak이어야한다.   
-오른쪽이 더 크면 right half에 어쨌든 peak가 있어야한다.
+<details>
+
+left, right를 초기화하고 nums에 -math.inf 를 append한다. 이렇게 함으로써 `nums[-1] = nums[n] = -math.inf`를 자연스럽게 적용시킬 수 있다.   
+mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. nums[-1]은 -inf이고 nums[cur] 보다 nums[cur-1] 이 더 크기 때문이다. 오른쪽에도 있을 수 있지만 왼쪽엔 보장이 된다.   
+오른쪽이 더 크면 right half에 peak가 있어야한다.   
 둘 다 아니면 현재가 peak이다.
 
-포인트는, `nums[cur-1] > nums[cur]` 라면 cur의 left에 peak가 있다는 게 보장된다는 것이다. 물론 오른쪽에도 있을 수 있지만 왼쪽엔 무조건 있잖아. 
-
-<details>
 
 ```py
     def findPeakElement(self, nums: List[int]) -> int:
         if len(nums) == 1:
             return 0
+        nums.append(-math.inf)
 
         l, r = 0, len(nums) - 1
         while l <= r:
             m = (l + r) // 2
-            if m == 0:
-                if nums[m] > nums[m+1]:
-                    return m
-                return m + 1
-            if m == len(nums) - 1:
-                if nums[m] > nums[m-1]:
-                    return m
-                return m-1
             
             if nums[m-1] > nums[m]:
                 r = m - 1
@@ -105,6 +169,11 @@ mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. -1�
                 l = m + 1
             else:
                 return m
+
+"""
+이건 딱 조건을 만족하는 포인트인 m을 찾는 문제이니까 o o o x x 이런 식으로 생각하지 않아도 된다. 
+m은 ans 지점을 거치게 되고 if ans: return m 로 답을 구하면 된다.
+"""
 ```
 
 </details>
@@ -117,6 +186,29 @@ mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. -1�
 https://leetcode.com/problems/find-k-closest-elements/
 
 문제: sorted integer array가 주어지고 k, x가 주어진다. x랑 가장 가까운 k개의 원소를 정렬된 순서로 반환하라. abs(y - x)가 동일하면 작은 y값이 더 가까운 걸로 간주한다. x가 arr에 존재하지 않을 수 있다.
+
+
+
+<details><summary>brute force O(N)</summary>
+
+```py
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        # 전체를 놓고 양 쪽을 비교하면서 not closer 한 곳을 줄인다.
+        l, r = 0, len(arr) - 1
+        while r - l > k - 1:
+            if x - arr[l] <= arr[r] - x:  # 두 개가 같으면 right를 버려야한다. 값이 더 작은 게 우선이기 때문이다.
+                r -= 1
+            else:
+                l += 1
+        
+        return arr[l: r+1]
+```
+
+</details>
+
+
+
+<details><summary>내 첫 approach</summary>
 
 너무 헤맸다.     
 헤맨 포인트:
@@ -134,7 +226,7 @@ https://leetcode.com/problems/find-k-closest-elements/
 - 그 index를 기준으로 한 칸 왼쪽을 l, 한 칸 오른쪽을 r로 둔다.
 - l과 r 중 더 가까운 쪽을 한 칸 더 옮긴다. 이 작업을 k번 반복한다.
 
-<details>
+
 
 ```python
 class Solution:
@@ -201,22 +293,21 @@ class Solution:
 
 </details>
 
-~근데 솔루션 보니까 `mid = bisect_left(arr, x)` 로 간단히 구해버렸다..~ 이걸로 하면 틀린다.
 
 
 
-Best 솔루션
+<details><summary>Best solution</summary>
+
 - answer subarray의 시작 지점을 찾는 것이다.   
-- 정답 array의 시작 지점의 left bound는 0이 될 것이고 right bound는 n-k가 될 것이다. n-k 부터 시작을 해서 끝(n-1)까지 다 해야 k개가 되기 때문이다.
+- 정답 array의 시작 지점으로 가능한 범위의 left bound는 0이고 right bound는 n-k이다. 
 - 이 left, right에 대해 mid를 구한 후 mid 값과 mid + k 값을 비교한다. 
-mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k 중 하나는 버려져야한다. k+1로 하는 이유는 최적화된 subarray가 더 오른쪽에 있는지 왼쪽에 있는지 알아야하기 때문이다.      
-- mid가 target에 더 가깝다면 mid+k 이후는 subarray에 포함될 수가 없으므로 버려야하고 subarray의 시작지점은 mid 이하가 된다. 안 그러면 mid를 버려야하는데 mid가 더 가깝기 때문에 버리면 안 되기 때문이다.   
-- right를 mid로 옮기고 다음 iteration을 진행한다.   
+- mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k 중 하나는 버려져야한다. k+1로 하는 이유는 최적화된 subarray가 더 오른쪽에 있는지 왼쪽에 있는지 알아야하기 때문이다.      
+- mid가 target에 더 가깝다면 `[mid+1, mid+k]` 은 답이 될 수 없고 그 이후의 subarray도 마찬가지이다. `[mid, mid+k-1]` 혹은 그 왼쪽의 subarray가 답이 될 수 있다.
+- subarray의 시작지점은 mid 이하가 된다. right를 mid로 옮기고 다음 iteration을 진행한다.   
 - 이걸 반복하다가 left == right 되는 순간이 답이다.
-- ?
 
 
-<details>
+
 
 ```py
     def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
@@ -228,29 +319,13 @@ mid ~ mid+k 의 subarray를 보면 크기가 k+1 이기 때문에 mid나 mid+k �
             else:
                 right = mid  # 아니라면 시작점은 0~mid 중 하나이다.
         return arr[left:left + k]
+
+"""
+condition: mid가 더 멀다 => mid+1 이후에 start point가 있다.
+not condition: mid+k가 더 멀다 => mid 이전에 start point가 있다. mid가 답인지는 아직 모른다. 따라서 right를 mid로 바꿔주고 다음 작업을 해야한다.
+"""
 ```
 
-</details>
-
-closest 에 대한 binary search 할 때는 `while left <= right: left = mid + 1 or right = mid - 1` 로 하는 게 복잡한 것 같다.   
-`while left < right: if A, left = mid + 1, else right = mid` 이런 식으로 하자. A는 0 ~ mid 가 답이 될 수 없는, 답에서 멀다는 조건이다. 
-
-
-
-<details><summary>brute force O(N)</summary>
-
-```py
-    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
-        # 전체를 놓고 양 쪽을 비교하면서 not closer 한 곳을 줄인다.
-        l, r = 0, len(arr) - 1
-        while r - l > k - 1:
-            if x - arr[l] <= arr[r] - x:  # 두 개가 같으면 right를 버려야한다. 값이 더 작은 게 우선이기 때문이다.
-                r -= 1
-            else:
-                l += 1
-        
-        return arr[l: r+1]
-```
 
 </details>
 

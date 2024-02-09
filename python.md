@@ -105,7 +105,7 @@ class MyClass:
         a = 1
 
         def func2():
-            # unlocal a 라고 먼저 선언하면 사용할 수 있다.
+            # nonlocal a 라고 먼저 선언하면 사용할 수 있다.
             a += 1
 
         # func2를 호출하지 않으면 exception이 발생하지 않는다.
@@ -135,3 +135,70 @@ mc = MyClass()
 mc.func1()
 ```
 
+func1의 parameter를 사용하려고 할 때
+
+```py
+class MyClass:
+    def func1(self, a):
+
+        def func2():
+            # UnboundLocalError: local variable 'a' referenced before assignment
+            a += 1
+            print(f"func2: {a}")
+
+        func2(a)
+        print(f"func1: {a}")
+
+mc = MyClass()
+mc.func1(10)
+```
+
+
+func1의 paramter를 func2 argument로 넘겨줄 때
+
+```py
+class MyClass:
+    def func1(self, a):
+
+        def func2(a):
+            a += 1
+            print(f"func2: {a}")
+
+        func2(a)
+        print(f"func1: {a}")
+
+mc = MyClass()
+mc.func1(10)
+
+"""
+$ python3 tmp.py
+func2: 11
+func1: 10
+"""
+```
+
+child function에서 수정된 건 반영되지 않는다.
+
+
+nonlocal을 사용하는 경우는 child function에서 바꾼 것도 반영된다. 같은 주소를 참조하나보다.
+
+```py
+class MyClass:
+    def func1(self, a):
+
+        def func2():
+            nonlocal a
+            a += 1
+            print(f"func2: {a}")
+
+        func2()
+        print(f"func1: {a}")
+
+mc = MyClass()
+mc.func1(10)
+
+"""
+func2: 11
+func1: 11
+"""
+```
