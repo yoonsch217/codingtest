@@ -17,8 +17,7 @@ collision이 많다면 worst case runtime은 O(N)이 될 수 있다. 하지만 �
 
 또, hash table을 balanced binary search tree로도 구현할 수 있다.   
 이렇게 구현하면 lookup time은 O(log N/k)이 된다.    
-k개의 key가 있고 각 key마다 linked list가 아닌 binary search tree를 놓는 것이다. bst에서의 lookup time은 height인 log N이다.   
-그럼 결국 linked list보다 더 빠른 거 아닌가?   
+k개의 key가 있고 각 key마다 linked list가 아닌 binary search tree를 놓는 것이다. bst에서의 lookup time은 height인 log N이다.     
 이렇게 할 때의 장점은 메모리를 적게 쓴다는 점과 key를 iterate하기 편하다는 점도 있다.   
 
 ### hash set / hash map
