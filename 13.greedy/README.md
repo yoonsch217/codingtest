@@ -17,4 +17,6 @@
 이럴 땐 dp를 쓰는 게 맞을 것이다. dp의 coin change 문제 참고.
 
 
+Graph의 Kruskal's algorithm, Prim's algorithm 등이 greedy를 사용한다.
+
 

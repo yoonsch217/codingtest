@@ -117,8 +117,6 @@ sorting을 해도 되고 heap을 써도 된다.
 greedy strategy를 사용한다.   
 visited set, unvisited set은 visited라는 boolean list를 사용해서 할 수도 있다.   
 
-Kruskal's algorithm은 edge를 추가하면서 mst를 확장하지만 Prim's algorithm은 vertex를 추가하면서 mst를 확장한다.
-
 - Time Complexity: O(E log V) for binary heap, O(E + V log V) for Fibonacci heap.   
 - Space Complexity: O(V)   
 
@@ -126,11 +124,11 @@ Kruskal's algorithm은 edge를 추가하면서 mst를 확장하지만 Prim's alg
 
 ## Single Source Shortest Path Algorithm
 
+하나의 source vertex를 두고 각 vertex까지 닿는 최소 path와 길이를 구하는 알고리즘이다.
+
 BFS와 같은 방법은 모든 edge의 weight 가 같을 때 사용된다.   
 하지만 weight가 edge마다 다르다면 사용할 수 없다.   
 edge relaxation란, 다른 vertex를 거치더라도 더 weight 합이 작은 길을 찾는 것이다.(relax = 최단거리 업데이트)    
-
-하나의 source vertex를 두고 각 vertex까지 닿는 최소 path와 길이를 구하는 게 single source shortest path algorithm이다.
 
 
 ### Dijkstra's Algorithm
@@ -157,7 +155,7 @@ Proof skip...
 멀리 돌아오는데 큰 negative weight가 있다면 돌아오는 게 weight가 더 작다.   
 이동할 때마다 그때의 distance가 최소임을 보장하고 해당 vertex는 visited set에 넣고 끝내버려야하는데 그렇게 못 한다.
 
-대표 예제: `743. Network Delay Time` https://leetcode.com/problems/network-delay-time ([내 정리](https://github.com/yoonsch217/codingtest/blob/main/graph/problems.md#743-network-delay-time))
+대표 예제: `743. Network Delay Time` https://leetcode.com/problems/network-delay-time
 
 
 - Time Complexity: O(E+VlogV) when a Fibonacci heap is used, O(V+ElogV) when a Binary heap is used.   
@@ -169,13 +167,12 @@ Proof skip...
 ### Bellman-Ford Algorithm
 
 모든 weighted directed graph에서 사용할 수 있다.   
-하지만 negative weight cycle이 있으면 답이 없다.(negative weight edge는 있어도 되지만 negative weight cycle은 있으면 안 된다.)
 
 Basic Theorem
+- negative-weight cycle(그 cycle을 한 번 돌 때의 weight 합이 음수인 경우) 있는 그래프에서는 shortest path가 없다.
 - negative-weight cycle이 없는 그래프에서 어떤 두 노드의 shortest path는 최대 N-1개의 edge를 갖는다.    
-- negative-weight cycle이라는 건 어떤 cycle이 있을 때 그 cycle을 한 번 돌 때의 weight 합이 음수인 경우이다.
 - 어떤 path가 N 이상의 edge를 갖는다는 건 cycle이 있다는 건데 positive cycle일테니 weight가 늘어날 것이다. 따라서 최대 N-1개의 edge를 갖는다.
-- negative-weight cycle이 있는 그래프에서는 shortest path가 없다.
+
 
 이런 문제는 Dynamic Programming 를 이용해서 풀 수 있다.
 - dp(k, u): 최대 k개의 edge를 이용해서 u로 갈 때의 최소 weight sum. k의 범위는 1부터 N-1 까지가 된다. 각 값의 초깃값은 inf이다. dp(0, source) = 0
@@ -190,7 +187,7 @@ dp matrix를 보면 모든 k에 대해 저장할 필요가 없다. 현재 k에 �
 
 이 iteration을 k번 한다면 source에서 k번 움직여서 갔을 때의 결과값이다.   
 => 작업에 k번의 제한이 있는 경우 Dijkstra 보다 Bellman-Ford가 편리하다. [787. Cheapest Flights Within K Stops
-](https://github.com/yoonsch217/codingtest/blob/main/graph/problems.md#787-cheapest-flights-within-k-stops)
+](https://leetcode.com/problems/cheapest-flights-within-k-stops/description/)
 
 Complexity
 - Time Complexity: worst, avg O(VE) 모든 vertex가 서로 연결되어 있는 경우. best O(E)

@@ -339,10 +339,30 @@ https://leetcode.com/problems/find-smallest-letter-greater-than-target/
 
 문제: 알파벳 소문자로 이루어진 리스트가 주어지고 target character가 주어진다. target char보다 큰 문자 중 가장 작은 문자를 반환하라. target char보다 큰 게 없으면 첫 번째 문자를 반환하라.
 
-`while left <= right` 로 binary search를 먼저 했다. target을 찾는 게 아니라 target보다 큰 최소를 찾는 거니까 `letters[mid] <= target` 이면 left를 옮기고 아니면 right를 옮기도록 했다.   
-while이 끝났을 때 left가 len 이상이면 못 찾고 끝난 거니까 letters[0]을 반환한다. 아니면 letters[left]를 반환한다. left가 condition을 만족하는 가장 작은 값이다.   
+<details>
 
-README에 정리했는데, 다 끝나면 left는 condition을 만족하지 않는 것 중 가장 왼쪽에 존재한다. condition을 만족할 때마다 l을 오른쪽으로 옮기기 때문이다.
+- o o o x x x
+- left condition: target char보다 작거나 같다
+- left 구한다. left가 index 밖이라면 첫 번째 문자를 반환한다.
+
+```py
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        l, r = 0, len(letters) - 1
+        while l <= r:
+            m = (l + r) // 2
+            if letters[m] <= target:
+                l = m + 1
+            else:
+                r = m - 1 
+        if l >= len(letters):
+            return letters[0]
+        return letters[l]
+```
+
+</details>
+
+
+
 
 
 
@@ -354,23 +374,23 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
 문제: sorted array with unique integer가 주어진다. 한 군데를 기준으로 rotate 되어 있는데 그 array의 최솟값을 구하라. `ex) [3, 4, 5, 1, 2] => return 1`
 
 
+<details>
+
 데이터를 먼저 이해하자. mid가 각 상황일 때 어떤 의미인지를 충분히 생각하고 깔끔하게 분류한 걸 글로 정리한 뒤에 코드를 생각해보자.
 
-start < end면 rotated가 안 된거니까 그거에 대한 처리를 먼저 한다. rotated 된 경우에 대해서는 index 0의 value를 기준으로 잡는다.   
-아래와 같이 우선 데이터를 이해한다.
+start < end면 rotated가 안 된거니까 그거에 대한 처리를 먼저 한다.    
+rotated 된 경우에 대해서는 index 0의 value를 기준으로 잡는다. 아래와 같이 우선 데이터를 이해한다.
 - `[index 1, rotated point-1]`: index 0의 값보다 큰 값이다.   
 - `[rotated point, last]`: index 0의 값보다 작은 값이다.    
 
 이해한 데이터를 바탕으로 아래 로직으로 찾는다. Using binary search
 - nums[l] < nums[r] 라면 sorting 된 상태이기 때문에 nums[l] 반환
-- mid가 nums[l]보다 작다면 mid 위치는 `[rotated point, last]` 범위의 값이다.   
-  - nums[mid-1]이 nums[0]보다 크거나 같으면 nums[mid-1]은 `[rotated point, last]` 범위가 아니란 뜻이고, 즉 m위치는 `[rotated point, last]` 의 제일 왼쪽이라는 뜻이다. => nums[mid]를 반환    
+- mid가 nums[l]보다 작다면 mid 위치는 `[rotated point, r]` 범위의 값이다.   
+  - mid보다 한 칸 낮은 nums[mid-1]이 nums[l]보다 크거나 같으면 mid-1은 `[rotated point, last]` 범위의 왼쪽이라는 뜻이다. 따라서 mid가 rotated point이다. => nums[mid]를 반환    
   - mid-1 이 out of index가 되려면 mid가 0이어야하는데 이런 상황은 발생하지 않는다. 이미 첫 번째 조건에서 반환되었을 것이기 때문이다.
   - 위 조건이 아니라면 mid는 `[rotated point, last]` 범위 중간에 있다는 것이고 mid 왼쪽에 rotated point가 있기 때문에 left half를 탐색한다. `right = m - 1`
-- 위 조건이 아니라면 left half를 탐색한다. `left = m + 1`   
+- 위 조건이 아니라면 right half를 탐색한다. `left = m + 1`   
 
-
-<details>
 
 ```py
     def findMin(self, nums: List[int]) -> int:
@@ -403,7 +423,9 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
 
 문제: 중복된 값이 있는 integer array가 ascending order로 정렬되어 있었는데 몇 번의 rotation이 일어난 상태이다. 이 array에서 최솟값을 구하라.
 
-(내 풀이) 중복된 값이 있음으로서 달라지는 부분이 있다.   
+<details><summary>내 풀이</summary> 
+
+중복된 값이 있음으로서 달라지는 부분이 있다.   
 로직은 다음과 같다.   
 - 기본 binary search 템플릿을 사용한다.
 - nums[left] < nums[right] 라면 그 subarray는 rotation이 없는 것이므로 nums[left] 를 반환한다.
@@ -415,21 +437,30 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
   - right가 left와 같을 때만 남았는데 이 때는 linear하게 탐색을 한다.
 
 
-(solution) 비슷한데 훨씬 간단하다. right랑 비교했는데 뭐가 달라지지? left 기준으로 해도 돌아가긴 한다.
+</details>
 
-right를 기준으로 한 데이터 분석
-- `[0 ~ rotation point-1]`: right 보다 크거나 같아야한다.
-- `[rotation point ~ rightend-1]`: right보다 작거나 같아야한다.
+
+
+<details><summary>solution</summary> 
+
+비슷한데 linear 탐색 대신 범위를 하나 좁혀서 다시 binary search를 시도한다.   
+데이터 분석을 다시 해보자.
+
+left를 기준으로 한 데이터 분석
+- `[left, rotation point-1]`: left 보다 크거나 같아야한다.
+- `[rotation point, rightend]`: left보다 작거나 같아야한다.
 
 풀이
-- mid가 right보다 작으면 left half를 본다. left에서 mid 사이에 rotation point가 있어야한다.
-- mid가 right보다 크면 right half를 본다.
-- 아니면 right를 하나 줄임으로써 범위를 좁힌다.
+- if nums[left] < nums[right]:
+   - return nums[left]
+- if nums[mid] < nums[left]:
+   - `[rotation point, rightend]` 범위에 mid가 있는 것이다. mid가 답인지 검증하고 아니라면 left half를 탐색해야한다.
+- if nums[mid] > nums[left]:
+   - right half를 탐색한다.
+- if nums[mid] == nums[left]:
+   - left를 하나 올려서 다시 탐색한다.
 
 
-left 기준으로 보완한 내 풀이
-
-<details>
 
 ```py
 def findMin(self, nums: List[int]) -> int:
@@ -465,12 +496,11 @@ https://leetcode.com/problems/search-a-2d-matrix-ii/
 
 문제: 각 row와 column은 ascending order로 sort 되어 있다. target 이 해당 matrix 안에 있는지 판별하는 알고리즘을 구현하라.
 
+<details>
+
 - 어떤 위치에서 target보다 크다면, 해당 위치 기준 righter, lower elements는 다 무시할 수 있다. 이 때는 왼쪽으로 한 칸 이동해야한다.
 - 어떤 위치에서 target보다 작다면, 해당 위치 기준 lefter, upper elements는 다 무시할 수 있다. 이 때는 아래로 한 칸 이동해야한다.
-
-Time: O(M + N) / Space: O(1)
-
-<details>
+- binary search로 target을 찾으면 return True, 못 찾고 loop를 나오면 return False
 
 ```python
 def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
@@ -490,6 +520,8 @@ def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
     
     return False
 ```
+
+Time: O(M + N) / Space: O(1)
 
 </details>
 
