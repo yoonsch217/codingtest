@@ -62,6 +62,8 @@ shortest path를 찾으려면 path를 리스트 복사해가면서 저장해야�
 
 <img src="image.png" alt="Alt text" width="200"/>
 
+
+
 ### Bidirectional search
 
 src에서 dest까지의 최단 경로를 찾는 방법이다..   
@@ -166,6 +168,7 @@ Proof skip...
 
 ### Bellman-Ford Algorithm
 
+Bellman-Ford 알고리즘은 기본적으로 dp인데 최적화를 시킨 알고리즘이다.   
 모든 weighted directed graph에서 사용할 수 있다.   
 
 Basic Theorem
@@ -175,14 +178,12 @@ Basic Theorem
 
 
 이런 문제는 Dynamic Programming 를 이용해서 풀 수 있다.
-- dp(k, u): 최대 k개의 edge를 이용해서 u로 갈 때의 최소 weight sum. k의 범위는 1부터 N-1 까지가 된다. 각 값의 초깃값은 inf이다. dp(0, source) = 0
-- directed graph에 대한 adjacent matrix를 만든다.
-- k가 0일 때는 source vertex 빼고 다 inf의 값을 그대로 갖는다. 그 이후 k를 1부터 N-1까지 차례로 늘리며 작업을 한다.
-- u를 향하는 edge가 있는 vertex들을 찾은 후 각 v에 대해 `k-1 개의 edge를 사용해서 v로 가는 최소 weight sum + v에서 u로 가는 weight` 들의 최솟값을 구하여 저장한다.
-  - `dp[k][u] = min(dp[k-1][v] + w(v, u) for v in [vertices that go directly to vertex u])`
+- `dp[k][u]`: 최대 k개의 edge를 이용해서 u로 갈 때의 최소 weight sum. k <= N-1
+- 초깃값은 inf, dp[0][source] = 0
+- `dp[k][u] = min(dp[k-1][v] + w(v, u) for v in [vertices that go directly to vertex u])`
+- k를 1부터 늘려가면서 bottom up으로 값을 만들어간다.
 - k가 N-1일 때의 값들이 최종 결과이다.
 
-Bellman-Ford 알고리즘은 기본적으로 dp인데 최적화를 시킨 알고리즘이다.   
 dp matrix를 보면 모든 k에 대해 저장할 필요가 없다. 현재 k에 대한 row와 이전 k-1에 대한 row만 있으면 된다.   
 
 이 iteration을 k번 한다면 source에서 k번 움직여서 갔을 때의 결과값이다.   
@@ -190,7 +191,8 @@ dp matrix를 보면 모든 k에 대해 저장할 필요가 없다. 현재 k에 �
 ](https://leetcode.com/problems/cheapest-flights-within-k-stops/description/)
 
 Complexity
-- Time Complexity: worst, avg O(VE) 모든 vertex가 서로 연결되어 있는 경우. best O(E)
+- Time Complexity: worst, avg O(VE), best O(E)
+  - worst: 모든 vertex가 서로 연결되어 있는 경우
   - dp의 모든 값을 만들긴 해야하지 않나? 그러면 총 dp matrix는 V x V가 될 거다. k는 1부터 N이고 u는 각 vertex니까 1부터 N이다. 각 iteration은 E. VxVxE?
 - Space Complexity: O(V^2) V*V matrix를 저장해야한다.
 
@@ -200,6 +202,8 @@ res list를 inf로 초기화한 후, 한 번 작업할 때 모든 edge에 대해
 이 작업은 최대 N-1 반복하는데 그 전에 값이 안 변할 수 있다. 그러면 그 이후에도 값이 안 변할테니 멈추면 된다.
 
 한계: edge의 iterate하는 순서가 영향을 미친다. edge 리스트가 잘못된 순서로 있으면 edges iteration마다 업데이트 되는 횟수가 적다. edge 리스트가 잘 돼있으면 edges iteration마다 업데이트가 자주 될 수 있다.
+
+
 
 ### SPFA Algorithm(The Shortest Path Faster Algorithm)
 
@@ -226,18 +230,16 @@ Complexity
 Directed Acyclic Graph에서 vertex 사이에 순서가 있을 때 linear sorting을 제공한다.    
 Prerequisite가 있는 course를 듣는 순서를 정하는 상황이 하나의 예이다. cycle이 있으면 불가능하다.
 
-in-degree 라는 값이 있다. 해당 vertex에 대해 required vertex가 몇 개가 남았는지를 나타낸다. required vertex 중 하나가 처리되면 in-degree 값은 1 감소한다. 맨 처음 시작할 때는 in-degree 값이 0인 vertex를 찾아서 시작한다.    
+in-degree 라는 dict가 있다. 해당 vertex에 대해 required vertex가 몇 개가 남았는지를 나타낸다. required vertex 중 하나가 처리되면 해당 vertex의 in-degree 값은 1 감소한다. 맨 처음 시작할 때는 in-degree 값이 0인 vertex를 찾아서 시작한다.    
 
-- Time: O(V+E)
-- Space: O(V+E)
-
-adjacency list를 만들어서 `adj_list[course]` 가 course에 dependent한 course를 저장한다면 O(V+E) time과 O(V+E) space가 필요하다.    
-처음 adj list 만들 때 O(E) 시간이 필요하고 그 이후에는 vertex 방문할 때마다 연결된 edge만 찾아서 in-degree를 줄여주면 된다. 연결된 edge만 방문하기 때문에 전체 작업을 수행하면 edge는 한 번씩만 방문된다.    
-space의 경우는 adj list 만드는 데 O(E) 공간이 필요하고 in-degree 값 저장하는 데 O(V) 공간이 필요하다.
+- Time: O(V+E)    
+adj list 만드는 데 O(E), 각 vertex에서 나오는 edge 탐색하는 데 O(V+E)
+- Space: O(V+E)    
+adj list 만드는 데 O(E), in-degree 값 저장하는 데 O(V)
 
 DAG 에서만 가능하다. in-degree가 0인 vertex가 하나는 있어야 가능하다. 
 
-[예시](https://github.com/yoonsch217/codingtest/blob/main/graph/problems.md#210-course-schedule-ii)
+[210. Course Schedule II](https://leetcode.com/problems/course-schedule-ii/)
 
 
 
@@ -245,11 +247,15 @@ DAG 에서만 가능하다. in-degree가 0인 vertex가 하나는 있어야 가�
 ## cycle 있는지 확인하는 방법
 
 vertex를 white, gray, black으로 색칠하는 방법이 있다.   
-처음에는 모든 vertex가 white이다.    
-작업이 시작되었지만 모든 descendants가 처리되진 않았다면 gray이다. 이동하다가 gray vertex를 만나게 되면 cycle이 있다는 것이다.   
-모든 descendant가 처리되면 black이 된다. black 처리가 되면 이후 traverse에서 black vertex로 가더라도 cycle이 만들어지지 않는다. 이미 다른 traverse가 시작된 것이기 때문이다.   
 
-DFS로 해야할 듯. BFS로 하면 cycle이 없어도 traverse 중 gray to gray 이동이 있을 것 같다.
+- white: 초기 상태
+- gray: 해당 vertex를 방문했지만 그 vertex의 모든 descendants가 방문되지 않은 상태
+- black: 해당 vertex의 모든 descendants가 방문된 상태
+
+탐색하다가 gray vertex를 만나면 cycle이 있는 것이다.    
+black vertex는 괜찮다. 해당 black vertex에서 이전 vertex로 갈 수 있는 경로는 없기 때문이다.   
+
+DFS로 해서 처음에 gray로 바꾸고, recursive하게 descendant 탐색한 뒤에 다 끝나면 black으로 바꾸고 return하면 될 것 같다.
 
 
 
@@ -264,3 +270,14 @@ Shortest Path를 찾을 때
 - unweighted graph => BFS
 - weighted graph with positive weights => Dijkstra
 - weighted graph with negative weights => Bellman-Ford, SPFA
+
+prerequisite가 있는 노드들의 order to take를 구할 때 => Kahn
+
+
+탐색하는 문제를 풀 때 further traversal을 하지 않아도 될 상황을 최대한 정교하게 생각하자.   
+예시: (787. Cheapest Flights Within K Stops)[https://leetcode.com/problems/cheapest-flights-within-k-stops/]의 simple Dijkstra's alrogithm
+
+BFS에서 visited_set과 같은 상태를 deepcopy 해서 넘기는 건 웬만하면 틀렸다고 생각하자.
+
+DFS할 때 cycle이 답이 될 수 없는 문제라면 white, gray, black coloring를 통해 더 빠르게 탐색할 수가 있다. O(V)
+
