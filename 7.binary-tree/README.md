@@ -29,8 +29,7 @@ complete이면서 full인 binary tree이다. 모든 leaf 노드들이 같은 lev
 왼쪽 자식 노드들은 자기보다 다 작거나 같고, 오른쪽 자식 노드들은 다 자기보다 높다.   
 in-order traverse를 하면 정렬된 순서로 방문한다.   
 balanced 상태면 검색에 O(log N)이 걸리고 unbalanced면 최대 O(N)걸린다.    
-~balanced라는 조건이 없으면 root가 median이라는 보장이 없다.~   
-balanced라도 root가 중앙값은 아니지. root기준 왼섭트랑 오섭트 개수가 2 이상 차이날 수 있으니까.
+balanced라도 root가 중앙값이란 보장은 없다. root기준 left subtree 노드 개수와 right subtree 노드 개수가 동일해야 median이다.
 
 - insert
   - leaf에 넣는다. root부터 시작해서 자기 위치를 찾아 내려온 뒤 leaf 노드에서 알맞은 child leaf로 생성한다.
@@ -58,12 +57,12 @@ recursion을 이용할 수도 있다. preorder traverse하면서 level을 저장
 result list의 길이가 현재의 level보다 크지 않다면 빈 list를 append함으로써 현재 level에 맞는 공간을 만들어준다.
 
 
-recursive한 거는 iterative하게 구현할 수 있다. recursion도 call stack을 사용한다.
-
-
 
 iterative한 in-order 탐색
 ```python
+# 왼쪽으로 내려오면서 stack에 넣는다. 그러면 그 stack에는 제일 작은 게 top에 있게 된다.
+# stack에 있는 거 하나 pop해서 처리하고 그 right child로 이동한다. 그 다음 작은 건 그 값의 right child이기 때문이다.
+# right child에 대해 동일하게 해준다. right child가 없으면 다시 stack에서 pop한다.
 while stack or root:
   while root:
     stack.append(root)
@@ -80,10 +79,8 @@ while stack:
     curr_node = stack.pop()
     if curr_node:
         # operation
-        stack.append(curr_node.right)
+        stack.append(curr_node.right) # 먼저 넣는 게 나중에 처리된다.
         stack.append(curr_node.left)
-
-return answer
 ```
 
 이 traversal은 O(n) time / O(h) space 가 필요하다.   
@@ -100,7 +97,7 @@ def inorder(root: Optional[TreeNode]) -> List:
     return inorder(root.left) + [root.val] + inorder(root.right) if root else []
 ```
 
-다음 값 찾기: right가 없으면? None이 나오는 거지.
+successor(다음 값) 찾기: right가 없으면? None이 나오는 거지.
 
 ```python
 def successor(root: TreeNode) -> TreeNode:
@@ -110,7 +107,7 @@ def successor(root: TreeNode) -> TreeNode:
     return root
 ```
 
-이전 값 찾기
+predecessor(이전 값) 찾기
 
 ```python
 def predecessor(root: TreeNode) -> TreeNode:
