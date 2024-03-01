@@ -98,6 +98,7 @@ mutable은 reference를 확인한다. 값이 같아도 주소가 같아야한다
 ### Variable Scope
 
 함수 안에 또 함수를 정의했을 때,
+nonlocal 선언을 먼저 하고 사용하면 outer scope의 변수에 접근 및 수정이 가능하다.
 
 ```py
 class MyClass:

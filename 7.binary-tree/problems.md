@@ -5,21 +5,25 @@ https://leetcode.com/problems/unique-binary-search-trees-ii
 
 문제: integer n이 주어진다. 1부터 n까지 n개의 노드를 갖고 만들 수 있는 unique BST 리스트를 순서 상관 없이 반환하라.
 
+<details><summary>Approach 1</summary>
+
 - root는 1부터 n까지 될 수 있다.
 - k가 root가 되었을 때, left subtree는 1부터 k-1까지로 만들 수 있는 bst가 될 것이다.
 - helper(start, end)를 start부터 end를 통해 만들 수 있는 bst 리스트라고 하자.
 - 각 root k마다, helper(1, k-1) 중 하나가 left subtree가 되고 helper(k+1, n) 중 하나가 right subtree가 된다. 이걸 각각 엮으면 된다.
 
-내 첫 번째 solution. 근데 helper(1,3) 이나 helper(2,4)나 동일한 답이고 value만 다른 건데 이 부분 최적화를 못 했다.    
+내 solution. 근데 helper(1,3) 이나 helper(2,4)나 동일한 답이고 value만 다른 건데 이 부분 최적화를 못 했다.    
+length에 대해서 리스트 반환하는 함수를 만들고 그 함수 결과에 대해서 base만큼만 더해주면 더 빠를 것 같다.
 
-
-<details>
 
 ```python
+# class TreeNode:
+#     def __init__(self, val:int =0, left: TreeNode =None, right:TreeNode=None):
+
 def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
     @lru_cache(maxsize=None)
     def helper(start_idx: int, end_idx: int) -> List[TreeNode]:
-        # Gets all the bsts that can be created from the nodes from start_idx to end_idx
+        # Get all the bsts that can be created from the nodes from start_idx to end_idx
         if end_idx < start_idx:
             return [None]
         if start_idx == end_idx:
@@ -39,33 +43,53 @@ def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
 </details>
 
 
+
+
+
+
+
 ### 366. Find Leaves of Binary Tree
 
 https://leetcode.com/problems/find-leaves-of-binary-tree/
 
-문제: binary tree가 주어졌을 때, leaf 노드 리스트를 구하고, 그 leaf 노드를 없앤 tree의 leaft 노드 리스트를 구하면서 tree가 사라질 때까지의 leaf 노드 리스트를 순서대로 리스트에 넣은 2d array를 반환하라.
+문제: binary tree가 주어졌을 때, leaf 노드 리스트를 구하고, 그 leaf 노드를 없앤 tree의 leaf 노드 리스트를 구하면서 tree가 사라질 때까지의 leaf 노드 리스트를 순서대로 리스트에 넣은 2d array를 반환하라.
 
+<details><summary>Approach</summary>
 
-기본적으로 `height(root)=1+max(height(root.left), height(root.right))` 를 생각한다.   
+기본적으로 트리에는 height 0부터 max까지 있고 각각의 height에는 빈 리스트가 아님이 보장된다.    
+traverse하면서 자기 height를 구하고 자기 위치에 맞는 곳에 들어간다.
+
+`height(root)=1+max(height(root.left), height(root.right))` 를 생각한다.   
 그러려면 어떤 함수의 f(leftchild)와 f(rightchild) 값이 구해진 상태여야 현재 height를 구할 수 있기 때문에 left와 right 후에 자기 노드를 처리하는 post order를 사용한다.    
 getHeight이라는 함수를 만드는데 이 함수는 post-order DFS를 하면서 leaf로부터의 height를 구한다.    
 height를 구하면 `res[height].append(node.val)`을 해줌으로써 알맞은 위치에 답을 넣어주고 `return height`를 한다.    
+
 O(N) / O(N)
 
+</details>
 
 
 
-### 2096. Step-By-Step Directions From a Binary Tree Node to Another
+
+
+
+
+### 2096. Step-By-Step Directions from a Binary Tree Node to Another
 
 https://leetcode.com/problems/step-by-step-directions-from-a-binary-tree-node-to-another/
 
-문제: binary tree가 주어지고 각 node는 고유한 값을 갖는다. start_value와 dest_value가 있을 때 start_value를 갖는 노드에서 dest_value를 갖는 노드로 가는 최단 경로를 찾아라. 위로 가야한다면 U, 왼쪽 아래로 가야한다면 L, 오른쪽 아래로 가야한다면 R을 넣는다.
+문제: 각 노드는 고유한 값을 갖는 binary tree의 root와 dest_value, start_value가 주어진다. 
+start_value를 갖는 노드에서 dest_value를 갖는 노드로 가는 최단 경로를 찾아라. 
+위로 가야한다면 U, 왼쪽 아래로 가야한다면 L, 오른쪽 아래로 가야한다면 R을 넣는다.
 
+
+
+<details><summary>Approach 1</summary>
 
 내가 처음 풀은 solution. 시간이 느리게 측정된다. 각 node까지의 path를 구한 다음에 그 두 path를 비교해서 겹치는 건 없앴다. 그 다음 남은 걸로 답을 만들었다.   
 복잡도는 O(N) / O(N) 인 것 같은데. 전체 트리 한 번 훑으면서 path 찾고, 그 path 한 번 더 작업하고.   
 
-<details>
+
 
 ```python
 class Solution:
@@ -105,17 +129,21 @@ class Solution:
         
 ```
 
-</details>
+
+
+
+
 
 솔루션도 비슷한 거 같은데 각각의 path 구할 때 root 기준의 L, R을 애초에 넣었다. 객체를 직접 다루고 가져가기보다는 필요한 결과만 다루도록 하자. 메모리도 많이 차지하고 비효율적이다.   
 그리고 deque 쓸 필요도 없었다. 어차피 한 쪽으로만 넣고 한 쪽으로만 빼니까 list로 간단히 할 수 있었다.
 
-<details>
+
 
 ```py
 class Solution:
     def getDirections(self, root: Optional[TreeNode], startValue: int, destValue: int) -> str:
         def find(n: TreeNode, val: int, path: List[str]) -> bool:
+            # find 함수 깔끔하다.
             if n.val == val:
                 return True
             if n.left and find(n.left, val, path):
@@ -123,6 +151,7 @@ class Solution:
             elif n.right and find(n.right, val, path):
                 path += "R"
             return path
+
         s, d = [], []
         find(root, startValue, s)
         find(root, destValue, d)
@@ -135,27 +164,51 @@ class Solution:
 </details>
 
 
+
+
+
+
+
+
 ### 101. Symmetric Tree
 
 https://leetcode.com/problems/symmetric-tree/description/
 
 문제: binary tree의 root가 주어졌을 때 그 binary tree가 symmetric한지 구하라. 세로선을 기준으로 접었을 때 동일하게 겹쳐야 symmetric한 것이다.
 
+
+<details><summary>Approach 1</summary>
+
 level traversal 하는 방법으로 풀 수 있다.   
 각 level의 list가 symmetric하면 다음 level로 넘어간다. symmetric하지 않으면 False return해야한다.   
-이 때 주의할 점이 몇 가지 있다. 어떤 node의 child가 None이라도 next list에는 추가해줘야한다. 그래야 자리까지 정확히 symmetric한지 알 수 있다.   
+
+이 때 어떤 node의 child가 None이라도 next list에는 추가해줘야한다. 그래야 자리까지 정확히 symmetric한지 알 수 있다.   
 그 next list를 갖고 다음 iteration을 할 때는 None인 node는 무시해도 된다. 이미 이전까지의 자리를 확인했기 때문에 유효한 node에 대해서만 추가로 진행하면 된다.   
+
+각 노드는 한 번씩만 방문하고, symmetric한지 체크하는 것도 각 리스트의 길이만큼만 필요하니까 O(2N) 이다.
+O(N) / O(N)
 
 또 다른 내 풀이로는, preorder traverse 하면서 list를 만든 뒤에 리스트를 비교했다.    
 child node로 갈 때 left 먼저 갈지 right 먼저 갈지의 순서만 바꿨다. None도 넣어줘야한다.    
 이것도 O(N) / O(N)의 복잡도이다.
 
-역시 solution이 더 깔금하다...   
-큐를 두고 처음에는 `[root, root]`를 넣는다. 처음 root는 왼쪽 subtree에 대한 root, 두 번째 root는 right subtree에 대한 root이다.   
-그러고 두 개씩 pop을 하면서 left와 right를 동시에 비교한다. left subtree에 있는 노드에 대해서는 left, right 순서로 큐에 넣고, right subtree에 있는 노드는 반대 순서로 넣는다.   
-두 개씩 빼면 한상 첫 번째 값은 left subtree, 두 번째 값은 right subtree 에서 온 게 보장이 되는구나.
 
-<details>
+</details>
+
+
+
+<details><summary>Approach 2</summary>
+
+역시 solution이 더 깔금하다...   
+큐를 하나 두고 처음에는 `[left_root, right_root]`를 넣는다. left_root는 왼쪽 subtree에 대한 root, right_root는 right subtree에 대한 root이다.   
+그러고 두 개씩 pop을 하면서 left와 right를 동시에 비교한다.  
+두 개씩 빼면 한상 첫 번째 값은 left subtree, 두 번째 값은 right subtree 에서 온 게 보장이 된다.    
+동일하다면 popped 노드에 대해 child node를 큐에 넣어줘야한다.   
+left subtree에 있는 노드에 대해서는 left, right 순서로 큐에 넣고, right subtree에 있는 노드는 반대 순서로 넣는다.   
+
+이것도 전체 노드를 한 번씩 방문해야하고, 큐의 크기도 N이다. 그래도 전체 traverse할 필요가 없고, 각 level마다 가 아니라 각 node마다 검증하는 거니까 더 빨리 validate가 될 것 같다.    
+O(N) / O(N) 
+
 
 ```python
 def isSymmetric(self, root: Optional[TreeNode]) -> bool:
@@ -176,12 +229,12 @@ def isSymmetric(self, root: Optional[TreeNode]) -> bool:
     return True
 ```
 
-</details>
+
 
 
 비슷한 방식으로 recursive 하게도 할 수 있다. 
 
-<details>
+
 
 ```python
 def isSymmetric(self, root: Optional[TreeNode]) -> bool:

@@ -239,7 +239,7 @@ recursive function `top_down(node, params)`은 다음과 같다. 예시로 binar
 4. right_ans = top_down(node.right, right_params) 로 right subtree에 대한 답을 구한다.
 5. 필요 시 return ans (recursion이 끝나면 `return ans`)
 
-
+child로 내려갈 때 ans 변수를 넘겨주고, 해당 child에서는 업데이트된 ans를 반환할 것 같다.
 
 ### Bottom-up
 
@@ -254,6 +254,6 @@ postorder traversal과 유사하다.
 3. right_ans = bottom_up(node.right)
 4. return answer (`return max(left_depth, right_depth) + 1`)
 
-
+top-down과 다르게 ans 변수를 넘겨주지 않아도 된다. leaf에서 만든 데이터를 올려보내면서 답을 업데이트한다.
 
 
