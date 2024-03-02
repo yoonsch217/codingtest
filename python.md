@@ -32,6 +32,9 @@ https://www.geeksforgeeks.org/heapq-with-custom-predicate-in-python/
 
 
 
+
+
+
 ### bisect
 
 `from bisect import bisect_left, bisect_right`
@@ -40,6 +43,12 @@ https://www.geeksforgeeks.org/heapq-with-custom-predicate-in-python/
 - bisect_right(list, data): 리스트에 데이터를 삽입할 가장 오른쪽 인덱스를 찾는 함수
 
 리스트 nums가 `[1 2 3 3 4 5]` 로 주어졌을 때, bisect_left(nums, 3)은 3을 넣을 수 있는 가장 왼쪽 index이므로 2가 되고 bisect_right(nums, 3)은 4가 된다.
+
+
+
+
+
+
 
 ### dict
 
@@ -73,6 +82,17 @@ sorted_dict = {k: disordered[k] for k in sorted(disordered)}
 이렇게 key 로만 하는 게 더 빠르다.
 
 
+
+
+
+### reference
+
+- `a = b` 를 하면 a라는 변수가 바라보는 reference가 b가 바라보는 곳과 동일해진다.
+- `a = my_list`한 뒤에 `a[1] = 10` 와 같이 사용하면 a가 바라보는 곳과 my_list가 바라보는 곳이 같은 상태로 수정하니까 my_list도 영향을 준다.
+- `a = my_list` `a = None` 이런 식으로 해버리면 a가 바라보는 reference 자체가 바뀌므로 my_list는 영향 없다.
+
+
+
 ### copy
 
 shallow copy: 실제로는 연결이 되어 있다. 메모리 주소만 복사한 것이고 같은 객체를 바라본다.    
@@ -88,10 +108,21 @@ immutable 객체의 경우는 shallow copy를 하든 deep copy를 하든 상관�
 
 
 
+
+
+
+
+
 ### compare
 
 `==` 로 비교할 때, immutable은 값이 같은지를 확인한다.   
 mutable은 reference를 확인한다. 값이 같아도 주소가 같아야한다.   
+
+
+
+
+
+
 
 
 

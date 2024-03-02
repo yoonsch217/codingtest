@@ -200,6 +200,7 @@ child node로 갈 때 left 먼저 갈지 right 먼저 갈지의 순서만 바꿨
 <details><summary>Approach 2</summary>
 
 역시 solution이 더 깔금하다...   
+
 큐를 하나 두고 처음에는 `[left_root, right_root]`를 넣는다. left_root는 왼쪽 subtree에 대한 root, right_root는 right subtree에 대한 root이다.   
 그러고 두 개씩 pop을 하면서 left와 right를 동시에 비교한다.  
 두 개씩 빼면 한상 첫 번째 값은 left subtree, 두 번째 값은 right subtree 에서 온 게 보장이 된다.    
@@ -252,11 +253,18 @@ def isSymmetric(self, root: Optional[TreeNode]) -> bool:
 
 
 
+
+
+
+
 ### 173. Binary Search Tree Iterator
 
 https://leetcode.com/problems/binary-search-tree-iterator
 
-문제: BSTIterator 라는 class는 binary search tree 를 받아서 construct 되는데 next 라는 함수와 hasNext 라는 함수를 갖는다. next는 호출될 때마다 가장 작은 수부터 차례대로 반환되고 hasNext는 다음 next가 존재하는지를 나타내는 boolean이다. next가 호출될 때는 항상 hasNext가 true인 상황이라고 가정을 한다. next 함수와 hasNext 함수를 구현하라.
+문제: BSTIterator 라는 class는 binary search tree 의 root를 받아서 construct 된다. BSTIterator 내부에 next 라는 함수와 hasNext 라는 함수를 갖는다. 
+next는 호출될 때마다 가장 작은 수부터 차례대로 반환되고 hasNext는 다음 next가 존재하는지를 나타내는 boolean이다. next가 호출될 때는 항상 hasNext가 true인 상황이라고 가정을 한다. next 함수와 hasNext 함수를 구현하라.
+
+<details><summary>Approach 1</summary>
 
 나는 처음에 그냥 bst flatten을 해서 리스트를 만든 뒤에 앞에서부터 pointer를 옮겼다.    
 이렇게 해도 되지만 solution은 stack을 사용했다.
@@ -266,13 +274,12 @@ https://leetcode.com/problems/binary-search-tree-iterator
 - left child만 추가했었으므로 pop된 min의 right subtree는 고려가 안 됐다. min이 right subtree를 갖는다면 min의 parent보다 작은 값이 거기 있다.
 - 따라서 pop된 min의 right subtree가 있는지 확인하고 있다면 그것도 동일하게 left child nodes들을 stack에 추가를 한다.
 
-이것도 결국 in-order traversal과 동일하게 동작을 하는데 stack을 사용하는 방법이네. memory를 height 만큼까지 쓰니까 조금 더 효율적이긴 할 것 같다.
+이것도 결국 in-order traversal과 동일하게 동작을 하는데 stack을 사용하는 방법이네. 대신 memory를 height 만큼까지 쓰니까 조금 더 효율적이다.
 
-<details>
+
 
 ```python
 class BSTIterator:
-
     def __init__(self, root: TreeNode):
         self.stack = []
         self._leftmost_inorder(root)
@@ -292,12 +299,16 @@ class BSTIterator:
         return len(self.stack) > 0
 ```
 
+next: O(1) / O(h)
+
+hasNext는 O(1)의 시간을 가질 것이다.   
+next는 기본적으로 right subtree를 iterate하는 것이므로 O(N)의 시간이 필요하지만 amortized O(1)으로 볼 수 있다.    
+space는 O(h)이 필요하다. 처음에 h만큼 넣고, _h만큼 올라갔다면, 그 right subtree에서 넣을 수 있는 데이터 양은 올라간 만큼인 _h이므로 계속 h 이하로 유지가 된다.
+
 </details>
 
 
-hasNext는 O(1)의 시간을 가질 것이다.   
-next는 기본적으로 right subtree를 iterate하는 것이므로 O(N)의 시간이 필요하지만 amortized O(1)으로 볼 수 있다.   
-space는 O(N)이 필요하다.
+
 
 
 
@@ -305,16 +316,19 @@ space는 O(N)이 필요하다.
 
 ### 250. Count Univalue Subtrees
 
+https://leetcode.com/problems/count-univalue-subtrees
+
 문제: root node가 주어졌을 때 uni value subtree의 수를 구하라. uni value subtree란 모든 노드의 값이 동일한 subtree를 말한다.
 
+<details><summary>Approach 1</summary>
 
-leaf node부터 확인을 한다. leaf node는 자기 자신 밖에 없으므로 항상 uni value subtree이다.   
-그리고 어떤 node가 uni value subtree가 아니라면 그 모든 parent들도 uni value subtree가 아니다.   
-어떤 node가 uni value subtree이려면 node.left와 node.right 모두 uni value subtree 이어야하고 node.val, node.left.val, node.right.val 이 모두 같아야한다.   
+leaf node부터 확인을 한다. 근데 subtree가 꼭 original tree의 leaf를 가져야하나? 지금은 문제가 lock돼서 안 보인다.
+
+- leaf node는 자기 자신 밖에 없으므로 항상 uni value subtree이다.   
+- 그리고 어떤 node가 uni value subtree가 아니라면 그 모든 parent들도 uni value subtree가 아니다.   
+- 어떤 node가 uni value subtree이려면 node.left와 node.right 모두 uni value subtree 이어야하고 node.val, node.left.val, node.right.val 이 모두 같아야한다.   
 
 O(N) / O(N)
-
-<details>
 
 
 ```python
@@ -373,20 +387,20 @@ class Solution:
                     return False
                 if node.right and node.val != node.right.val:
                     return False
-    
                 self.count += 1
                 return True
+
             return False
         
         dfs(root)
         return self.count
 ```
 
-</details>
+
 
 근데 global variable은 좋지 않은 코딩이다. 대신에 dfs 함수가 두 개의 값을 return하도록 한다.
 
-<details>
+
 
 ```python
     def countUnivalSubtrees(self, root: Optional[TreeNode]) -> int:
@@ -416,28 +430,27 @@ class Solution:
 
 
 
+
+
 ### 450. Delete Node in a BST
 
 https://leetcode.com/problems/delete-node-in-a-bst/description/
 
-문제: BST에서 root 가 주어지고 target이 주어졌을 때 target 값을 갖는 노드를 제거된 BST의 root를 반환하라.
+문제: unique value로 이루어진 BST에서 root 가 주어지고 target이 주어졌을 때 target 값을 갖는 노드를 제거된 BST의 root를 반환하라.
 
-어렵다. 이 함수는 target을 지운 뒤 그 tree의 root를 반환해준다.
-target이 왼쪽에 있다면 deleteNode(target.left)의 결과는 leftsubtree에서 target을 지우고 그 subtree의 root이다.
-그러면 root.left = deleteNode(target.left) 로 해주면 전체 tree에 대한 작업이 끝난다.
+<details><summary>Approach 1</summary>
+
+지우는 과정을 상상해서 단순화시킨 후 구현하기가 까다롭다.
+
+이 함수는 target을 지운 뒤 그 tree의 root를 반환해준다.   
+따라서 recursive하게 생각했을 때, target이 root 왼쪽에 있다면 `root.left = deleteNode(root.left, target)`` 으로 하면 아래에서 알아서 된다.   
+
 
 1. leaf node이면, 그 node를 None으로 바꾼다.
-2. right child가 있으면 leftmost of the right subtree(successor)와 바꾼 뒤 그 node를 recursive하게 삭제한다.
-3. left child가 있으면 rightmost of the left subtree(predecessor)와 바꾸고 그 node를 recursive하게 삭제한다.
+2. right child가 있으면 leftmost of the right subtree(i.e. successor)와 바꾼 뒤 그 node를 recursive하게 삭제한다.
+3. left child가 있으면 rightmost of the left subtree(i.e. predecessor)와 바꾸고 그 node를 recursive하게 삭제한다.
 
-헷갈리는 게, 어떤 객체 root에 대해서 root = None 하면 그 객체가 None이 돼?
-root라는 변수가 None으로 reassign 되는 게 아니라?
-root.parent.left = None 이런 식으로 해야하는 줄 알았다.
-immutable
-그럼 while successor.left: successor = successor.left 이런 식으로 하는 것도 포인터가 내려가는 게 아닌가?
-포인터 개념인줄 알았는데.
 
-<details>
 
 solution
 
@@ -452,7 +465,7 @@ solution
             root.right = self.deleteNode(root.right, key)
         else:
             if not(root.left or root.right):
-                root = None
+                root = None  # 추가로 할 작업이 없다. 그냥 None을 반환하면 된다. 그럼 recursion에서 위에 있던 parent node에서 받아서 업데이트할 것이다.
             elif root.right:
                 successor = root.right
                 while successor.left:
@@ -460,6 +473,7 @@ solution
                 root.val = successor.val
                 root.right = self.deleteNode(root.right, root.val)
             else:
+                # 마찬가지로 predecessor를 찾아서 바꿔주면 되네. 나는 cur.parent를 찾아서 cur를 건너뛰고 연결하려고 하니까 복잡했다.
                 predecessor = root.left
                 while predecessor.right:
                     predecessor = predecessor.right
@@ -469,15 +483,15 @@ solution
         return root
 ```
 
-</details>
 
-user solution에 있던 더 간단한 코드.
 
-1. target node의 left가 없으면 target node의 right를 반환하면 된다. right도 없다고 해도 괜찮다. 그럼 None이 반환되어야한다.
+user solution에 있던 더 간단한 코드. `left가 있으면, right가 있으면` 의 조건이었는데 `left가 없으면, right가 없으면` 으로 바꾸니까 간단해진다.
+
+1. target node의 left가 없으면 target node의 right를 반환하면 된다. right도 없다고 해도 괜찮다. 그럼 None이 반환된다.
 2. target node의 right가 없으면 target node의 left를 반환하면 된다.
 3. target node가 left와 right 둘 다 있으면 successor를 찾아서 바꾼 뒤 successor node를 recursive하게 지워준다.
 
-<details>
+
 
 ```python
     def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
