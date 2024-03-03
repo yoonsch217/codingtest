@@ -8,7 +8,7 @@ linked list의 경우 insertion, deletion에 대해 O(1)의 시간이 걸리지�
 heap의 경우는 insertion, deletion에 대해 O(logN)의 시간이 걸리지만 min/max 값을 찾는 데는 O(1)의 시간이 걸린다.
 
 
-### implementation
+### Implementation
 
 heap은 complete binary tree이고 각 노드의 값은 자식 노드보다 큰 값을 갖지 않는다.   
 
@@ -27,6 +27,9 @@ deletion
 - root를 제거하고 leaf 노드의 가장 오른쪽 노드를 root로 올려서 complete binary tree를 유지한다.
 - root 위치로 올린 노드를 왼쪽과 오른쪽 child 노드들과 비교해서 크면 자리를 바꾸면서 bubble down 한다. 
 left child, right child 둘 다 current보다 작다면 둘 중 작은 걸 고른다.
+
+> complete binary tree니까 heap 구현을 list로 해도 괜찮을 것 같다. 
+일반 tree의 경우는 비어있는 곳이 많을 때 list로 구현하면 너무 메모리 낭비가 심하다.
 
 
 ### Heap Sort
@@ -55,7 +58,7 @@ heapq.nlargest(k, count.keys(), key=count.get)
 
 heapify의 complexity   
 O(N) time, O(N) space   
-O(NlogN)으로 생각할 수 있는데 O(N)이다. 각 노드의 heapify는 O(h)의 시간이 들고 h의 높이를 갖는 노드는 n/pow(2, h+1) 만큼 있다.   
+O(NlogN)으로 생각할 수 있는데 O(N)이다. 각 노드의 heapify는 O(h)의 시간이 들고 h의 높이를 갖는 노드는 n/pow(2, h+1) 만큼 있다. 극한으로 보내면 upper bound는 O(N)이다.   
 https://www.geeksforgeeks.org/time-complexity-of-building-a-heap/   
 
 ![image](image.png)

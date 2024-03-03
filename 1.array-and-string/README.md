@@ -33,6 +33,12 @@ inversion이란, out of order인 pair를 말한다.
 stability라는 개념도 있다.   
 valid한 sorting 결과가 여러 개일 수 있는데, 그 때 기존 input의 순서를 더 유지하는 결과가 더 stable하다고 말한다.
 
+```
+>> data = [('red', 1), ('blue', 1), ('red', 2), ('blue', 2)]
+>> sorted(data, key=itemgetter(0))
+[('blue', 1), ('blue', 2), ('red', 1), ('red', 2)]
+# blue라는 두 원소에 대해 서로 동일한 sorting degree..?를 갖는데 이럴 땐 원래의 순서가 보장되도록 정렬된다.
+```
 
 ### Selection Sort
 
