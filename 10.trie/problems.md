@@ -15,6 +15,7 @@ class TrieNode:
         self.children = {}
         self.isEnd = False
 
+
 class Trie:
     def __init__(self):
         self.root = TrieNode()
@@ -61,11 +62,14 @@ class Trie:
 
 ### 140. Word Break II
 
+https://leetcode.com/problems/word-break-ii/description/
+
 문제: Given a string s and a dictionary of strings wordDict, add spaces in s to construct a sentence where each word is a valid dictionary word. Return all such possible sentences in any order.
 
 Input: s = "catsanddog", wordDict = ["cat","cats","and","sand","dog"]   
 Output: ["cats and dog","cat sand dog"]
 
+<details><summary>Approach 1</summary>
 
 - word dict의 단어들로 Trie를 만든다.
 - s를 iterate하면서 Trie를 따라간다. 
@@ -81,7 +85,6 @@ Output: ["cats and dog","cat sand dog"]
    - list 하나를 계속 사용했다. backtracking인가 이게? DFS로 쭉 갔다가 나올 때는 list에서 pop 하면서 나왔다. 덕분에 메모리도 아끼고 리스트 복사하는 시간도 아꼈다.
 
 
-<details>
 
 ```py
     def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:

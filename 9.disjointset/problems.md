@@ -4,16 +4,19 @@ https://leetcode.com/problems/smallest-string-with-swaps
 
 문제: string s가 주어지고 index pair로 이루어진 리스트 pairs가 주어진다. 리스트의 각 원소인 index pair에 있는 두 index는 각각 s의 index를 의미하고 그 두 index끼리는 swap이 가능하다. 횟수 제한 없이 swap을 했을 때 lexicographically smallest string을 반환하라.
 
+
+<details><summary>Approach 1</summary>
+
 pairs에 union-find를 한다. 그런데 서로 연결된 index끼리 자유롭게 swap이 가능하다는 걸 어떻게 증명하는지 몰랐다. 실험적으로만 알았고.   
 [0, 1], [1, 2] 이렇게 있으면 [0, 1, 2]가 자유롭게 교환 가능하다는 걸.   
 swap을 두 번 하면 제자리로 온다. 그럼 한 번 하고, 다른 character를 원하는 위치로 옮긴 후 다시 swap을 하면 제자리로 돌아올 것이다. 이 원리인가.   
+
 - union find로 root array를 만들어서 grouping한다.
 - key: root, value: reachable character list 로 dict를 만든 뒤 각 list를 정렬한다.
 - string 길이만큼의 인덱스를 앞에서부터 돌면서 자기 위치의 그룹에 있는 character를 추가한다.
 - 자기 위치 그룹의 character list에서 어디까지 추가했는지를 기록하기 위해 key: root, value: count 의 dict도 필요하다.
 - Time complexity: O((E+V)⋅α(V)+VlogV)
 
-<details>
 
 ```python
 for x, y in pairs:
@@ -36,10 +39,13 @@ for i in range(len(s)):
 return ''.join(res)
 ```
 
+
+DFS로도 가능하다.
+
 </details>
 
 
-DFS로도 가능하다.
+
 
 
 
@@ -52,6 +58,7 @@ https://leetcode.com/problems/evaluate-division/description/
 이 queries의 각 element에 대해서 `output[i] = queries[i][0] / queries[i][1]` 을 만족하는 output 리스트를 반환하라. 
 구할 수 없는 게 있으면 -1.0 을 넣는다.
 
+<details><summary>Approach 1</summary>
 
 solution에 있는 union find 기법이다.   
 - root array 대신 var_to_gid_weight 라는 dictionary를 사용한다. key는 equation에 사용되는 변수값, value는 (gid, gid 기준의 multiple) 의 tuple 을 갖는다.
@@ -60,7 +67,6 @@ solution에 있는 union find 기법이다.
 - 결과 구할 때는 변수가 var_to_gid_weight에 둘 다 포함이 안 되면 -1을 넣는다. 포함되는 게 있으면 gid를 각각 구해서 다르면 -1을 넣는다. gid가 같다면 계산을 한다.
 
 
-<details>
 
 ```python
     def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
@@ -116,16 +122,16 @@ O((M+N) * logN) / O(N)
 
 
 
+<details><summary>Approach 2</summary>
 
 
-근데 이거를 그래프로 이해할 수도 있다. 예를 들어 a/b = 2 인 경우 a에서 b로 가는 edge가 있고 그 weight가 2라고 표현할 수도 있는 것이다.   
+이거를 그래프로 이해할 수도 있다. 예를 들어 a/b = 2 인 경우 a에서 b로 가는 edge가 있고 그 weight가 2라고 표현할 수도 있는 것이다.   
 화살표 방향이 나누는 방향으로 사용할 수 있기 때문에 directed graph를 쓴다.   
 a/c 를 구할 때는 a에서 c로 가는 path를 DFS로 찾으면서 곱셈 혹은 나눗셈을 하면 된다.      
 graph를 구할 때 보통은 노드 index가 있어서 matrix로 구하는데 여기서는 그렇게 할 수가 없다.   
 그런 경우는 `graph = defaultdict(defaultdict)` 으로 해서 그냥 `graph[start][end] = weight` 으로 넣어버린다.   
 
 
-<details>
 
 ```python
     def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
@@ -186,17 +192,20 @@ O(MN) / O(N)
 https://leetcode.com/problems/largest-component-size-by-common-factor/
 
 
-문제: nums 라는 int 리스트가 주어지고 각 element는 하나의 노드이다. 1이 아닌 공약수를 가지면 서로 undirectedly 연결이 된다. 가장 많이 연결된 수를 subgraph의 노드 수를 구하라.
+문제: nums 라는 int 리스트가 주어지고 각 element는 하나의 노드이다. 1이 아닌 공약수를 가지면 서로 undirectedly 연결이 된다. 가장 많이 연결된 수의 subgraph의 노드 수를 구하라.  
+`Input: nums = [4,6,15,35], Output: 4`, `Input: nums = [20,50,9,63], Output: 2`
 
-처음에 각 num마다의 공약수 set을 만들고 has_common_factor 함수를 `len(s1 & s2) > 0` 조건으로 하려고 했는데 TLE 난다. intersection operation은 꽤 긴 시간이 걸린다.   
+<details><summary>Approach 1</summary>
+
+처음에 각 num마다의 공약수 set을 만들고 has_common_factor 함수를 `len(s1 & s2) > 0` 조건으로 하려고 했는데 TLE 난다.   
+intersection operation은 꽤 긴 시간이 걸린다.   
 
 - 각 숫자마다 prime set을 구한다. 예를 들어 12라면 (2, 3)이 prime set이다. 
-- prime_to_num dictionary를 만들어서 같은 prime을 갖는 num 끼리 union을 해준다.
+- prime_to_nums dictionary를 만든다. 그러고는 같은 prime을 갖는 num 끼리 union을 해준다.
 - union 된 그룹 중 가장 큰 그룹의 크기를 반환한다.
 
 prime set 구하는 것도 까다로웠다. 이 접근 방식은 외워둬야할 것 같다.
 
-<details>
 
 ```py
 class Solution:
@@ -216,25 +225,28 @@ class Solution:
             root2 = find(target2)
             node_to_root[root2] = root1
 
-        # Time Complexity: O(N * sqrt(m))
+        # Time Complexity: O(sqrt(m))
         def get_prime_set(num):
             if num == 1:
                 return set()
             for i in range(2, int(sqrt(num)) + 1):
                 if num % i == 0:
+                    # 만약 2로 나눠진다면, 가장 큰 약수는 n//2 일 것이다. 그렇게 범위를 줄일 수 있다.
+                    # 만약 4로 나눠지는 수였다면, 2로 recursive하게 다 나누고 더 이상 2로 나눠지지 않을 때 
+                    # 3으로 나누고, 3으로 안 나눠질 때 4로 나누는 걸 시도한다. 따라서 4가 set에 포함될 경우는 없다.
                     return get_prime_set(num//i) | set([i])
             return set([num])
         
 
-        prime_to_num = defaultdict(list)
+        prime_to_nums = defaultdict(list)
         # Time complexity: O(N * log(m)). At most log(m) prime divisors can exist
         for num in nums:
             prime_set = get_prime_set(num)
             for pr in prime_set:
-                prime_to_num[pr].append(num)
+                prime_to_nums[pr].append(num)
         
-        for pr in prime_to_num:
-            cur_nums = prime_to_num[pr]
+        for pr in prime_to_nums:
+            cur_nums = prime_to_nums[pr]
             for i in range(len(cur_nums)-1):
                 union(cur_nums[i], cur_nums[i+1])
         

@@ -4,7 +4,6 @@
 ### union & find
 
 - 연결된 노드들끼리 grouping할 때 사용한다.
-- 각 그룹마다 root node를 갖는다.
 - 노드 수 만큼의 길이를 갖는 root array가 있다.
 - 각 노드는 자기가 속한 그룹의 root node index를 root array의 자기 index 위치에 저장한다.
 - root array는 처음에 각자 노드가 자기 그룹의 root인 것으로 초기화된다. `[0, 1, 2, 3, ...]`
