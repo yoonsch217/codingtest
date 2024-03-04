@@ -79,6 +79,12 @@ f(i+1)은 이전의 값을 취하든가 버리든가 둘 중 하나이기 때문
 [예시](https://github.com/yoonsch217/codingtest/blob/main/dynamic-programming/problems.md#918-maximum-sum-circular-subarray)
 https://leetcode.com/problems/maximum-sum-circular-subarray
 
+
+### Knapsack algorithm
+
+todo: https://leetcode.com/problems/last-stone-weight-ii/description/
+https://leetcode.com/discuss/study-guide/1152328/01-Knapsack-Problem-and-Dynamic-Programming
+
 ## 전략
 
 - state variable을 찾고 dp(i)의 표현식을 찾는다. 여러 상황에 대한 합으로 만들어질 수 있으니 상황 분석을 잘 하자.   
@@ -121,3 +127,7 @@ https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/ 문제는 최�
 ### optimization on space(in grid problems)
 
 grid 문제를 풀 때, grid 자체를 업데이트하면서 진행할 수 있으면 O(1)의 space complexity를 갖는다.
+
+
+
+

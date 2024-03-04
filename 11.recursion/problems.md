@@ -77,12 +77,13 @@ https://leetcode.com/problems/robot-room-cleaner/
 robot 객체에는 move, turnRight, turnLeft, clean 네 가지의 함수가 있다. move는 현재 바라보는 방향으로 한 칸을 이동할 수 있으면 이동하고 True를 반환하고 못 가면 가만히 있으면서 False를 반환한다.
 이 네 가지 함수를 사용하여 주어진 2차원 matrix의 방을 다 청소하는 함수를 짜라. 방 matrix는 주어지지 않는다.
 
-방문한 곳은 다시 방문하지 않는 것이 좋다. 따라서 visited set을 만들어서 들고 다닌다. 네 방향 다 살펴봤을 때 더이상 갈 곳이 없다면 처음의 위치로 backtracking을 한다. 이렇게 함으로써 맨 처음 기준으로 네 방향을 다 탐색할 수가 있다.
+<details><summary>Approach 1</summary>
+
+방문한 곳은 다시 방문하지 않는 것이 좋다. 따라서 visited set을 만들어서 들고 다닌다. 
+4 방향 다 살펴봤을 때 더이상 갈 곳이 없다면 처음의 위치로 backtracking을 한다. 이렇게 함으로써 맨 처음 기준으로 네 방향을 다 탐색할 수가 있다.
 
 DFS 랑 비슷하다. DFS에서는 child 두 개 중 하나를 골라서 끝까지 갔다가 backtracking해서 나머지 하나로 또 끝까지 간다. robot clean의 경우는 child가 네 개인 상황으로 생각하면 된다. 
-하나 방향을 끝까지 탐색해서 더 갈 곳이 없으면 backtrack해서 원래 자리로 돌아온 뒤 다른 child로 가야한다.
-
-<details>
+한 방향을 끝까지 탐색해서 더 갈 곳이 없으면 backtrack해서 원래 자리로 돌아온 뒤 다른 child로 가야한다.
     
 ```python
 class Solution:
@@ -116,19 +117,26 @@ class Solution:
 
 </details>
 
+
+
+
+
+
+
 ### 50. Pow(x, n)
 
 https://leetcode.com/problems/powx-n/
 
 문제: x의 n제곱을 구하라.
 
-`x^n = x^(n//2) * x^(n//2) * x^(n%2)`  => base case는 exponent가 0 혹은 1일 때이다.
 
+<details><summary>Approach 1</summary>
 
-<details>
+`x^n = x^(n//2) * x^(n//2) * x^(n%2)` => base case는 exponent가 0 혹은 1일 때이다.
 
 ```py
 def myPow(self, x: float, n: int) -> float:
+    @lru_cache(maxsize=None)
     def get_pow(base, exponent):
         if exponent == 0:
             return 1
@@ -147,17 +155,19 @@ def myPow(self, x: float, n: int) -> float:
 
 
 
+
+
+
 ### 93. Restore IP Addresses
 
 https://leetcode.com/problems/restore-ip-addresses/description/
 
-문제: 길이가 1에서 15까지인 문자열이 주어졌고 각 문자는 digit이다. 이 문자열에 dot 세 개를 넣어서 만들 수 있는 valid ip address의 리스트를 반환하라. 각 숫자는 0 ~ 255 까지의 값이어야하고 cannot have leading zeros의 조건을 만족해야한다.
+문제: 길이가 1에서 15까지인 문자열이 주어졌고 각 문자는 digit이다. 이 문자열에 dot 세 개를 넣어서 만들 수 있는 valid ip address의 리스트를 반환하라. 
+각 숫자는 0 ~ 255 까지의 값이어야하고 cannot have leading zeros의 조건을 만족해야한다.
 
+<details><summary>Approach 1</summary>
 
-iterative한 방법과 backtracking의 방법이 있다.   
 iterative한 건, is_valid(start_idx, end_idx)를 만들어 놓고 3중 for 문을 통해 각 위치에 dot을 넣는 것이다. 그래서 만들어진 4개의 part가 다 valid하면 정답에 추가한다.    
-
-<details>
 
 ```python
 def restoreIpAddresses(self, s: str) -> List[str]:
@@ -201,11 +211,12 @@ def restoreIpAddresses(self, s: str) -> List[str]:
 
 </details>
     
+
+<details><summary>Approach 2</summary>
     
 backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack 시작하기 전에 dots.append(cur_dot_idx)하고 끝나면 dots.pop() 을 한다.   
 각 dot마다 iterate할 때는 세 번만 iterate하면 된다.   
-    
-<details>
+
 
 ```python
     def restoreIpAddresses(self, s: str) -> List[str]:
@@ -251,11 +262,9 @@ backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack �
         return ans
 ```
 
-</details>
 
 내 솔루션. 어떻게 풀긴 풀었네. 80%
 
-<details>
 
 ```py
     def restoreIpAddresses(self, s: str) -> List[str]:
@@ -312,3 +321,84 @@ backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack �
 ```
 
 </details>
+
+
+
+
+
+
+### 494. Target Sum
+
+https://leetcode.com/problems/target-sum/description/
+
+문제: You are given an integer array nums and an integer target. 
+You want to build an expression out of nums by adding one of the symbols '+' and '-' before each integer in nums and then concatenate all the integers. 
+For example, if nums = [2, 1], you can add a '+' before 2 and a '-' before 1 and concatenate them to build the expression "+2-1". 
+Return the number of different expressions that you can build, which evaluates to target. 
+
+<details><summary>Approach 1</summary>
+
+전형적인 backtracking 문제이다.
+
+```py
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        @lru_cache(maxsize=None)
+        def backtrack(idx, current_sum):
+            if idx == len(nums):
+                if current_sum == target:
+                    return 1
+                return 0
+            
+            plus_res = backtrack(idx+1, current_sum + nums[idx])  # 여기서 recursive하게 들어갈 때랑 
+            minus_res = backtrack(idx+1, current_sum - nums[idx])  # 여기서 들어갈 때랑 겹칠 수가 있다. 그 부분을 lru_cache로 최적화한다.
+            
+            return plus_res + minus_res
+            
+        
+        res = backtrack(0, 0)
+        return res
+```
+
+</details>
+
+
+
+
+
+### Target Sum (interview)
+
+문제: 1, 2, ..., 9의 숫자가 순서대로 있고 그 사이에 +, -를 넣든가 아무것도 안 넣을 수 있다. 그렇게 만들어진 수식이 100이 되도록 하는 수식을 모두 구하라.
+
+<details><summary>Apporach 1</summary>
+
+```py
+def find_expressions(target):
+    def backtrack(start, expression, current_sum):
+        if start == 9:
+            if current_sum == target:
+                expressions.append(expression)
+            return
+
+        # Try adding the next number
+        backtrack(start + 1, expression + '+' + str(start + 1), current_sum + (start + 1))
+        
+        # Try subtracting the next number
+        backtrack(start + 1, expression + '-' + str(start + 1), current_sum - (start + 1))
+        
+        # Try concatenating the next number
+        new_number = int(str(start) + str(start + 1))
+        backtrack(start + 2, expression + str(new_number), current_sum + new_number)
+
+    expressions = []
+    backtrack(1, '1', 1)
+    return expressions
+
+target_number = 100  # Change this to your target number
+result = find_expressions(target_number)
+for expression in result:
+    print(expression)
+```
+
+</details>
+
+
