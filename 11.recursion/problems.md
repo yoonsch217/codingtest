@@ -4,15 +4,20 @@ https://leetcode.com/problems/n-queens-ii/
 
 문제: nxn 체스판에 n 개의 퀸을 놓아야하는데 서로 공격을 못 하게 하는 unique 배치의 수를 구하라.
 
+<details><summary>Approach 1</summary>
+
 same column, same row, diagonal, anti-diagonal 을 피해서 배치해야한다.   
-같은 row를 피하는 방법으로는 각 작업마다 하나의 row씩 늘려서 배치하는 것이 있다.   
-같은 column을 피하는 방법으로는 column set을 만들어서 set 안에 있는지 확인할 수 있다.   
-diagonal과 anti-diagonal이 조금 독특한데 diagonal position에 있으려면 `(compare_row - compare_col) == (cur_row - cur_col)` 이 되어야 하고, anti-diagonal position에 있으려면 `(compare_row + compare_col) == (cur_row + cur_col)` 가 되어야한다.   
+
+- 같은 row를 피하는 방법으로는 각 작업마다 하나의 row씩 늘려서 배치하는 것이 있다.   
+- 같은 column을 피하는 방법으로는 column set을 만들어서 set 안에 있는지 확인할 수 있다.   
+- diagonal과 anti-diagonal이 조금 독특한데 diagonal position에 있으려면 `(compare_row - compare_col) == (cur_row - cur_col)` 이 되어야 하고, 
+anti-diagonal position에 있으려면 `(compare_row + compare_col) == (cur_row + cur_col)` 가 되어야한다.   
 따라서 row-col 을 보관하는 diagonal set과 row+col 을 보관하는 anti-diagonal set을 갖고 비교하면 된다.   
+
 recursion으로 row를 늘려가면서 invalid한 순간 멈추고 backtracking하여 다음 candidate를 검증하면 된다.   
 
 
-<details>
+
 
 ```python
     def totalNQueens(self, n: int) -> int:
@@ -47,14 +52,21 @@ recursion으로 row를 늘려가면서 invalid한 순간 멈추고 backtracking�
         return res
 
 ```
-    
+
+Complexity:   
+- O(N!) / O(N) set 비교하는 건 O(1)이니까 처음에 N개, 그 다음에 N-1, ... 해서 N!이다.    
+
+
 </details>
 
 
 
-Complexity:   
-solution 대로 하면 O(N!)/O(N)이다. set 비교하는 건 O(1)이니까 처음에 N개, 그 다음에 N-1, ... 해서 N!이다.    
-확실히 빠르네 솔루션이.
+
+
+
+
+
+
 
 
 ### 489. Robot Room Cleaner

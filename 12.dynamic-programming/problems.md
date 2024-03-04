@@ -7,9 +7,9 @@ https://leetcode.com/problems/maximum-subarray
 문제: integer array nums가 주어졌을 때, subarray의 sum이 최대인 sum을 구하라.
 
 
-가장 기본적인 Kadane's algorithm이다.
+<details><summary>Approach 1</summary>
 
-<details>
+가장 기본적인 Kadane's algorithm이다.
 
 ```py
 def maxSubArray(self, nums: List[int]) -> int:
@@ -34,6 +34,7 @@ https://leetcode.com/problems/maximum-sum-circular-subarray
 
 문제: circular integer array nums가 있다. 동일한 위치의 element가 두 번 이상 나오지 않도록 했을 때의 maximum possible sum of a non-empty subarray를 구하라. 
 
+<details><summary>Approach 1</summary>
 
 두 가지 case로 나눌 수가 있다. 아래 둘 중 큰 값이 답이다.
 - array 안에 포함되는 subarray 중 답이 있는 경우
@@ -44,7 +45,7 @@ https://leetcode.com/problems/maximum-sum-circular-subarray
 - right_max[i]를 nums[i:] 중 subarray의 sum이 가장 큰 값이라고 하자. `best = max(best, prefix_sum[i] + right_max[i+1]) for i in range(n-1)`가 된다.
 
 
-<details>
+
 
 ```py
 class Solution:
@@ -86,13 +87,13 @@ class Solution:
             single_answer = max(single_answer, cur)
         
         # Circular array answer
-        right_max = [-math.inf] * n
+        right_max = [-math.inf] * n  # right_max[i]: i가 left end인 subarray 중 최대의 sum
         right_max[n-1] = nums[n-1]
         postfix = nums[n-1]
         for i in range(n-2, -1, -1):
             num = nums[i]
             postfix += num
-            right_max[i] = max(right_max[i+1], postfix)
+            right_max[i] = max(right_max[i+1], postfix)  # todo: 이 부분 좀 더 보자
         
         prefix = 0
         circular_answer = -math.inf
@@ -110,6 +111,10 @@ O(N) time, O(N) space
 </details>
 
 
+
+
+<details><summary>Approach 2</summary>
+
 잘 생각해보면 두 번째 풀이의 코드를 좀 더 간단히 할 수 있다.
 
 
@@ -122,7 +127,6 @@ O(N) time, O(N) space
   양수가 있다면 minSum은 그 양수를 포함하지 않을테고 그러면 arraySum != minSum이 되기 때문이다. 
   다 음수라면 그 값은 normal answer보다 클 수가 없다. normal answer은 그 중에서 가장 작은 값 하나만 골랐을 것이기 때문이다. normal answer이 음수가 되고 linked answer이 0이 되기 때문에 단순히 max(normal answer, linked answer) 하면 안 된다. 따라서 이 case에 대한 예외 처리를 해줘야한다.
 
-<details>
 
 ```py
 class Solution:
@@ -150,11 +154,24 @@ class Solution:
 
 
 
+
+
+
+
+
 # 309. Best Time to Buy and Sell Stock with Cooldown
 
 https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/
 
 문제: prices 라는 리스트가 주어진다. 주식을 사거나 팔 수 있는데 팔고나면 하루 동안 cool down이 필요해서 아무것도 못 한다. 주식을 동시에 두 개 이상 갖고 있을 순 없다. 최대로 만들 수 있는 수익을 구하라. 팔고난 뒤가 아니라도 cool down이 가능하다.
+
+```
+Input: prices = [1,2,3,0,2]
+Output: 3
+Explanation: transactions = [buy, sell, cooldown, buy, sell]
+```
+
+<details><summary>Approach 1</summary>
 
 state가 복잡할 때는 각각을 나누고 서로의 상관관계를 구하라.
 결국에는 얼마나 복잡하든 특정 상태의 i 시점에 대해 과거와의 점화식을 구하는 문제인 것이다.
@@ -164,9 +181,9 @@ There can exist three states:
 - Having a stock   
 - Just after selling a stock   
 
-no_stock can be turned into: no_stock or have_stock   
-have_stock can be turned into: have_stock or after_sell   
-after_sell can be turned into: no_stock   
+`no_stock` can be turned into: `no_stock` or `have_stock`   
+`have_stock` can be turned into: `have_stock` or `after_sell`   
+`after_sell` can be turned into: `no_stock`   
 
 ```
 s[i]: Maximum profit for the state at the time i. When buying a stock, the profit is decreased by the amount of the price
@@ -175,7 +192,7 @@ have_stock[i] = max(have_stock[i-1], no_stock[i-1] - prices[i])
 after_sell[i] = have_stock[i-1] + prices[i]
 ```
 
-<details>
+
 
 ```py
     def maxProfit(self, prices: List[int]) -> int:

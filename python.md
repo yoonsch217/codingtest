@@ -131,6 +131,12 @@ mutable은 reference를 확인한다. 값이 같아도 주소가 같아야한다
 함수 안에 또 함수를 정의했을 때,
 nonlocal 선언을 먼저 하고 사용하면 outer scope의 변수에 접근 및 수정이 가능하다.
 
+기본적으로 outer function's scope에 있는 변수에 접근은 가능하다. 하지만 modify 하려면 nonlocal 선언이 필요하다.
+
+- nonlocal 없이, `print(outer_scope_var)` 가능
+- nonlocal 없이, `outer_scope_var += 1` 불가능
+- nonlocal 없이, `outer_scope_var = 3` 가능 => inner function의 새로운 객체가 생성되는 것
+
 ```py
 class MyClass:
     def func1(self):
@@ -175,6 +181,8 @@ class MyClass:
 
         def func2():
             # UnboundLocalError: local variable 'a' referenced before assignment
+            # a = 3 이런 식은 가능(inner function에 새로운 객체 생성))
+            # modify 없이 print 는 가능
             a += 1
             print(f"func2: {a}")
 
