@@ -7,6 +7,9 @@ https://leetcode.com/problems/unique-paths-ii/
 문제: robot이 m x n matrix의 제일 왼쪽 위에 놓여져있고 오른쪽이나 아래로만 움직일 수 있다. matrix[i][j]의 값이 1이라면 그 곳은 로봇이 움직일 수 없다. grid의 제일 오른쪽 아래에 갈 수 있는 경로의 수를 구하라.
 
 
+
+<details><summary>Approach 1</summary>
+
 ```
 dp(i, j): Number of the unique paths from (0, 0) to (i, j)
 dp(i, j) is 
@@ -16,9 +19,6 @@ dp(i, j) is
 - dp(i-1, j) + dp(i, j-1) otherwise
 ```
 
-
-
-<details>
 
 top down
 
@@ -81,6 +81,7 @@ https://leetcode.com/problems/minimum-path-sum/description/
 
 
 
+<details><summary>Approach 1</summary>
 
 ```
 dp(i, j): The minimum sum of costs to reach (i, j) from the top left corner
@@ -94,7 +95,6 @@ dp(i, j) is
 - bottom up: iterative하게 하려면 하나의 row를 저장하면서 하는 방법이 있다. O(mn) / O(n)    
 - optimization on space: bottom up을 하면서 original matrix에 업데이트하는 방법도 있다. O(mn) / O(1)
 
-<details>
 
 top down
 
@@ -152,6 +152,8 @@ https://leetcode.com/problems/maximal-square/
 문제: mxn binary matrix가 0 혹은 1로 채워져있다. 1로만 이루어진 가장 큰 정사각형의 넓이를 반환하라.
 
 
+<details><summary>Approach 1</summary>
+
 - 어떤 꼭지점 (i,j) 를 기준으로 왼쪽, 위, 왼쪽위 점들이 둘러싸는 점들이다.
 - 왼쪽 점 (i, j-1), 위쪽 점 (i-1, j) 이 겹치는 부분은 현재 점을 기준으로도 연장될 수가 있다.
 - 만약, 4, 4 라면 현재 점 기준으로 왼쪽 4개, 위쪽 4개를 더 포함할 수 있다는 건데, 제일 왼쪽 위 꼭지점은 아직 알 수 없다.
@@ -165,7 +167,6 @@ dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1)) + 1
 이렇게 하면 dp로 풀이는 가능하고, 공간 최적화를 하려면 직전 row의 정보만 보관하면 된다.
 
 
-<details>
 
 ```py
     def maximalSquare(self, matrix: List[List[str]]) -> int:
@@ -192,12 +193,14 @@ dp(i, j) = min(dp(i-1,j), dp(i,j-1), dp(i-1,j-1)) + 1
         return max_side * max_side
 ```
 
-</details>
-
 prev_row, cur_row 두 개를 쓰는 게 아니라 prev_row, left_value 이렇게 두 개를 쓰려고 해봤다.    
 그런데 row를 오른쪽으로 이동하면서 prev_row의 자기 위치를 업데이트해야하는데 그렇게 하면 (i-1, j-1) 위치를 구하기가 어렵다.     
 왜냐하면 prev_row[j-1]은 left_value와 동일하기 때문이다.    
 그냥 row 두 개를 쓰자.   
+
+
+</details>
+
 
 
 
@@ -213,11 +216,11 @@ https://leetcode.com/problems/minimum-falling-path-sum/description/
 
 문제: n x n matrix가 있을 때 falling path 중 minimum sum을 구하라. falling path란 제일 윗 row에서 제일 밑 row 까지 내려오는데 내려올 때 바로 아래나 대각선 아래로만 내려오는 path를 의미한다.
 
-
+<details><summary>Approach 1</summary>
 
 ```
 dp(i, j): minimum falliing path sum to get to matrix[i][j]
-dp(i, j) = matrix[i][j] + min(dp(i-1, j-1), dp(i-1, j), dp(i-1, j+1)))
+dp(i, j) = matrix[i][j] + min(dp(i-1, j-1), dp(i-1, j), dp(i-1, j+1))
 ```
 
 grid 문제를 연속으로 푸니까 기본 문제는 똑같은 틀에서 벗어나질 않네.
@@ -225,7 +228,6 @@ grid 문제를 연속으로 푸니까 기본 문제는 똑같은 틀에서 벗�
 
 이것도 마찬가지로 bottom up으로 할 수 있는데 O(N) space로 할 수 있다. 그냥 밑에 row부터 차례대로 올라오는 것이다. 결국 row 0 의 결괏값만 알면 되는 건데 이는 row 1의 결괏값만 필요하다.
 
-<details>
 
 ```py
     def minFallingPathSum(self, matrix: List[List[int]]) -> int:
@@ -246,3 +248,5 @@ grid 문제를 연속으로 푸니까 기본 문제는 똑같은 틀에서 벗�
 ```
 
 </details>
+
+

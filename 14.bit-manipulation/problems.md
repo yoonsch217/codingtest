@@ -6,12 +6,12 @@ https://leetcode.com/problems/convert-a-number-to-hexadecimal/
 input이 26이면 output은 "1a"이고 -1이면 ffffffff이다. 
 0일 때를 제외하고는 leading zero는 없어야한다. int는 4바이트이다. 
 
+<details><summary>Approach 1</summary>
+
 binary로 변환한 뒤 base 16으로 변환하는 개념이 있다.   
 input 을 2비트로 간주하고 4자리씩 확인을 해보면 된다.   
 그러면 2비트로 변환한 후 오른쪽부터 네 개씩 끊어서 base 16으로 변환하면 되는데 이걸 bit operation으로 하면 편하다.
 
-
-<details>
 
 ```py
     def toHex(self, num: int) -> str:
@@ -48,10 +48,11 @@ https://leetcode.com/problems/reverse-bits/description/
 
 문제: 32bit unsigned integer를 reverse한 값을 구하라.
 
+<details><summary>Approach 1</summary>
+
 처음에는 리스트를 만들어서 reversed bits를 저장하고 다시 그 list를 iterate하면서 결괏값을 계산했다.   
 근데 한 번의 iteration에서 바로 결과를 더해주는 게 좋아보인다.
 
-<details>
 
 ```python
     def reverseBits(self, n: int) -> int:
@@ -66,9 +67,12 @@ https://leetcode.com/problems/reverse-bits/description/
 
 </details>
 
+
+<details><summary>Approach 2</summary>
+
 solution에 이런 것도 있는데 우선 넘어가자.
 
-<details>
+
 
 ```py
     def reverseBits(self, n):
@@ -96,9 +100,10 @@ https://leetcode.com/problems/single-number
 문제: int 리스트가 있는데 하나의 element만 한 개 존재하고 나머지는 다 두 개씩 존재한다. 하나만 존재하는 수를 구하라. constant space. 
 `[1, 1, 2, 2, 3]` => 3
 
+<details><summary>Approach 1</summary>
+
 XOR 연산을 하면 동일한 숫자는 사라지게 된다.
 
-<details>
 
 ```py
     def singleNumber(self, nums: List[int]) -> int:
@@ -123,6 +128,7 @@ https://leetcode.com/problems/sum-of-two-integers/description/
 
 문제: integer a, b 가 주어졌을 때 `+`, `-` 연산 없이 두 integer의 합을 구하라.
 
+<details><summary>Approach 1</summary>
 
 덧셈   
 XOR 연산을 하면 carry 를 무시한 합을 구할 수가 있다. 두 bit가 같으면 그 자릿수는 0이고 다르면 1이다.     
@@ -141,7 +147,6 @@ sign이 다를 때 덧셈 뺄셈은 그냥 나머지로 하고 마지막에 부�
 여러 케이스들을 손으로 써보면서 감을 잡아야할 것 같다. 
 음수에 대해서 -1, -2, -3 이게 어떻게 증가하고 음수끼리의 연산은 어떻게 되는지.
 
-<details>
 
 ```py
     def getSum(self, a: int, b: int) -> int:
@@ -170,12 +175,12 @@ sign이 다를 때 덧셈 뺄셈은 그냥 나머지로 하고 마지막에 부�
         return x * sign
 ```
 
-</details>
-
-
 어렵고 신기하다..
 
 32 bit로 정해져있기 때문에 O(1) / O(1) 이다.
+
+</details>
+
 
 
 
@@ -189,6 +194,17 @@ sign이 다를 때 덧셈 뺄셈은 그냥 나머지로 하고 마지막에 부�
 
 https://leetcode.com/problems/smallest-sufficient-team/description/
 
+
+문제: In a project, you have a list of required skills req_skills, and a list of people. The ith person people[i] contains a list of skills that the person has.
+Consider a sufficient team: a set of people such that for every required skill in req_skills, there is at least one person in the team who has that skill. We can represent these teams by the index of each person.
+For example, team = [0, 1, 3] represents the people with skills people[0], people[1], and people[3].
+Return any sufficient team of the smallest possible size, represented by the index of each person. You may return the answer in any order.
+It is guaranteed an answer exists.    
+Input: `req_skills = ["java","nodejs","reactjs"], people = [["java"],["nodejs"],["nodejs","reactjs"]]`
+Output: `[0,2]`
+
+<details><summary>Approach 1</summary>
+
 DP with state compression
 
 ```
@@ -196,11 +212,9 @@ dp[skills] = skills를 만족하기 위한 최소 인원의 team
 작업을 진행하다가 dp[s]에 대해 더 작은 인원의 team이 발견된다면 바꿔치기 한다.
 이 부분이 좀 헷갈렸다. 더 작은 인원이 보이면 이전 팀 정보를 버리고 바꿔치기 해도 되나.
 바꿔쳤는데 나중에 이전 값이 필요할 때가 있을까? 없다. key가 skill 목록이다보니까 어찌됐든 그 skill 목록을 만들기만 하면 된다.
-사람 목록은 더 이상 중요하지 않아진다.
 ```
 
 
-<details>
 
 ```py
     def smallestSufficientTeam(self, req_skills: List[str], people: List[List[str]]) -> List[int]:
@@ -238,6 +252,43 @@ dp[skills] = skills를 만족하기 위한 최소 인원의 team
                     skills_to_team[updated_skills] = prev_team + [p_idx]
         
         return skills_to_team[(1 << len(req_skills)) - 1]  # 전체 skill에 대한 값을 반환한다.
+```
+
+top down
+
+```py
+    def smallestSufficientTeam(self, req_skills: List[str],
+                               people: List[List[str]]) -> List[int]:
+        n = len(people)
+        m = len(req_skills)
+        skill_id = dict()
+        for i, skill in enumerate(req_skills):
+            skill_id[skill] = i
+        skills_mask_of_person = [0] * n
+        for i in range(n):
+            for skill in people[i]:
+                skills_mask_of_person[i] |= 1 << skill_id[skill]
+        dp = [-1] * (1 << m)
+        dp[0] = 0
+
+        def f(skills_mask):
+            if dp[skills_mask] != -1:
+                return dp[skills_mask]
+            for i in range(n):
+                new_skills_mask = skills_mask & ~skills_mask_of_person[i]
+                if new_skills_mask != skills_mask:
+                    people_mask = f(new_skills_mask) | (1 << i)
+                    if (dp[skills_mask] == -1 or
+                        people_mask.bit_count()
+                       < dp[skills_mask].bit_count()):
+                        dp[skills_mask] = people_mask
+            return dp[skills_mask]
+        answer_mask = f((1 << m) - 1)
+        ans = []
+        for i in range(n):
+            if (answer_mask >> i) & 1:
+                ans.append(i)
+        return ans
 ```
 
 - Time O(people * 2^skill)

@@ -30,12 +30,12 @@ base-2의 숫자 세 개마다 base-8의 숫자로 바뀌게 된다.
 - original code: 그냥 나타낸 코드이다. sign bit 포함이다.
 - inverse code
    - non negative int: original code와 동일하다.
-   - negative int: origincal code에서 sign bit 빼고 다 flip한 값이다.
+   - negative int: original code에서 sign bit 빼고 다 flip한 값이다.
 - complement code
-   - non negative int: origincal code와 동일하다. 
+   - non negative int: original code와 동일하다. 
    - negative int: inverse code에서 1을 더한 값이다. 
-   - two's complement: 어떤 positive integer에 대해서 음수 값을 구하려면, non-sign bits끼리 양수값 + 음수값이 10000000이 되어야 한다.   
-   ex) +18 = 00010010, -18 = 11101110
+   - two's complement: 어떤 positive integer에 대해서 음수 값을 구하려면, non-sign bits끼리 양수값 + 음수값이 1000 0000이 되어야 한다.   
+   ex) +18 = 0001 0010, -18 = 1110 1110
    positive integer에서 flip을 한 값을 생각해보자. 그 둘을 합치면 항상 1111111이 된다. 우리는 10000000을 만들어야하므로 거기에 1만 더 하면 된다.    
    즉, positive integer의 flip한 값에서 1을 더한 게 complement code에서의 negative int의 크기이고 거기에 
    sign bit만 더해주면 된다.   
@@ -53,7 +53,7 @@ base-2의 숫자 세 개마다 base-8의 숫자로 바뀌게 된다.
 
 - 64 original code, inverse code, complement code => 01000000 / 01000000 / 01000000
 - -64 original code, inverse code, complement code => 11000000 / 10111111 / 11000000
-- -1 complement code: 1의 inverse는 11111110, 1 더하면 11111111
+- -1 complement code: -1의 inverse는 11111110, 1 더하면 11111111
 
 original code의 경우 두 가지 문제점이 있다.   
 0은 +0, -0 두 값이 동일한데 동일한 수가 다르게 표현될 수 있어서 비효율적이다.(10000000, 00000000)    
@@ -87,7 +87,6 @@ unary operation
    - 즉 양수에 대한 negation은 부호를 바꾸고 magnitude에 1을 더한 값이 된다.   
 
 shift operation
-
 - left shift (`<<`)
    - left shift opertion의 경우는 bit를 왼쪽으로 옮기면서 high bit는 버리고 low bit는 0으로 채운다. arithmetic shift나 logical shift나 동작이 동일하다.   
    - 숫자 a를 n번 shift하면 `a * 2^n`가 된다.

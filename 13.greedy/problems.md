@@ -7,12 +7,15 @@ https://leetcode.com/problems/boats-to-save-people/
 문제: people 리스트가 주어지는데 각 값은 몸무게이다. 보트들에 사람을 최대 두 명 태울 수 있는데 `limit` 의 무게를 넘을 순 없다. 모든 사람을 태우기 위한 최소의 보트 수를 구하라.
 limit 보다 무거운 사람은 없다.
 
+<details><summary>Approach 1</summary>
 
 먼저 정렬을 한다. 그러고 two pointers로 오른쪽부터 하나, 왼쪽부터 하나를 놓고 이동한다.   
 오른쪽부터 무거운 사람을 태우면서 left pointer 몸무게가 더 태울 수 있는 무게면 태우고 안 되면 만다.    
 right pointer 이동할 때마다 보트를 사용하는 거니까 결과값을 1 늘린다.
 
-<details>
+무게 순서대로 a b c d 가 있을 때, d를 골랐다면 a와 b 중 a를 먼저 태워야한다. 
+a+d가 불가하다면 b+d도 불가하다. a+d가 가능하고 b+d가 불가한 경우, b+d를 먼저 해버리면 a+c가 되냐 안 되냐에 따라 다른 결과가 나온다.
+
 
 ```py
     def numRescueBoats(self, people: List[int], limit: int) -> int:
@@ -30,9 +33,11 @@ right pointer 이동할 때마다 보트를 사용하는 거니까 결과값을 
         return cnt
 ```
 
+이 방법은 at most 두 명까지 태울 수 있어서 가능한 것 같다. 두 명 제한이 없고 weight sum limit만 있다면? 
+
+
 </details>
 
-이 방법은 at most 두 명까지 태울 수 있어서 가능한 것 같다. 두 명 제한이 없고 weight sum limit만 있다면? 
 
 
 
@@ -61,14 +66,13 @@ https://leetcode.com/problems/container-with-most-water/description/
 Find two lines that together with the x-axis form a container, such that the container contains the most water.
 Return the maximum amount of water a container can store.
 
+<details><summary>Approach 1</summary>
+
 Greedy한 접근을 생각해본다.   
 너비와 높이가 중요하고, 하나를 포기하게 되면 다른 하나는 더 좋아져야한다.   
 너비를 가장 넓게 시작을 해본다. 그러면 left와 right를 양 끝으로 잡는다.    
 거기서 left와 right를 가운데로 움직이면 height는 무조건 높아져야한다.    
 left와 right 중 낮은 wall을 갖는 걸 옮겨야한다. 높은 wall을 갖는 걸 옮겨봤자 height = min(left, right)이기 때문에 이 값이 높아질 수가 없다.   
-
-
-<details>
 
 
 ```py
