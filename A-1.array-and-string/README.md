@@ -355,3 +355,7 @@ O(N^2) 이 나올 거 같으면 O(2N), O(3N) 등으로 할 수 있을지 생각�
 ex) https://leetcode.com/problems/container-with-most-water
 
 
+
+### KMP Algorithm
+
+https://leetcode.com/problems/longest-happy-prefix/description/

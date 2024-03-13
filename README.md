@@ -1,8 +1,31 @@
-todo:
-premium 끝나서 다시 못 풀어본 문제   
-https://leetcode.com/problems/amount-of-new-area-painted-each-day/    
 
-### 나중에 시간될 때 풀어보자.
+### Basic Data Structures and Operations
+
+- Array and String
+- Stack and Queue
+- HashTable
+- Binary Search
+
+
+### Algorithmic Techniques
+
+- Bit Manipulation
+- Recursion
+- Greedy
+- Dynamic Programming
+
+
+### Grapshs and Trees
+
+- Graph
+- Binary Tree
+- Heap
+- Trie
+- Disjoint Set
+
+
+
+### 풀어볼 문제들
 
 https://leetcode.com/problems/unique-paths-iii/description/
 https://leetcode.com/problems/concatenated-words/description/
