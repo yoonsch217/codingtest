@@ -75,8 +75,6 @@ i ~ j 의 범위가 답이라고 해보자. 그럼 `? ~ i-1`과 `j+1 ~ ?` 는 �
 f(i)를 `index i를 right end로 하는 subarray 중 가장 큰 sum 값` 이라고 하자.    
 f(i+1)은 이전의 값을 취하든가 버리든가 둘 중 하나이기 때문에 `max(nums[i+1], f(i) + nums[i+1])` 이 될 것이다.   
 
-[예시](https://github.com/yoonsch217/codingtest/blob/main/dynamic-programming/problems.md#918-maximum-subarray)   
-[예시](https://github.com/yoonsch217/codingtest/blob/main/dynamic-programming/problems.md#918-maximum-sum-circular-subarray)
 https://leetcode.com/problems/maximum-sum-circular-subarray
 
 

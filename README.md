@@ -39,6 +39,11 @@
 - Greedy
   - Container with Most Water
 - Dynamic Programming
+  - State Reduction
+  - Kadane's Algorithm
+  - Knapsack algorithm
+  - Best Time to Buy and Sell Stock with Cooldown: state가 여러 개 있고 각각의 관계를 구한 후 bottom up으로 업데이트한다.
+  - Optimization on Space in Grid Problems: grid 자체를 업데이트하면 공간을 줄인다.
 
 
 ### Grapshs and Trees
