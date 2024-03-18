@@ -217,6 +217,73 @@ after_sell[i] = have_stock[i-1] + prices[i]
 
 
 
+### 188. Best Time to Buy and Sell Stock IV
+
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/description/
+
+문제: You are given an integer array prices where prices[i] is the price of a given stock on the ith day, and an integer k. 
+Find the maximum profit you can achieve. You may complete at most k transactions: i.e. you may buy at most k times and sell at most k times. 
+Note: You may not engage in multiple transactions simultaneously (i.e., you must sell the stock before you buy again).
+
+
+<details><summary>Approach 1</summary>
+
+
+```
+dp(i, remained, holding): i~끝까지의 stock이 있고 remained만큼 거래할 수 있고 holding 상태일 때의 최대 이윤
+if holding: max(sell, doNothing)
+if not hodling: max(buy, doNothing)
+```
+
+```py
+    def maxProfit(self, k: int, prices: List[int]) -> int:        
+        # holding, not holding
+        dp = [[[0, 0] for _ in range(k+1)] for _ in range(len(prices)+1)]
+        
+        for i in range(len(prices)-1, -1, -1):
+            for j in range(1, k+1):
+                for idx in range(2):
+                    donothing = dp[i+1][j][idx]
+                    if idx == 0:
+                        dosomething = prices[i] + dp[i+1][j-1][idx+1]
+                    else:
+                        dosomething = -prices[i] + dp[i+1][j][idx-1]
+                    dp[i][j][idx] = max(donothing, dosomething)
+        
+        return dp[0][k][1]
+
+        # 내 추측. 기억이 안 난다.
+        # dp[i][k][0]: i전까지 k번 거래해서 holding 상태일 때의 최댓값
+        # dp[i][k][0] = max( dp[i-1][k][1] + prices[i-1] , dp[i-1][k][0] )
+        # dp[i][k][1] = max( dp[i-1][k+1][1] + prices[i-1] , dp[i-1][k][1] )
+```
+
+
+내가 이후에 관계식 구해본 것.
+
+```
+구매할 때 transaction count가 증가하고 판매할 땐 영향 없다고 정하자.
+
+have_stock(i, k): i까지 k 번의 transaction이 일어났을 때 최댓값
+no_stock(i, k)
+
+have_stock(i, k) = max( have_stock(i-1, k) , no_stock(i-1, k+1) - prices[i-1] )
+no_stock(i, k) = max( no_stock(i-1, k) , have_stock(i-1, k) + prices[i-1] )
+```
+
+초깃값 세팅을 해놓고 이걸로 할 수 있을 것 같다. 근데 모든 i에 대해 모든 k에 대해 리스트를 만드는 게 비효율적이다.
+왜냐하면, i가 0일 때는 k가 0 혹은 1인데 안 쓰는 이후 부분을 만들 필요가 없다. 
+이후 작업에도 마찬가지이다.
+초깃값을 잘 만들어놓고 거기서 확장을 잘 하는 구조로 만들면 좋을 것 같은데 생각이 안 난다.
+
+</details>
+
+
+
+
+
+
+
 
 
 
@@ -928,11 +995,6 @@ Time Complexity: amount * len(coins)
 
 
 
-
-### 188. Best Time to Buy and Sell Stock IV
-
-
-https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/description/
 
 
 
