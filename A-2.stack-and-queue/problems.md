@@ -6,11 +6,13 @@ https://leetcode.com/problems/evaluate-reverse-polish-notation
 operator는 `+, -, *, /` 를 사용한다. 나누기는 소수를 버리고 정수만 남는다.    
 ex) `tokens = ["4","13","5","/","+"]` => `(4 + (13 / 5)) = 6`
 
+
+<details><summary>Approach 1</summary>
+
 간단하다. 쭉 iterate하면서 연산자가 아니면 stack push하고 연산자면 최근 두 개 pop 한 뒤 계산하면 된다.
 
 lambda를 쓰면 다르게 풀 수도 있다.   
 
-<details>
   
 ```python
 def evalRPN(self, tokens: List[str]) -> int:
@@ -47,15 +49,16 @@ https://leetcode.com/problems/daily-temperatures
 
 문제: temperatures라는 리스트가 있는데 하루 간격의 기온이 저장되어 있다. 각 날짜에서 더 따뜻한 날이 올 때까지 기다려야하는 일수를 저장한 리스트를 반환하라. 더 따뜻한 날이 이후에 없다면 0을 저장하면 된다.
 
+<details><summary>Approach 1</summary>
+
 decreasing monotonic stack을 사용한다.   
 stack에는 아직 더 따뜻한 날을 못 만난 day가 저장되어 있다. 그러면 bottom에서 top으로 갈수록 덜 따뜻하다.   
 리스트를 iterate하면서 지금 보는 기온이 top보다 낮으면 그냥 push한다.   
 top보다 높으면 더 높은 top이 나올 때까지 pop하면서 pop된 날짜에 대해 답을 넣어준다.
 답은 현재 보는 index와 pop된 날짜의 차이이다.
 
-각 원소에 대해 한 번씩만 작업을 하게 되므로 O(N) 시간이 걸리게 되고 stack을 위한 O(N) 공간이 필요하게 된다.   
+O(N) / O(N)
 
-<details>
     
 ```python
 class Solution:
@@ -77,15 +80,17 @@ class Solution:
     
 </details>
 
-혹은 리스트를 뒤에서부터 iterate하면서 현재 날짜의 기온보다 높은 기온이 나오는 날을 찾는 방법도 있다.   
+<details><summary>Approach 2</summary>
+
+리스트를 뒤에서부터 iterate하면서 현재 날짜의 기온보다 높은 기온이 나오는 날을 찾는 방법도 있다.   
 지금까지의 가장 높은 기온을 저장하는 hottest variable을 두고 현재 기온이 hottest보다 높다면 hottest를 업데이트하고 continue한다.   
 이렇게 하는 이유는 그런 경우 더 따뜻한 날이 나올 수 없으므로 추가 작업이 필요 없기 때문이다.   
 answer list를 만들어 놓고 뒤에서부터 원소를 하나씩 보는데, i번째 날에 i+1의 온도를 확인한다.   
 i+1의 온도가 더 낮다면 i+1+answer[i+1] 위치로 가서 또 비교한다.   
 더 높은 온도가 나올 때까지 반복을 하는데 이렇게 하면 각 원소마다 두 번씩만 작업을 하게 된다.(backward iterate할 때 한 번, jump하면서 날 찾을 때 한 번)   
-따라서 O(N) time에 O(1) space 답을 해결할 수 있다.   
 
-<details>
+O(N) / O(1)
+
 
 ```python
 class Solution:
@@ -117,6 +122,9 @@ https://leetcode.com/problems/trapping-rain-water/
 
 문제: integer array가 주어지고 각 index의 값들은 그 index 위치에서의 bar 높이이다. 얼만큼의 물이 고일 수 있는지 구하라.
 
+
+<details><summary>Approach 1</summary>
+
 내 brute force한 방법   
 - 앞에서부터 iterate하면서 left wall로 생각을 한다. 
 - 각 left wall마다 오른쪽을 보면서 left wall 이상인 right wall을 찾는다. 그러면 물은 그 right wall을 넘지 못 하고 그 사이를 채운다.
@@ -130,8 +138,6 @@ https://leetcode.com/problems/trapping-rain-water/
 이걸 최적화하려면 `739. Daily Temperatures` 문제처럼 미리 각 left wall마다 그거보다 높은 wall이 처음으로 나오는 위치를 저장한 array, 
 그 이후의 wall 중 가장 높은 높이를 저장한 array 두 개를 O(N) 시간에 만들어 놓으면 이후 작업도 O(N)에 가능할 것이다.    
 
-
-<details>
 
 ```py
     def trap(self, height: List[int]) -> int:
@@ -163,6 +169,8 @@ https://leetcode.com/problems/trapping-rain-water/
 </details>
 
 
+<details><summary>Approach 2</summary>
+
 아이디어를 생각하기 어려웠다.    
 적분하듯이 쪼개서 각 위치에서의 물 양을 구한 뒤에 합하는 걸로 생각해보자.    
 현재 위치 i에서 물이 차려면 i 기준 왼쪽과 오른쪽 둘 다에 i보다 높은 bar가 있어야한다.    
@@ -170,7 +178,6 @@ https://leetcode.com/problems/trapping-rain-water/
 각 위치 i 기준으로 왼쪽에서 가장 높은 bar의 높이가 저장된 left_maxs와 오른쪽으로 한 결과인 right_maxs를 만든 뒤 답을 구한다.   
 O(N) / O(N)
 
-<details>
 
 ```python
     def trap(self, height: List[int]) -> int:        
@@ -197,6 +204,8 @@ O(N) / O(N)
 
 </details>
 
+<details><summary>Approach 3</summary>
+
 위의 방법은 두 번 iterate해야하는데 decreasing monotonic stack을 쓰면 한 번의 iterate로 가능하다.    
 - 오른쪽으로 iterate하면서 decreasing monotonic stack을 만든다. 그러면 stack에는 left wall 후보들이 남게 된다.
 - stack 만들다가 pop해야할 상황, 즉 현재 높이가 stack의 top보다 높다면 pop을 한다. 그 pop된 위치의 bar는 자기보다 높은 left wall과 right wall이 있는 것이다.
@@ -205,9 +214,8 @@ O(N) / O(N)
 - left bar와 right bar 사이에 popped bar보다 높은 건 없으므로 popped bar 높이 윗부분인 `min(left bar, right bar) - popped bar * width` 만큼 물이 찰 수 있다.
 - popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다.    
 
-신박하다.
+어렵다. 신박하다.
 
-<details>
 
 ```python
     def trap(self, height: List[int]) -> int:        
@@ -246,12 +254,11 @@ A와 B를 각각 subpart의 점수라고 할 때 (A) 처럼 감싸고 있으면 
 `"(())"` => 2점, `"()()"` => 2점
 
 
+<details><summary>Approach 1</summary>
 
 stack을 사용해서 풀 수 있다.   
 string을 iterate하면서 괄호 혹은 계산된 숫자를 stack에 넣는다. 
 그러면 제일 마지막에는 결괏값 하나만 stack에 존재하게 된다.
-
-<details>
 
 ```py
     def scoreOfParentheses(self, s: str) -> int:
@@ -285,12 +292,13 @@ string을 iterate하면서 괄호 혹은 계산된 숫자를 stack에 넣는다.
 </details>
 
 
+<details><summary>Approach 2</summary>
+
 stack의 다른 방법도 있다. 각 뎁스마다 값을 저장하는 것이다.   
 left parenthesis 나올 때마다 depth가 늘어나니까 stack에 추가하고 right parenthesis 나올 때마다 depth 하나 탈출한다.    
 depth 줄일 때마다 stack을 pop 한다. 
 이전 depth의 값에 추가해준다.   
 
-<details>
 
 ```python
 def solve(s: str) -> int:
@@ -311,8 +319,32 @@ def solve(s: str) -> int:
 
 </details>
 
+
+<details><summary>Approach 3</summary>
+
+O(1) space
+
 마지막 방법은 power로 생각하는 것이다. 특정 depth에 있는 ()는 밖으로 나올 때마다 2가 곱해진다.   
 그러면 왼쪽부터 linear하게 탐색하면서 열릴 때마다 depth를 증가시킨다. 닫힐 때 depth를 확인해서 pow(2, depth)를 결과에 더해준다. 바로 붙어있는 괄호들에 대해서만 처리하면 되는 듯.
+
+```py
+    def scoreOfParentheses(self, s: str) -> int:
+        depth = -1
+        res = 0
+        prev_left = -1
+        for i, c in enumerate(s):
+            if c == '(':
+                depth += 1
+                prev_left = i
+                continue
+            if c == ')':
+                if prev_left == i - 1:
+                    res += 2 ** depth
+                depth -= 1
+        return res
+```
+
+</details>
 
 
 
@@ -326,6 +358,9 @@ https://leetcode.com/problems/min-stack
 문제: minStack이라는 클래스의 메소드를 구현하라. 일반 stack의 메소드들에 더해서 get_min 이라는 메소드를 갖는데 스택에 있는 최솟값을 반환한다. 모든 메소드는 O(1) 시간에 수행돼야한다.   
 MinStack의 member function: `push`, `pop`, `top`, `getMin`
 
+
+<details><summary>Approach 1</summary>
+
 스택은 계속해서 위로 쌓이는 자료구조이다. 어떤 최솟값이 있고 그 이후로 그보다 작은 값이 없다면 그 위의 모든 값들에 대해서는 get_min이 그 최솟값이다.   
 따라서 stack에 (cur_val, prev_min) 의 tuple을 넣어주면 된다.   
 push할 때와 pop할 때 self.min을 업데이트 해주면 된다.   
@@ -334,7 +369,6 @@ push할 때는 현재와 비교해서 더 작으면 min이 업데이트 되는 �
 위 방법대로 하면 중복된 값이 많이 저장될 수 있다. 메모리 효율을 위해서 스택을 두 개 관리하는 방법도 있다. 하나는 그냥 스택, 다른 하나는 min 값이 바뀔 때만 저장하는 스택이다.   
 따라서 pop을 할 때는 min stack의 위에 있는 값과 같으면 둘 다 pop을 하는 식으로 한다.   
 
-<details>
 
 ```py
 class MinStack:
@@ -378,6 +412,7 @@ https://leetcode.com/problems/largest-rectangle-in-histogram/description/
 
 문제: Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in the histogram.
 
+<details><summary>Approach 1</summary>
 
 내 solution: TLE    
 - stack을 두고 (i, h) 값을 넣는다. 인덱스 i 이후부터 지금까지 가장 낮은 wall의 높이는 h인 것을 보장한다. 
@@ -390,7 +425,6 @@ https://leetcode.com/problems/largest-rectangle-in-histogram/description/
 Time Complexity: O(N^2). 최악의 경우 increasing stack이 만들어질 수 있다.
 
 
-<details>
 
 ```py
     def largestRectangleArea(self, heights: List[int]) -> int:
@@ -414,16 +448,14 @@ Time Complexity: O(N^2). 최악의 경우 increasing stack이 만들어질 수 �
 
 </details>
 
+<details><summary>Approach 2</summary>
 
-two pointer를 두자.   
 어떤 지점 i를 기준으로, 해당 bar를 높이로 갖는 최대 rectangle을 구해보자. 그러면 해당 bar에서 왼쪽으로 봤을 때 처음으로 낮은 bar가 나오는 곳이 left index가 되고 반대가 right index가 된다.   
 이렇게 각 i를 대상으로 하게 되면 모든 rectangle을 구할 수 있다.   
 
 left_barriers를 생성한다. O(N). 739. Daily Temperatures 문제 생각하면 된다.   
 right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
 
-
-<details>
 
 ```py
     def largestRectangleArea(self, heights: List[int]) -> int:
@@ -470,5 +502,11 @@ right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
 
 
 
+
+
+https://leetcode.com/problems/minimum-cost-tree-from-leaf-values/description/
+https://leetcode.com/problems/sum-of-subarray-minimums/description/
+https://leetcode.com/problems/online-stock-span/description/
+https://leetcode.com/problems/next-greater-element-ii/description/
 
 

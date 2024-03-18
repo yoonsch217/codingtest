@@ -4,7 +4,7 @@ https://leetcode.com/problems/koko-eating-bananas
 
 문제: piles 라는 리스트가 있고 각 원소는 바나나의 개수이다. 감시자가 h 시간동안 떠나있을 때, 시간당 k의 속도로 바나나를 먹는다. 한번에 하나의 pile만 먹을 수 있다. 전체 바나나를 다 먹기 위한 최소의 k를 구하라.
 
-<details>
+<details><summary>Approach 1</summary>
 
 각 pile 먹는 속도는 math.ceil(pile/k) 이다. 따라서 총 걸리는 시간은 `sum of math.ceil(pile/k) for each pile in piles` 이 된다.    
 전체 바나나를 다 먹을 수 있는 속도라면 possible, 못 먹으면 impossible이라고 하자.   
@@ -45,9 +45,10 @@ https://leetcode.com/problems/furthest-building-you-can-reach
 문제: heights, bricks, ladders 가 주어진다. 건물들을 왼쪽부터 이동하는데 높은 건물로 갈 때는 높이 차이만큼 brick을 쓰든가 ladder 하나를 써야한다. 가장 멀리 갈 수 있는 건물을 찾아라.
 
 
-<details>
+<details><summary>Approach 1</summary>
 
 **Heap**    
+
 ladders 개수 L 을 크기로 갖는 힙을 생성하고 앞에서부터 높이 차를 넣으면서 힙을 채운다. 즉, 사다리로만 올라가되 그 높이차를 기록해놓는 것이다.   
 사다리를 다 썼을 땐 이제 벽돌을 써야한다. 벽돌 써야하는 상황 왔을 때, 현재 필요한 벽돌과 힙에 있는 최소의 높이차를 비교한다.     
 현재 필요한 벽돌 수가 더 적으면 벽돌 소진하면 되는 것이고, 힙에 있는 최솟값이 더 작으면 예전에 썼던 사다리를 지금 쓰고 예전 작업은 벽돌로 하면 된다.   
@@ -81,10 +82,12 @@ class Solution:
                 return i - 1
 
         return len(heights) - 1
-
-
 ```
-    
+
+<details>
+
+<details><summary>Approach 2</summary>
+
 
 
 **Binary Search**    
@@ -145,7 +148,7 @@ https://leetcode.com/problems/find-peak-element/
 
 문제: 서로 다른 값을 갖는 integer array가 주어졌을 때 peak의 위치를 반환하라. peak란 주변보다 strictly greater한 값을 가지는 곳을 말하며 `nums[-1] = nums[n] = -math.inf` 으로 간주한다. O(log n) 의 알고리즘을 구하라.
 
-<details>
+<details><summary>Approach 1</summary>
 
 left, right를 초기화하고 nums에 -math.inf 를 append한다. 이렇게 함으로써 `nums[-1] = nums[n] = -math.inf`를 자연스럽게 적용시킬 수 있다.   
 mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. nums[-1]은 -inf이고 nums[cur] 보다 nums[cur-1] 이 더 크기 때문이다. 오른쪽에도 있을 수 있지만 왼쪽엔 보장이 된다.   
@@ -187,9 +190,15 @@ https://leetcode.com/problems/find-k-closest-elements/
 
 문제: sorted integer array가 주어지고 k, x가 주어진다. x랑 가장 가까운 k개의 원소를 정렬된 순서로 반환하라. abs(y - x)가 동일하면 작은 y값이 더 가까운 걸로 간주한다. x가 arr에 존재하지 않을 수 있다.
 
+```
+Input: arr = [1,2,3,4,5], k = 4, x = 3
+Output: [1,2,3,4]
+```
 
 
-<details><summary>brute force O(N)</summary>
+<details><summary>Approach 1</summary>
+
+brute force O(N)
 
 ```py
     def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
@@ -208,7 +217,7 @@ https://leetcode.com/problems/find-k-closest-elements/
 
 
 
-<details><summary>내 첫 approach</summary>
+<details><summary>Approach 2</summary>
 
 너무 헤맸다.     
 헤맨 포인트:
@@ -296,7 +305,34 @@ class Solution:
 
 
 
-<details><summary>Best solution</summary>
+<details><summary>Approach 3</summary>
+
+어렵다.
+
+```
+예시)
+[1, 1, 2, 3, 4, 5, 6, 6, 7, 7] (10개), k = 3, x = 2
+left, right = 0, 7
+mid = 3
+  nums[mid:mid+k+1] = [3, 4, 5, 6]
+  nums[mid] = 3
+  nums[mid+k] = 6
+  => nums[mid] 가 더 가깝다. 
+  => nums[mid:mid+k] vs nums[mid+1:mid+k+1] 두 개를 비교했을 때, 후자는 답이 될 수 없다.
+  => 중간 값들은 겹치고 하나만 다른데 더 가까운 값이 있는 게 답일 테니까.
+  => 따라서 answer의 시작점은 mid의 오른쪽이 될 수 없으므로 right를 mid로 바꾼다.
+left, right = 0, 3
+mid = 1
+  nums[mid:mid+k+1] = [1, 2, 3, 4]
+  nums[mid] = 1
+  nums[mid+k] = 4
+left, right = 0, 1
+mid = 0
+  nums[mid:mid+k+1] = [1, 1, 2, 3]
+  nums[mid] = 1
+  nums[mid+k] = 3
+left, right = 0, 0
+```
 
 - answer subarray의 시작 지점을 찾는 것이다.   
 - 정답 array의 시작 지점으로 가능한 범위의 left bound는 0이고 right bound는 n-k이다. 
@@ -339,7 +375,7 @@ https://leetcode.com/problems/find-smallest-letter-greater-than-target/
 
 문제: 알파벳 소문자로 이루어진 리스트가 주어지고 target character가 주어진다. target char보다 큰 문자 중 가장 작은 문자를 반환하라. target char보다 큰 게 없으면 첫 번째 문자를 반환하라.
 
-<details>
+<details><summary>Approach 1</summary>
 
 - o o o x x x
 - left condition: target char보다 작거나 같다
@@ -374,7 +410,7 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
 문제: sorted array with unique integer가 주어진다. 한 군데를 기준으로 rotate 되어 있는데 그 array의 최솟값을 구하라. `ex) [3, 4, 5, 1, 2] => return 1`
 
 
-<details>
+<details><summary>Approach 1</summary>
 
 데이터를 먼저 이해하자. mid가 각 상황일 때 어떤 의미인지를 충분히 생각하고 깔끔하게 분류한 걸 글로 정리한 뒤에 코드를 생각해보자.
 
@@ -423,7 +459,9 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
 
 문제: 중복된 값이 있는 integer array가 ascending order로 정렬되어 있었는데 몇 번의 rotation이 일어난 상태이다. 이 array에서 최솟값을 구하라.
 
-<details><summary>내 풀이</summary> 
+<details><summary>Approach 1</summary>
+
+내 풀이
 
 중복된 값이 있음으로서 달라지는 부분이 있다.   
 로직은 다음과 같다.   
@@ -441,7 +479,9 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
 
 
 
-<details><summary>solution</summary> 
+<details><summary>Approach 2</summary>
+
+Solution
 
 비슷한데 linear 탐색 대신 범위를 하나 좁혀서 다시 binary search를 시도한다.   
 데이터 분석을 다시 해보자.
@@ -459,6 +499,7 @@ left를 기준으로 한 데이터 분석
    - right half를 탐색한다.
 - if nums[mid] == nums[left]:
    - left를 하나 올려서 다시 탐색한다.
+   - 이렇게 재시도할 생각을 해야한다.
 
 
 
@@ -483,6 +524,8 @@ def findMin(self, nums: List[int]) -> int:
             l += 1
 ```
 
+어렵다.
+
 </details>
 
 
@@ -496,11 +539,13 @@ https://leetcode.com/problems/search-a-2d-matrix-ii/
 
 문제: 각 row와 column은 ascending order로 sort 되어 있다. target 이 해당 matrix 안에 있는지 판별하는 알고리즘을 구현하라.
 
-<details>
+<details><summary>Approach 1</summary>
 
 - 어떤 위치에서 target보다 크다면, 해당 위치 기준 righter, lower elements는 다 무시할 수 있다. 이 때는 왼쪽으로 한 칸 이동해야한다.
 - 어떤 위치에서 target보다 작다면, 해당 위치 기준 lefter, upper elements는 다 무시할 수 있다. 이 때는 아래로 한 칸 이동해야한다.
 - binary search로 target을 찾으면 return True, 못 찾고 loop를 나오면 return False
+
+이게 왜 binary search지?
 
 ```python
 def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:

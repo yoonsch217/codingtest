@@ -4,6 +4,8 @@ https://leetcode.com/problems/group-anagrams
 
 문제: 문자열 리스트가 주어졌을 때 같은 anagram끼리 묶은 리스트를 반환하라. 리스트 순서는 상관 없다.
 
+<details><summary>Approach 1</summary>
+
 두 문자열이 anagram인지를 확인하기 위해서는 sorting 결과를 보는 방법도 있고 각 문자의 출현 횟수를 비교하는 방법도 있다.   
 지금 문제의 경우는 알파벳 소문자만 사용하기 때문에 sorting보다는 출현 횟수를 보는 게 더 빠르다.
 
@@ -12,7 +14,6 @@ ord() 함수로 count를 증가시킨 다음에 마지막에 counts list를 hash
 이 때, 나는 map(str, counts) 한 뒤에 '.'.join(counts)를 했는데 이러면 너무 느리다.   
 대신 tuple(counts)를 하면 빠른 시간에 hashable key 생성이 된다.
 
-<details>
 
 ```py
     def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
@@ -29,10 +30,9 @@ ord() 함수로 count를 증가시킨 다음에 마지막에 counts list를 hash
         return ans
 ```
 
-</details>
-
 
 Complexity
 - Time Complexity: O(NK) where N is the length of `strs`, and K is the maximum length of a string in `strs`.
 - Space Complexity: O(NK)
 
+</details>
