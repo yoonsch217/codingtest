@@ -22,8 +22,22 @@
 ### Algorithmic Techniques
 
 - Bit Manipulation
+  - 기본 연산
+    - `-64` original code, inverse code, complement code => 11000000 / 10111111 / 11000000
+    - magnitude는 sign bit 빼고 전체 flip 후 1을 더하면 된다.
+    - `&`, `|`, `^`, `<<`, `>>`
+    - `~`: 각 bit flip. 양수에 대한 negation은 부호 바꾸고 magnitude를 하나 올린 값이다. (`~5` = -6)
+    - Get i-th bit of the given number.: `num & (1<<i)`
+    - Set i-th bit to 1: `num | (1<<i)`
+    - Clear i-th bit: `num & (~(1<<i))`
+    - `-a = ~(a-1)`
+    - n & (n-1) 을 하게 되면 n에 존재하는 1 중에 가장 낮은 자리에 있는 1만 0으로 바꿔준다.
+  - Bit Mask: 정수 하나로 리스트를 사용한 것과 같은 효과를 낸다. `10110(2) = 22`
+  - State Compression via Bit Manipulation
 - Recursion
+  - backtracking: recursion을 들어가다가 invalid한 순간 멈추고 valid한 지점까지 돌아온다. DFS 생각하자.
 - Greedy
+  - Container with Most Water
 - Dynamic Programming
 
 

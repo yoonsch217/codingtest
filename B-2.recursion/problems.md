@@ -389,6 +389,8 @@ def find_expressions(target):
         new_number = int(str(start) + str(start + 1))
         backtrack(start + 2, expression + str(new_number), current_sum + new_number)
 
+        # Target이 100이 아니라면 두 개를 연결하는 것 말고 세 개를 연결하는 것도 고려해야할 것 같다.
+
     expressions = []
     backtrack(1, '1', 1)
     return expressions
