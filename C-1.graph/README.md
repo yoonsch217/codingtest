@@ -29,7 +29,8 @@ Tree의 경우는 root가 존재하고 root만 알면 다 조회가 가능하다
 ### 특징
 
 DAG 그래프 안에서 최대 pow(2, N-1) -1 개의 distinct, non-empty path가 있을 수 있다.    
-두 vertices 사이에는 최대 한 개의 path가 있을 수 있다. 따라서 N개의 element로 만들 수 있는 subset의 수를 구해야한다.    
+N개의 element로 만들 수 있는 subset의 수를 구해야한다.    
+`[a, b, c]` 가 있다면, `[a]`, `[b]`, `[c]`, `[a, b]`, `[a, c]`, `[b, c]`, `[a, b, c]` 각각의 노드를 거치는 distinct paths이다. `[]`는 제외했다.   
 어떤 subset에서 각 element마다 exist or abscent 둘 중 하나가 된다. 따라서 2^N 개의 subset이 존재할 수 있고, 모두 abscent인 경우는 empty subset이므로 path는 at most pow(2, N) - 1 이 된다.    
 
 기본적으로는 connected graph가 아니라면 모든 노드의 리스트를 저장하고 있어야한다.    

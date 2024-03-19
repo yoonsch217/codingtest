@@ -39,16 +39,27 @@
 - Greedy
   - Container with Most Water
 - Dynamic Programming
-  - State Reduction
-  - Kadane's Algorithm
+  - State Reduction: 최근 n개만 필요하진 않은지, 상관관계가 있는 변수끼리 합칠 수 있는지 체크
+  - Kadane's Algorithm: `i~j` 범위가 항상 커버됨으로 valid한 알고리즘이다.
   - Knapsack algorithm
   - Best Time to Buy and Sell Stock with Cooldown: state가 여러 개 있고 각각의 관계를 구한 후 bottom up으로 업데이트한다.
-  - Optimization on Space in Grid Problems: grid 자체를 업데이트하면 공간을 줄인다.
+  - Optimization on Space in Grid Problems: grid 자체를 업데이트하면 공간을 줄인다. 혹은 직전 row만 보관해도 가능한지 확인해본다.
 
 
 ### Grapshs and Trees
 
 - Graph
+  - all possible paths 수는 O(2^N)
+  - BFS의 space O(min(M, N))
+  - bidirectional search: src, dst 사이의 최단 경로 찾을 때 각각에서 BFS를 한다. `O(2*k^d/2) for d is the shortest distance`
+  - Kruskal's Algorithm: MST. greedy + union-find. edge를 weight 순서로 정렬 후 작은 edge부터 cycle이 없다면 추가한다.
+  - Prim's Algorithm: MST. greedy. visited set & edge heap. unvisited로 가는 가장 작은 edge부터 추가한다.
+  - Dijkstra's Algorithm: greedy. `vtx_to_dist` dict과 `edge_heap(w, s, d)` heap이 필요하다.
+  - Bellman-Ford Algorithm: dp. `dp[k][u]: 최대 k edge로 u 갈 때 최소 weight sum`
+  - SPFA Algorithm: Bellman-Ford에서 iteration마다 연결된 edge만 큐에 넣어서 작업한다.
+  - Kahn's Algorithm: topological sorting. `vtx_to_degree` dict
+  - Cycle 확인하기: white, gray, black with DFS. gray 만나면 cycle.
+  - Cheapest Flights within K Stops
 - Binary Tree
 - Heap
 - Trie
