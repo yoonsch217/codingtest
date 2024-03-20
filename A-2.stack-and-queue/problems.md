@@ -503,10 +503,82 @@ right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
 
 
 
+### 503. Next Greater Element II
 
-https://leetcode.com/problems/minimum-cost-tree-from-leaf-values/description/
-https://leetcode.com/problems/sum-of-subarray-minimums/description/
-https://leetcode.com/problems/online-stock-span/description/
 https://leetcode.com/problems/next-greater-element-ii/description/
 
+문제:
 
+
+
+### 907. Sum of Subarray Minimums
+
+https://leetcode.com/problems/sum-of-subarray-minimums/description/
+
+문제:
+
+
+<details><summary>Approach 1</summary>
+
+brute force하게 N^2 Time 알고리즘을 생각했다.   
+
+```py
+    def sumSubarrayMins(self, arr: List[int]) -> int:
+        n = len(arr)
+        res = 0
+        for i in range(n):
+            cur_min = arr[i]
+            for j in range(i, n):
+                cur_min = min(cur_min, arr[j])
+                res += cur_min
+        
+        return res % (pow(10,9) + 7)
+```
+
+
+</details>
+
+
+
+
+<details><summary>Approach 2</summary>
+
+- heap에 (value, index) 를 저장한다.
+- 왼쪽부터 오른쪽으로 iterate한다. cur_idx가 subarray의 rightend라고 생각하자. 
+- 0부터 first_min_index 까지가 leftend일 때는 min 값이 first_min_value이다.
+- first_min_index+1 부터 second_min_index까지가 leftend일 때는 min 값이 second_min_value이다.
+- 이렇게 해서 cur_index가 되면 break하고 rightend를 하나 더 늘린다.
+
+근데 heap을 매번 pop, push를 반복해야 하기 때문에 이것도 결국 worst는 N^2이다.
+구현 스킵
+
+</details>
+
+
+<details><summary>Approach 3</summary>
+
+`503. Next Greater Element II` 를 활용해야한다.    
+
+- 어떤 index를 기준으로 했을 때, 왼쪽에서 자기보다 처음으로 작은 값이 나오는 위치를 l, 오른쪽에 처음 나오는 위치를 r이라 하자.
+- `arr[l+1:r] 범위에서는 어떤 contiguos subarray도 min 값은 arr[index]가 된다.
+- duplicate value에 대한 처리를 고려해야한다.
+
+
+
+</details>
+
+###
+
+https://leetcode.com/problems/sliding-window-maximum/description/
+
+문제: 
+
+
+
+
+
+
+https://leetcode.com/problems/minimum-cost-tree-from-leaf-values/description/
+https://leetcode.com/problems/online-stock-span/description/
+https://leetcode.com/problems/maximal-rectangle/description/
+https://leetcode.com/problems/remove-duplicate-letters/description/
