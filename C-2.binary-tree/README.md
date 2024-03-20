@@ -142,6 +142,8 @@ rightmost의 right child를 cur.right로 연결하면 안되나 생각도 했었
 O(n) time / O(1) space가 필요하다.   
 각 노드는 최대 두 번 방문이 될 수 있다.   
 
+![alt text](image.png)
+
 <details>
 
 ```python
@@ -185,7 +187,8 @@ def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 
 - inorder
 
-동일한 개념이다.
+parent 노드룰 찾는 방법은 동일하다. 
+내려가기 전에 res list에 값을 넣었던 preorder과 달리 위로 올라오면서 res list에 값을 넣어주는 것이다.
 
 1. root부터 cur로 놓는다.
 2. cur의 left가 없으면, cur에 대해 처리하고 cur = cur.right 로 옮겨준다.
@@ -229,7 +232,7 @@ def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 
 > 조건: 어떤 recursion에서 답을 구할 수 있는 parameter를 정할 수 있는가? 그 parameter와 현재 노드의 값을 통해 child node에게 전달할 parameter를 구할 수 있는가?   
 
-preorder traversal과 유사하다.   
+preorder traversal과 유사하다. 내려보낼 값을 먼저 정하고 child에 대해 호출한다.   
 
 recursive function `top_down(node, params)`은 다음과 같다. 예시로 binary tree의 maximum depth를 구하는 것이 있다.
 
@@ -246,7 +249,7 @@ child로 내려갈 때 ans 변수를 넘겨주고, 해당 child에서는 업데�
 > 조건: 어떤 노드에서 그 children의 답을 안다면 현재 노드에 대한 답을 구할 수 있는가?
 
 child node로 recursive하게 호출한 후 child node에서 return한 값과 current node의 값을 통해서 결과를 계산한다.   
-postorder traversal과 유사하다.   
+postorder traversal과 유사하다. child를 먼저 호출하고 그 값들을 통해 올려보낼 값을 정한다.   
 이것도 마찬가지로 binary tree의 maximum depth를 구할 수 있다.   
 
 1. base case를 정의한다. (`if node is None: return 0`)

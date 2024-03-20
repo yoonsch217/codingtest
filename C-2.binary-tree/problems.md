@@ -86,58 +86,12 @@ start_value를 갖는 노드에서 dest_value를 갖는 노드로 가는 최단 
 
 <details><summary>Approach 1</summary>
 
-내가 처음 풀은 solution. 시간이 느리게 측정된다. 각 node까지의 path를 구한 다음에 그 두 path를 비교해서 겹치는 건 없앴다. 그 다음 남은 걸로 답을 만들었다.   
+내가 처음 풀은 solution은 시간이 느리게 측정된다. 각 node까지의 path를 구한 다음에 그 두 path를 비교해서 겹치는 건 없앴다. 그 다음 남은 걸로 답을 만들었다.   
 복잡도는 O(N) / O(N) 인 것 같은데. 전체 트리 한 번 훑으면서 path 찾고, 그 path 한 번 더 작업하고.   
 
-
-
-```python
-class Solution:
-    def getDirections(self, root: Optional[TreeNode], startValue: int, destValue: int) -> str: 
-        self.tmp_path = deque()
-        self.path_to_start, self.path_to_dest = None, None
-
-        def helper(cur, direction):
-            if cur == None or (self.path_to_start and self.path_to_dest):
-                return
-            self.tmp_path.append((cur, direction))
-
-            if cur.val == startValue:
-                self.path_to_start = copy.deepcopy(self.tmp_path)
-            if cur.val == destValue:
-                self.path_to_dest = copy.deepcopy(self.tmp_path)
-
-            helper(cur.left, 'L')
-            helper(cur.right, 'R')
-            self.tmp_path.pop()
-        
-        helper(root, '')
-
-        while self.path_to_start and self.path_to_dest:
-            if self.path_to_start[0][0].val == self.path_to_dest[0][0].val:
-                self.path_to_start.popleft()
-                self.path_to_dest.popleft()
-            else:
-                break
-        
-        rtn = []
-        for i in range(len(self.path_to_start)):
-            rtn.append('U')
-        for i in range(len(self.path_to_dest)):
-            rtn.append(self.path_to_dest[i][1])
-        return ''.join(rtn)
-        
-```
-
-
-
-
-
-
-솔루션도 비슷한 거 같은데 각각의 path 구할 때 root 기준의 L, R을 애초에 넣었다. 객체를 직접 다루고 가져가기보다는 필요한 결과만 다루도록 하자. 메모리도 많이 차지하고 비효율적이다.   
+솔루션도 비슷한 거 같은데 각각의 path 구할 때 root 기준의 L, R을 애초에 넣었다.    
+객체를 직접 다루고 가져가기보다는 필요한 결과만 다루도록 하자. 메모리도 많이 차지하고 비효율적이다.    
 그리고 deque 쓸 필요도 없었다. 어차피 한 쪽으로만 넣고 한 쪽으로만 빼니까 list로 간단히 할 수 있었다.
-
-
 
 ```py
 class Solution:
@@ -436,14 +390,14 @@ class Solution:
 
 https://leetcode.com/problems/delete-node-in-a-bst/description/
 
-문제: unique value로 이루어진 BST에서 root 가 주어지고 target이 주어졌을 때 target 값을 갖는 노드를 제거된 BST의 root를 반환하라.
+문제: unique value로 이루어진 BST에서 root 가 주어지고 target이 주어졌을 때 target 값을 갖는 노드가 제거된 BST의 root를 반환하라.
 
 <details><summary>Approach 1</summary>
 
 지우는 과정을 상상해서 단순화시킨 후 구현하기가 까다롭다.
 
 이 함수는 target을 지운 뒤 그 tree의 root를 반환해준다.   
-따라서 recursive하게 생각했을 때, target이 root 왼쪽에 있다면 `root.left = deleteNode(root.left, target)`` 으로 하면 아래에서 알아서 된다.   
+따라서 recursive하게 생각했을 때, target이 root 왼쪽에 있다면 `root.left = deleteNode(root.left, target)` 으로 하면 아래에서 알아서 된다.   
 
 
 1. leaf node이면, 그 node를 None으로 바꾼다.
@@ -483,6 +437,7 @@ solution
         return root
 ```
 
+O(h) / O(h)
 
 
 user solution에 있던 더 간단한 코드. `left가 있으면, right가 있으면` 의 조건이었는데 `left가 없으면, right가 없으면` 으로 바꾸니까 간단해진다.

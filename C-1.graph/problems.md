@@ -261,7 +261,7 @@ Bellman Ford를 최적화시킨 알고리즘 => iteration마다 모든 edge를 �
                         continue
                     new_distances[_dst] = distances[cur] + _price
                     next_list.append(_dst)
-            distances = new_distances
+            distances = new_distances  # 여기 loop depth를 실수하지 말자.
             cur_list = next_list
         
         if distances[dst] == math.inf:
