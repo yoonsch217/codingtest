@@ -611,6 +611,64 @@ https://leetcode.com/problems/sliding-window-maximum/description/
 문제: 
 
 
+<details><summay>Approach 1</summary>
+
+
+```py
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        l, r = 0, k
+        res = []
+        #cur_window = nums[0:k]
+        while l <= len(nums) - k:
+            r = l + k
+            res.append(max(nums[l:r]))
+            l += 1 
+        return res
+```
+
+</details>
+
+
+<details><summary>Approach 2</summary>
+
+monotonic queue를 활용한다.   
+
+- 큐에는 작아지는 순서로 데이터가 들어가게 된다.
+- 새로운 값이 들어올 때, head를 하나씩 보면서 index가 유효하지 않으면 버린다.
+- tail부터 지금의 값보다 작으면 버리고 지금 값의 위치를 찾아 들어간다.
+- 버려진 값들은 지금 값보다 작으면서 왼쪽에 존재하는 거니까 앞으로의 답에 영향을 줄 수 없다.
+
+```py
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        m_queue = deque()
+        res = []
+        for i, num in enumerate(nums):
+            while m_queue and m_queue[0][1] <= i - k:
+                # 여기는 index만 봐도 된다. 남은 건 유효한 max니까.
+                m_queue.popleft()
+                
+            while m_queue and (m_queue[-1][0] <= num or m_queue[-1][1] <= i - k):
+                # 여기는 값만 비교해도 되긴 되는데 그냥 정리해주자.
+                m_queue.pop()
+
+            m_queue.append((num, i))
+            if i < k-1:
+                continue
+
+            res.append(m_queue[0][0])
+        
+        return res
+```
+
+O(N) / O(N)
+
+</details>
+
+
+
+
+
+---
 
 
 
