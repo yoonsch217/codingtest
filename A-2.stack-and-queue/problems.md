@@ -507,7 +507,44 @@ right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
 
 https://leetcode.com/problems/next-greater-element-ii/description/
 
-문제:
+문제: Given a circular integer array nums (i.e., the next element of nums[nums.length - 1] is nums[0]), return the next greater number for every element in nums. 
+The next greater number of a number x is the first greater number to its traversing-order next in the array, which means you could search circularly to find its next greater number. If it doesn't exist, return -1 for this number.
+
+
+<details><summary>Approach 1</summary>
+
+
+```py
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+        stack = []
+        res = deepcopy(nums)
+        for i in range(len(nums)-1, -1, -1):
+            num = nums[i]
+            while stack and num >= stack[-1]:
+                stack.pop()
+            if stack:
+                res[i] = stack[-1]
+            else:
+                res[i] = -1
+            stack.append(num)
+        
+        for i in range(len(nums)-1, -1, -1):
+            num = nums[i]
+            while stack and num >= stack[-1]:
+                stack.pop()
+            if stack:
+                res[i] = stack[-1]
+            else:
+                break
+            stack.append(num)
+        
+        return res
+```
+
+</details>
+
+
+
 
 
 

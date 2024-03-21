@@ -10,6 +10,7 @@
   - Dutch National Flag
 - Stack and Queue
   - Monotinic Stack
+  - Monotonic Deque
   - Daily Temperatures: monotonic stack, backward iterate
   - Trapping Rain Water: left_maxs + right_maxs 로 구하기, monotonic stack
 - HashTable
