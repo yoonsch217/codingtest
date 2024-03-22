@@ -88,8 +88,6 @@ class Solution:
 
 <details><summary>Approach 2</summary>
 
-
-
 **Binary Search**    
 
 특정 위치까지 갈 수 있나 없나는 판단할 수 있다. 그 구간의 height diffs를 받아서 정렬한 뒤 min부터 벽돌 사용하도록 하면 판단이 된다.    
@@ -457,7 +455,7 @@ rotated 된 경우에 대해서는 index 0의 value를 기준으로 잡는다. �
 
 https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/
 
-문제: 중복된 값이 있는 integer array가 ascending order로 정렬되어 있었는데 몇 번의 rotation이 일어난 상태이다. 이 array에서 최솟값을 구하라.
+문제: 중복된 값이 있는 integer array가 ascending order로 정렬되어 있었는데 중간에 rotation이 일어난 상태이다. 이 array에서 최솟값을 구하라.
 
 <details><summary>Approach 1</summary>
 

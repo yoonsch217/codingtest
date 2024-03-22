@@ -214,7 +214,9 @@ def restoreIpAddresses(self, s: str) -> List[str]:
 
 <details><summary>Approach 2</summary>
     
-backtracking하는 건, dots 위치 리스트를 갖고 다니면서 backtrack 시작하기 전에 dots.append(cur_dot_idx)하고 끝나면 dots.pop() 을 한다.   
+backtracking
+
+dots 위치 리스트를 갖고 다니면서 backtrack 시작하기 전에 dots.append(cur_dot_idx)하고 끝나면 dots.pop() 을 한다.   
 각 dot마다 iterate할 때는 세 번만 iterate하면 된다.   
 
 
