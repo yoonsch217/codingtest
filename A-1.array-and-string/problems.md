@@ -4,13 +4,16 @@ https://leetcode.com/problems/longest-substring-without-repeating-characters
 
 문제: 문자열이 주어졌을 때 반복되는 글자가 없는 가장 긴 substring의 길이를 반환하라.
 
+<details><summary>Approach 1</summary>
+
 sliding window를 사용한다. substring의 left와 right를 정해주는 포인터 두 개를 저장한다.   
 그리고 dictionary 하나를 만들어서 key는 나타났던 문자, value는 그 문자의 위치를 저장한다.   
 string을 traverse하면서 현재 문자가 dictionary에 있으면서 그 문자의 위치가 cur_idx보다 크거나 같으면 left pointer를 `d[cur] + 1` 로 업데이트한다.   
 그리고 `d[cur] = right` 로 업데이트 혹은 추가를 해주고 `right += 1` 로 포인터 위치를 옮긴다.    
+
 Time: O(N) , Space: O(N)
 
-<details>
+
 
 ```python
 def lengthOfLongestSubstring(self, s: str) -> int:
@@ -36,19 +39,19 @@ https://leetcode.com/problems/car-pooling/
 
 문제: capacity 라는 integer와 passengers라는 리스트가 주어진다. passengers 리스트는 `[승객수, 탑승 시각, 하차 시각]` 로 구성되어 있다. 전체 여정을 하면서 capacity를 넘는 순간이 있다면 false, 그렇지 않다면 true를 반환한다.
 
+
+<details><summary>Approach 1</summary>
+
 어떤 시간 순서열에서 i ~ j 까지 어떤 변화가 있다가 사라져야한다면 map[i] += event, map[j] -= event 식으로 사용한다.   
 그러면 그 map을 key로 sort하면 시간 순서대로 정렬이 된다. froms와 tos를 iterate하면서 확인한다.   
 `dd = sorted(d.items())` 이렇게 하면 dict가 key로 정렬된 후에 tuple list로 저장이 된다.   
 
-dictionary 안 쓰고 tuple list 만들어서 각 element가 (location, num_boarding) 과 같이 하면 corner case가 생길 거 같다.   
-예를 들어 한 location에 내리는 trip이 여러 개 있을 때, 이걸 처음에 froms, tos 만들 때 한 location에 합쳐서 데이터를 만들어야 한다.   
-근데 tuple list를 하면 (location, disembarking1), (location, disembarking2) 이렇게 두 개가 만들어지게 된다.   
-그러면 나중에 sorting 했을 때 각 iteration에서 하나의 data만 계산하고 capacity를 검증하는 방식이라면 더 내릴 사람이 있는데도 exceeded 로 판단할 수 있다.   
-즉, 같은 location 에 대한 데이터는 하나가 되어야한다.
+한 location에 내리는 trip이 여러 개 있을 때, 이걸 처음에 froms, tos 만들 때 한 location에 합쳐서 데이터를 만들어야 한다.   
+근데 dict 대신 tuple list를 사용하면 (location, disembarking1), (location, disembarking2) 이렇게 두 개가 만들어지게 된다.   
+그러면 나중에 sorting 했을 때 각 iteration에서 하나씩 계산하면 안 되고 동일 location이 아닐 때까지 뒤로 탐색을 더 해야해서 불편하다.   
 
 sort 작업 때문에 Time: O(N log N), Space: O(N) 일 것 같다.
 
-<details>
 
 ```python
 def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
@@ -83,10 +86,13 @@ def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
 </details>
 
 
+
+
+<details><summary>Approach 2</summary>
+
 조건을 보니까 시각이 1 ~ 1000까지라는 제약이 있다. bucket sort를 사용할 수도 있다.    
 Time: O(N), Space: O(1)
 
-<details>
 
 ```python
 boardings = [0] * 1001
@@ -108,14 +114,23 @@ return True
 </details>
 
 
+
+
+
+
 ### 2158. Amount of New Area Painted Each Day
 
 https://leetcode.com/problems/amount-of-new-area-painted-each-day/  (locked)
 
 문제: 0-indexed 2D integer array paint가 주어진다. paint[i] = [start_i, end_i] 인데 i 시점에 start position과 end position 사이를 칠할 수 있다. paint array를 앞에서부터 iterate하면서 해당 범위 내에 색칠을 하는데 같은 부분을 두 번 이상 색칠하지는 않는다. 각 iteration에서 색칠해아 하는 칸의 수를 구하라.
 
+
+<details><summary>Approach 1</summary>
+
+
 sweep line이라는 개념이 들어간다.   
 https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/1740812/Python-Complete-3-solutions-using-different-data-structures   
+
 좀 어렵다.   
 먼저 iteratre하면서 각각의 start position과 index를 tuple로 묶어서 리스트에 넣는다. end position과 index도 마찬가지로 넣는다. 각각이 start인지 end인지 boolean 등으로 표시를 해놓는다.    
 그 다음에 position을 기준으로 sort를 한다.   
@@ -126,6 +141,14 @@ https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/174081
 인덱스 낮은 작업이 우선이므로 인덱스 1의 작업에 의한 색칠 부분으로 인식하면 된다.   
 
 
+- start position과 index를 tuple로 묶어서 position array에 넣는다. end position과 index도 마찬가지로 넣는다. start인지 end인지 알 수 있도록 넣는다.
+- position을 기준으로 sort를 한다. 리스트를 앞에서부터 스캔하면 빠른 position부터 나올 것이다.   
+- 전체 길이에 맞는 buffer array를 만든다.   
+- position array를 iterate하면서 start가 나오면 그때부터 buffer의 해당 position에 해당 index를 넣는다. end가 나오면 해당 index에 대해서 그만 넣는다.   
+- 나중에 buffer array를 살펴봤을 때 어떤 칸에 1, 5가 있다면 인덱스 1 작업과 인덱스 5 작업에 의해 색칠될 수 있던 공간이라는 뜻이다.   
+인덱스 낮은 작업이 우선이므로 인덱스 1의 작업에 의한 색칠 부분으로 인식하면 된다.   
+
+<details>
 
 
 ### 904. Fruit Into Baskets

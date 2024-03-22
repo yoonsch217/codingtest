@@ -513,6 +513,12 @@ The next greater number of a number x is the first greater number to its travers
 
 <details><summary>Approach 1</summary>
 
+monitonic stack을 활용한다.
+
+- 뒤에서부터 iterate하면서 decreasing monotonic stack을 만든다.
+- 현재 값보다 큰 값이 나올 때까지 pop을 한다. stack이 비게 되면 -1을 넣고 그렇지 않다면 top을 넣는다.
+- 현재 값을 stack에 넣는다.
+- circular list이기 때문에 이 과정을 두 번 반복한다. stack이 비게 되는 순간은 바로 break할 수 있다.
 
 ```py
     def nextGreaterElements(self, nums: List[int]) -> List[int]:
@@ -552,7 +558,8 @@ The next greater number of a number x is the first greater number to its travers
 
 https://leetcode.com/problems/sum-of-subarray-minimums/description/
 
-문제:
+문제: Given an array of integers arr, find the sum of min(b), where b ranges over every (contiguous) subarray of arr. Since the answer may be large, return the answer modulo 10^9 + 7.    
+arr = [3,1,2,4], Subarrays are [3], [1], [2], [4], [3,1], [1,2], [2,4], [3,1,2], [1,2,4], [3,1,2,4] => 17
 
 
 <details><summary>Approach 1</summary>
@@ -598,13 +605,140 @@ brute force하게 N^2 Time 알고리즘을 생각했다.
 
 - 어떤 index를 기준으로 했을 때, 왼쪽에서 자기보다 처음으로 작은 값이 나오는 위치를 l, 오른쪽에 처음 나오는 위치를 r이라 하자.
 - `arr[l+1:r] 범위에서는 어떤 contiguos subarray도 min 값은 arr[index]가 된다.
-- duplicate value에 대한 처리를 고려해야한다.
+- duplicate value에 대한 처리를 고려해야한다. 이게 어렵다.
+  - 양 쪽 다 if greater, pop 을 하면 duplicate
+
+
+```
+both strictly greater condition
+
+values: 3 1 2 3 2 4
+index:  0 1 2 3 4 5
+
+left:   N N 1 2 2 4
+right:  1 N 4 4 N N
+
+[2, 3, 2]로 extend 되는 건 빠진다.
+
+```
+
+```
+both greater or equal condition
+
+values: 3 1 2 3 2 4
+index:  0 1 2 3 4 5
+
+left:   N N 1 2 1 4
+right:  1 N N 4 N N
+
+[2, 3, 2]를 기준으로 extend 되는 건 2번씩 중복되게 된다.
+```
+
+```
+left strictly greater, and right greater or equal condition
+
+values: 3 1 2 3 2 4
+index:  0 1 2 3 4 5
+
+left:   N N 1 2 2 4
+right:  1 N N 4 N N
+
+[2, 3, 2]를 기준으로 extend 되는 건 왼쪽에 있는 게 담당한다.
+오른쪽에 있는 값은 left를 빼고 extend하니까 중복이 안 된다.
+```
+
+
+어렵다.
+
+
+```py
+    def sumSubarrayMins(self, arr: List[int]) -> int:
+        # number of moves from current position to reach the first less element
+        left_dists = [0] * len(arr)
+        right_dists = [0] * len(arr)
+
+        d_stack = []
+        for i, num in enumerate(arr):
+            while d_stack and d_stack[-1][0] > num:
+                d_stack.pop()
+            if d_stack:
+                left_dists[i] = i - d_stack[-1][1]
+            else:
+                left_dists[i] = i+1
+            d_stack.append((num, i))
+
+        d_stack = []
+        for i in range(len(arr)-1, -1, -1):
+            num = arr[i]
+            while d_stack and d_stack[-1][0] >= num:
+                d_stack.pop()
+            if d_stack:
+                right_dists[i] = d_stack[-1][1] - i
+            else:
+                right_dists[i] = len(arr) - i
+            d_stack.append((num, i))
+        
+        res = 0
+        #print(f"{len(left_dists)} {len(right_dists)}")
+        for i in range(len(arr)):
+            res += (left_dists[i] * right_dists[i] * arr[i])
+        
+        return res % (pow(10, 9) + 7)
+```
+
+</details>
+
+
+<details><summary>Approach 3</summary>
+
+Approach 2를 최적화한 방법이다. 
+Approach 2의 경우는 각 원소당 최대 2 + 2 + 1 번 접근할 수 있을 것 같다.   
+Approach 3는 각 원소 당 최대 2번 접근한다.
+
+- 각 position i에 대해서, i가 rightend인 subarray를 생각하자.
+- i가 i-1에서 i로 하나 증가하게 되면, i-1일 때의 subarray들에서 i만 append한 것에 `[i]` 만 추가된 것이다.
+- arr[i]가 arr[i-1]보다 크다면, arr[i]가 추가된 것은 min에 영향을 주지 못한다.
+- arr[i]가 더 작다면, 처음으로 arr[i]보다 작은 값이 나오는 곳을 찾는다. 그 구간까지는 min 값이 바뀌어야한다.
+- result[i]를 i가 rightend인 subarray들의 min 합이라고 하자.
+- if arr[i] >= arr[i-1], result[i] = result[i-1] + arr[i]
+- else, result[i] = result[j] + arr[i] * (i-j), for j the first less element
+
+코드도 훨씬 간단하다.
+
+
+```py
+    def sumSubarrayMins(self, arr: List[int]) -> int:
+        arr = [0] + arr
+        result = [0]*len(arr)
+        stack = [0]
+        for i in range(len(arr)):
+            while arr[stack[-1]] > arr[i]:
+                stack.pop() 
+            j = stack[-1]
+            result[i] = result[j] + (i-j)*arr[i]
+            stack.append(i)
+        return sum(result) % (10**9+7)
+```
+
+
+
 
 
 
 </details>
 
-###
+
+
+
+
+
+
+
+
+
+
+
+### 239. Sliding Window Maximum
 
 https://leetcode.com/problems/sliding-window-maximum/description/
 
