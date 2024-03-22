@@ -131,21 +131,13 @@ https://leetcode.com/problems/amount-of-new-area-painted-each-day/  (locked)
 sweep line이라는 개념이 들어간다.   
 https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/1740812/Python-Complete-3-solutions-using-different-data-structures   
 
-좀 어렵다.   
-먼저 iteratre하면서 각각의 start position과 index를 tuple로 묶어서 리스트에 넣는다. end position과 index도 마찬가지로 넣는다. 각각이 start인지 end인지 boolean 등으로 표시를 해놓는다.    
-그 다음에 position을 기준으로 sort를 한다.   
-그러면 그 리스트를 앞에서부터 스캔하면 빠른 position부터 나올 것이다.   
-그다음에는 전체 길이에 맞는 buffer array를 만든다.   
-그러고는 position array를 iterate하면서 start가 나오면 그때부터 buffer의 해당 position에 해당 index를 넣는다. end가 나오면 해당 index에 대해서 그만 넣는다.   
-이렇게 하면 나중에 buffer array를 살펴봤을 때 어떤 칸에 1, 5가 있다면 인덱스 1 작업과 인덱스 5 작업에 의해 색칠될 수 있던 공간이라는 뜻이다.   
-인덱스 낮은 작업이 우선이므로 인덱스 1의 작업에 의한 색칠 부분으로 인식하면 된다.   
 
 
 - start position과 index를 tuple로 묶어서 position array에 넣는다. end position과 index도 마찬가지로 넣는다. start인지 end인지 알 수 있도록 넣는다.
 - position을 기준으로 sort를 한다. 리스트를 앞에서부터 스캔하면 빠른 position부터 나올 것이다.   
 - 전체 길이에 맞는 buffer array를 만든다.   
 - position array를 iterate하면서 start가 나오면 그때부터 buffer의 해당 position에 해당 index를 넣는다. end가 나오면 해당 index에 대해서 그만 넣는다.   
-- 나중에 buffer array를 살펴봤을 때 어떤 칸에 1, 5가 있다면 인덱스 1 작업과 인덱스 5 작업에 의해 색칠될 수 있던 공간이라는 뜻이다.   
+- 다 끝나고 buffer array를 살펴봤을 때 어떤 칸에 1, 5가 있다면 인덱스 1 작업과 인덱스 5 작업에 의해 색칠될 수 있던 공간이라는 뜻이다.   
 인덱스 낮은 작업이 우선이므로 인덱스 1의 작업에 의한 색칠 부분으로 인식하면 된다.   
 
 <details>
@@ -157,12 +149,15 @@ https://leetcode.com/problems/fruit-into-baskets/description/
 
 문제: fruits 라는 리스트가 주어지고 각 index에 있는 값은 그 위치에 있는 과일을 의미한다. 과일이 리스트대로 일렬로 나열되어 있고 사용자는 어느 한 지점부터 오른쪽으로 과일을 주워담는다. 최대 두 종류의 과일까지 담을 수 있고 그걸 넘어서는 순간 담을 수 없고 멈춰야한다. 최대로 많이 담을 수 있는 과일의 수를 구하라.
 
-~최대라는 말에 꽂혀서 dp로 생각하려다가 도저히 일반식이 안 나왔다.~   
+<details><summary>Approach 1</summary>
+
 related topic을 보니까 sliding window가 나와서 그 방법으로 풀었다.   
 
-최대 길이가 2인 dictionary를 만들고 key는 fruit, value는 그 fruit이 지금까지 나온 위치 중 가장 오른쪽 위치를 저장한다. left, right 포인터를 두고 right 포인터를 하나씩 오른쪽으로 옮긴다. 그러다가 3번째의 과일이 나오게 되면 left 포인터를 옮겨야한다. 이 때 dictionary를 이용하는데 dictionary에 있는 두 가지 과일 중 더 왼쪽에 있는 과일을 버려야한다. 그 과일의 위치 바로 다음부터가 동일한 과일이 연속으로 나오기 시작한 위치이기 때문에 거기에 left 포인터를 놓고 현재 right의 과일을 dictionary에 추가한다. 그러면 두 종류의 과일이 유지된다.
+- 최대 길이가 2인 dictionary를 만들고 key는 fruit, value는 그 fruit이 지금까지 나온 위치 중 가장 오른쪽 위치를 저장한다. 
+- left, right 포인터를 두고 right 포인터를 하나씩 오른쪽으로 옮긴다. 
+- dict에 없는 3번째의 과일이 나오게 되면 left 포인터를 옮긴다. 이 때 dict에 있는 두 가지 과일 중 더 왼쪽에 있는 과일을 버려야한다. 그 과일의 위치 바로 다음부터가 동일한 과일이 연속으로 나오기 시작한 위치이기 때문에 거기에 left 포인터를 놓고 현재 right의 과일을 dictionary에 추가한다.
 
-<details>
+
   
 ```python
 def totalFruit(self, fruits: List[int]) -> int:
@@ -202,7 +197,9 @@ https://leetcode.com/problems/longest-consecutive-sequence/description/
  `[100,4,200,1,3,2]` => 4
 
 
-Approach 1. set
+<details><summary>Approach 1</summary>
+
+set
 
 - 모든 값들을 set에 넣는다.
 - nums를 iterate하면서 현재 num에서 +1 씩 expand 하면서 nums set에 존재하는지 확인한다.
@@ -213,8 +210,6 @@ Approach 1. set
 num-1이 있는 경우 num을 continue 하면 한번 expand 했던 리스트에 있던 값들은 다시 expand하지 않게 된다.   
 어떤 sequence의 시작점은 left value를 갖지 않는다는 특징이 있다. 따라서 num-1이 존재한다면 무시해도 되는 것이다.
 
-
-<details>
 
 ```py
     def longestConsecutive(self, nums: List[int]) -> int:
@@ -235,8 +230,9 @@ num-1이 있는 경우 num을 continue 하면 한번 expand 했던 리스트에 
 
 </details>
 
+<details><summary>Approach 2</summary>
 
-Approach 2. Hash Map
+Hash Map
 
 - 각 위치에 대해서 최대로 expand할 수 있는 길이를 저장하는 hash map을 사용한다.   
 - 어떤 값 num에 대해 
@@ -249,7 +245,6 @@ Approach 2. Hash Map
    - num-left+1은 어떻게 filter out되지?
 
 
-<details>
 
 ```py
     def longestConsecutive(self, nums: List[int]) -> int:
@@ -290,12 +285,14 @@ https://leetcode.com/problems/sort-colors
 
 문제: nums 라는 integer list가 있고 0, 1, 2의 숫자가 있다. 0, 1, 2 순서대로 숫자들이 모이도록 정렬해라. in place.
 
+<details><summary>Approach 1</summary>
+
+
 selection sort를 사용하면 된다.   
 맨 앞 element 부터 차례대로, 오른쪽으로 iterate하면서 최솟값과 swap을 한다.
 
 아니면 각각 count를 세서 앞에서부터 채워도 된다. 
 
-<details>
 
 ```py
     def sortColors(self, nums: List[int]) -> None:
@@ -313,8 +310,12 @@ selection sort를 사용하면 된다.
 
 </details>
 
-근데 solution에 신박한 one pass algorithm이 있다.   
-Dutch National Flag 이라는 solution인데 포인터 세 개를 이용하는 방법이다.   
+
+<details><summary>Approach 2</summary>
+
+Dutch National Flag
+
+근데 solution에 one pass algorithm이 있다.   
 올바른 결과에서 0은 왼쪽부터, 2는 오른쪽부터 채워지면 되고 1은 나머지에 있으면 된다.   
 
 - p0을 제일 왼쪽, p2를 제일 오른쪽으로 둔다.   
@@ -322,7 +323,6 @@ Dutch National Flag 이라는 solution인데 포인터 세 개를 이용하는 �
 - 2면 p2와 swap 후 p2 한 칸 내리기, 1이면 skip 하고 cur 올리면 된다.   
 - 0일 땐 p0와 cur를 둘 다 올리는 게 중요하다.
 
-<details>
 
 ```py
     def sortColors(self, nums: List[int]) -> None:
