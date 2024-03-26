@@ -1,9 +1,46 @@
+아래와 같이 정의하는 게 유연한 코드이다.
+
+```java
+MyInterface<T> var = new MyClass<>();
+```
+
+
 ### Array
 
 ```java
 int[] nums = new int[n];
 Arrays.fill(nums, 0);
+int n = nums.length;  // length로 길이를 구한다.
+
+int[] nums2 = {1, 2, 3};  // initialize 할 땐 {}를 사용한다.
+
+Arrays.sort(nums);  // ArrayList는 안 된다.
+System.out.println(Arrays.toString(nums));
 ```
+
+```java
+List<Integer> arr = new ArrayList<Integer>(4); // 이렇게 정의하면 size 4짜리를 만든다. default는 10이다. 4를 넘어도 resize를 한다. 초기 상태에서 size() 호출하면 0이다.
+arr.add(10);
+arr.add(20);
+arr.add(30);
+arr.add(40);
+
+int target = arr.get(2);  // 30
+
+Collections.sort(arr);
+int n = arr.size();  // size()로 길이를 구한다.
+
+```
+
+
+
+
+
+
+
+
+
+
 
 ### Hash
 
@@ -15,8 +52,8 @@ import java.util.Set;
 
 
 Set<Integer> set = new HashSet<>();
-// Adding elements to the set
-set.add(1);
+
+set.add(1);  // Adding elements to the set
 
 for (int item : set) {
     System.out.println(item);
@@ -42,8 +79,14 @@ Map<String, Integer> map = new HashMap<>();
 // HashMap<String, Integer> map = ... 는 가능하고 동일한 기능이다.
 // HashMap<String, int> map 은 compilation error. Generics in Java do not support primitive types; they only support reference types
 
-// Adding key-value pairs to the map
-map.put("apple", 10);
+map.put("apple", 0);
+map.put("apple", 10);  // update
+map.put("apple", map.get("apple") + 10);  // update
+
+// update when exists
+map.put("apple", map.containsKey("apple") ? map.get("apple") + 10 : 0);  
+map.put("banana", map.getOrDefault("banana", 0) + 10);
+
 int count = map.get("apple");
 for (Map.Entry<String, Integer> entry : map.entrySet()) {
     System.out.println(entry.getKey() + ": " + entry.getValue());
@@ -53,7 +96,77 @@ for (String key : map.keySet()) {
     System.out.println("Key: " + key);
 }
 
+
+// adjacent list 구할 때
+Map<Integer,List<int[]>> map=new HashMap<>();
+
 ```
+
+
+### ArrayList, HashMap 예시
+
+
+<details><summary>1094. Car Pooling</summary>
+
+
+```java
+class Solution {
+    public boolean carPooling(int[][] trips, int capacity) {
+        HashMap<Integer, Integer> timeToNums = new HashMap<>();
+
+        int n = trips.length;
+        for(int i = 0; i < n; i++) {
+            int numPassengers = trips[i][0];
+            int fromTime = trips[i][1];
+            int toTime = trips[i][2];
+
+            // HashMap update 방법 1
+            if (timeToNums.containsKey(fromTime)) {
+                int prevNum = timeToNums.get(fromTime);
+                timeToNums.put(fromTime, prevNum + numPassengers);
+            }
+            else {
+                timeToNums.put(fromTime, numPassengers);
+            }
+
+            // HashMap update 방법 2
+            timeToNums.put(toTime, timeToNums.getOrDefault(toTime, 0) - numPassengers);
+            }
+        
+        // keySet을 ArrayList로 받기
+        List<Integer> timeArray = new ArrayList<>(timeToNums.keySet());
+
+        // ArrayList 정렬하기
+        // 역순 정렬: Collections.sort(timeArray, Collections.reverseOrder()) 
+        Collections.sort(timeArray);  
+        
+        int sumPassengers = 0;
+        for(int curTime : timeArray) {
+            sumPassengers = sumPassengers + timeToNums.get(curTime);
+            if (sumPassengers > capacity) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### Queue
@@ -153,7 +266,6 @@ push가 앞에 원소를 넣고 pop이 앞에 원소를 빼네. stack 느낌이 
 - peekLast()
 
 
-
 ```java
 import java.util.Deque;
 import java.util.ArrayDeque;
@@ -186,16 +298,108 @@ class HelloWorld {
 }
 ```
 
+pair로 넣기
+
+```java
+import javafx.util.Pair; // For JavaFX Pair class
+
+Deque<Pair<Integer, Integer>> deque = new ArrayDeque<>();
+deque.offerLast(new Pair<>(value1, value2));
+```
 
 
-### Heap
+
+
+
+
+### deque 예시
+
+
+<details><summary>503. Next Greater Element II</summary>
+
+```java
+class Solution {
+    public int[] nextGreaterElements(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+
+        Deque<Integer> d_deque = new ArrayDeque<>();
+
+        for (int i = n-1; i >= 0; i--) {
+            int cur = nums[i];
+            while (!d_deque.isEmpty() && d_deque.peekLast() <= cur) {
+                d_deque.pollLast();
+            }
+            if (d_deque.isEmpty()) {
+                res[i] = -1;
+            }
+            else {
+                res[i] = d_deque.peekLast();
+            }
+            d_deque.offerLast(cur);
+        }
+
+        for (int i = n-1; i >= 0; i--) {
+            int cur = nums[i];
+            while (!d_deque.isEmpty() && d_deque.peekLast() <= cur) {
+                d_deque.pollLast();
+            }
+            if (d_deque.isEmpty()) {
+                break;
+            }
+            else {
+                res[i] = d_deque.peekLast();
+            }
+            d_deque.offerLast(cur);
+        }
+
+        return res;
+    }
+}
+```
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Heap (PriorityQueue)
 
 Primary Queue는 우선순위 큐로 우선순위가 가장 낮은 값이 먼저 나오게 되어 있다.    
 우선순위가 낮다는 것은 Integer를 넣었을 때, 최소값으로 판단된다.
 
-```java
-PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+메소드는 deque와 유사하다.
 
+- add()
+- offer()
+- poll()
+- remove()
+- isEmpty()
+- size()
+
+```java
+import java.util.PriorityQueue;
+
+PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+pq.offer(3);
+pq.offer(1);
+pq.offer(2);
+System.out.println("Top element: " + pq.peek()); // Output: 1
+
+while (!pq.isEmpty()) {
+    System.out.println("Removed element: " + pq.poll());
+}
 ```
 
 최대 힙을 사용하는 방법은 Comparator 값을 세팅해주어 사용할 수 있다.
@@ -211,13 +415,103 @@ PriorityQueue<Integer> maxHeap = new PriorityQueue<Integer>(new Comparator<Integ
     });
 ```
 
+혹은 다음과 같이 간단히 사용도 가능한 것 같다.
+
+```java
+PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+
+PriorityQueue<Integer> maxHeap = new PriorityQueue<>((o1, o2) -> Integer.compare(o2, o1));
+```
+
+
+큐에 tuple 혹은 list 형태로 넣어야할 때
+
+```java
+PriorityQueue<int[]> minHeap = new PriorityQueue<>(Comparator.comparingInt(o -> o[0]));
+```
+
+
+PriorityQueue of Pair<K, V> Syntax
+
+```java
+// Since Pair<K, V> class was the part of JavaFX and JavaFX was removed from JDK since JDK 11. So Pairs can be used till JDK 10. 
+PriorityQueue<Pair<K, V>> = new PriorityQueue<>(initialCapacity, Comparator.comparing(Pair :: getKey));
+PriorityQueue<Pair<K, V>> = new PriorityQueue<>(Comparator.comparing(Pair :: getKey));
+```
+
+
+
+
+
+### Heap 예시
+
+<details><summary>378. Kth Smallest Element in a Sorted Matrix</summary>
+
+```java
+class Solution {
+    public int kthSmallest(int[][] matrix, int k) {
+        int n = matrix.length;
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(Comparator.comparingInt(o -> o[0]));
+
+        for (int i = 0; i < n; i++) {
+            minHeap.offer(new int[]{matrix[i][0], i, 0});
+        }
+
+        int ans = 0;
+        for (int i = 0; i < k; i++) {
+            int[] top = minHeap.poll();
+            int val = top[0], row = top[1], col = top[2];
+            ans = val;
+
+            if (col+1 < n) {
+                minHeap.offer(new int[]{matrix[row][col+1], row, col+1});
+            }
+        }
+
+        return ans;
+    }
+}
+
+```
+
+
+
+</details>
+
+
+
+
+
+
+
 
 
 
 ### Graph
 
 
-### Sort
+<details><summary>101. Symmetric Tree</summary>
+
+```java
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        return root == null || isSymmetricHelper(root.left, root.right);
+    }
+
+    private boolean isSymmetricHelper(TreeNode left, TreeNode right) {
+        if (left == null || right == null) {
+            return left == right;
+        }
+        if (left.val != right.val) {
+            return false;
+        }
+
+        return isSymmetricHelper(left.left, right.right) && isSymmetricHelper(left.right, right.left);
+    }
+}
+```
+
+</details>
 
 
 

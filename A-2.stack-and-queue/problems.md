@@ -171,7 +171,7 @@ https://leetcode.com/problems/trapping-rain-water/
 
 <details><summary>Approach 2</summary>
 
-아이디어를 생각하기 어려웠다.    
+아이디어를 생각하기 어렵다.    
 적분하듯이 쪼개서 각 위치에서의 물 양을 구한 뒤에 합하는 걸로 생각해보자.    
 현재 위치 i에서 물이 차려면 i 기준 왼쪽과 오른쪽 둘 다에 i보다 높은 bar가 있어야한다.    
 `cur_trapped_water = min(left_max, right_max) - cur_height`
@@ -689,7 +689,7 @@ right:  1 N N 4 N N
 </details>
 
 
-<details><summary>Approach 3</summary>
+<details><summary>Approach 4</summary>
 
 Approach 2를 최적화한 방법이다. 
 Approach 2의 경우는 각 원소당 최대 2 + 2 + 1 번 접근할 수 있을 것 같다.   
@@ -742,11 +742,13 @@ Approach 3는 각 원소 당 최대 2번 접근한다.
 
 https://leetcode.com/problems/sliding-window-maximum/description/
 
-문제: 
+문제: You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position.   
+Return the max sliding window.
 
 
-<details><summay>Approach 1</summary>
+<details><summary>Approach 1</summary>
 
+brute force
 
 ```py
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
