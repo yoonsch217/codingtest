@@ -140,7 +140,7 @@ https://leetcode.com/problems/amount-of-new-area-painted-each-day/discuss/174081
 - 다 끝나고 buffer array를 살펴봤을 때 어떤 칸에 1, 5가 있다면 인덱스 1 작업과 인덱스 5 작업에 의해 색칠될 수 있던 공간이라는 뜻이다.   
 인덱스 낮은 작업이 우선이므로 인덱스 1의 작업에 의한 색칠 부분으로 인식하면 된다.   
 
-<details>
+</details>
 
 
 ### 904. Fruit Into Baskets
