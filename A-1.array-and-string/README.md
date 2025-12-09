@@ -16,6 +16,10 @@ ArrayList와 같은 자료구조는 array가 가득 찼을 때 사이즈를 두 
 이를 효율적으로 하기 위해 StringBuilder를 사용한다.   
 StringBuilder는 resizable array를 만들어서 그 array에 계속 append를 한다.   
 
+질문: Kotlin 에서의 StringBuilder 예시는 뭔가?
+질문: StringBuilder 는 얼만큼의 시간 복잡도를 갖고 있나? 왜? 
+
+
 Python: `''.join(str_list)`
 
 
@@ -42,7 +46,7 @@ valid한 sorting 결과가 여러 개일 수 있는데, 그 때 기존 input의 
 
 ### Selection Sort
 
-맨 앞 element부터 차례대로 보면서 오른쪽으로 iterate 한 뒤에 가장 작은 값과 swap한다. 이렇게 n번 iterate하면 sorting된다.   
+맨 앞 element부터 차례대로 보면서 오른쪽으로 iterate 한 뒤에 가장 작은 값과 swap한다. 전체의 최솟값을 찾으면서 맨 앞에 넣고, 그 다음 최솟값 찾아서 그 다음에 넣는 방식이다. 이렇게 n번 iterate하면 sorting된다.   
 stable 하지 않은 sorting이다.
 
 O(N^2) / O(1)
@@ -50,13 +54,13 @@ O(N^2) / O(1)
 <details>
 
 ```py
-	def selectionSort(self, nums):
-		for i in range(len(nums)):
-			_min = min(nums[i:])
-			min_index = nums[i:].index(_min)
-			nums[i + min_index] = nums[i]
-			nums[i] = _min
-		return nums
+def selectionSort(self, nums):
+    for i in range(len(nums)):
+        _min = min(nums[i:])
+        min_index = nums[i:].index(_min)
+        nums[i + min_index] = nums[i]
+        nums[i] = _min
+    return nums
 ```
 
 </details>
@@ -64,22 +68,26 @@ O(N^2) / O(1)
 
 ### Bubble Sort
 
-맨 앞 두 개부터 차례대로 비교를 하면서 뒤에 element가 더 크면 swap한다.   
+맨 앞 두 개부터 차례대로 비교를 하면서 앞에 element가 더 크면 swap한다.   
 (0, 1) 비교하고 (1, 2) 비교하고 하면서 전체를 itearte한다.   
+물방울이 위로 뜨는 것처럼, 가장 큰 값을 뒤로 보내는 방식인 것 같다. 
 이 작업을 swap 없을 때까지 반복한다.
 동일한 값끼리는 바꾸지 않기 때문에 stable한 sorting이다.   
+
+질문: selection sort 와 유사한데 방향만 반대인가?
+
 
 O(N^2) / O(1)
 
 <details>
 
 ```py
-    def bubbleSort(self, nums):
-        n = len(nums)
-        for i in range(n):
-            for j in range(0, n - i - 1):
-                if nums[j] > nums[j + 1]:
-                    nums[j], nums[j + 1] = nums[j + 1], nums[j]
+def bubbleSort(self, nums):
+    n = len(nums)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if nums[j] > nums[j + 1]:
+                nums[j], nums[j + 1] = nums[j + 1], nums[j]
                     
 ```
 
