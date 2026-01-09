@@ -16,8 +16,7 @@ ArrayList와 같은 자료구조는 array가 가득 찼을 때 사이즈를 두 
 이를 효율적으로 하기 위해 StringBuilder를 사용한다.   
 StringBuilder는 resizable array를 만들어서 그 array에 계속 append를 한다.   
 
-질문: Kotlin 에서의 StringBuilder 예시는 뭔가?
-질문: StringBuilder 는 얼만큼의 시간 복잡도를 갖고 있나? 왜? 
+질문: StringBuilder 는 얼만큼의 시간 복잡도를 갖고 있나? O(N) 왜냐하면 append 자체가 amortized O(1) 이고 이걸 N번 반복하기 때문이다. 그리고 마지막에 stringfy 시키는 건 O(N)
 
 
 Python: `''.join(str_list)`
@@ -32,7 +31,7 @@ sorting의 기본은 우선 comparsion을 정의하는 것이다.
 
 inversion이란, out of order인 pair를 말한다.   
 `[3, 4, 6, 5, 2]` 의 리스트를 increasing order sorting 한다고 할 때 inversion은 `3,2` `4,2` `6,2` `5,2` `6,5` 총 다섯 개가 있다.   
-즉, sorting이란 행동은 inversion 수를 0으로 만드는 작업과 같다고 말할 수 있다.   
+즉, sorting이란 행동은 inversion 수를 0으로 만드는 작업과 같다.   
 
 stability라는 개념도 있다.   
 valid한 sorting 결과가 여러 개일 수 있는데, 그 때 기존 input의 순서를 더 유지하는 결과가 더 stable하다고 말한다.
@@ -46,10 +45,13 @@ valid한 sorting 결과가 여러 개일 수 있는데, 그 때 기존 input의 
 
 ### Selection Sort
 
-맨 앞 element부터 차례대로 보면서 오른쪽으로 iterate 한 뒤에 가장 작은 값과 swap한다. 전체의 최솟값을 찾으면서 맨 앞에 넣고, 그 다음 최솟값 찾아서 그 다음에 넣는 방식이다. 이렇게 n번 iterate하면 sorting된다.   
-stable 하지 않은 sorting이다.
+- 시간 복잡도: O(N^2)
+- 공간 복잡도: O(1)
+- stable? No
+- 동작 원리
+  - 매 iteration 마다 최솟값을 찾아서 맨 앞부터 채워넣는다.
+  - 맨 앞 element부터 차례대로 보면서 오른쪽으로 iterate 한 뒤에 가장 작은 값과 swap한다. 전체의 최솟값을 찾으면서 맨 앞에 넣고, 그 다음 최솟값 찾아서 그 다음에 넣는 방식이다. 이렇게 n번 iterate하면 sorting된다.   
 
-O(N^2) / O(1)
 
 <details>
 
@@ -68,16 +70,16 @@ def selectionSort(self, nums):
 
 ### Bubble Sort
 
-맨 앞 두 개부터 차례대로 비교를 하면서 앞에 element가 더 크면 swap한다.   
-(0, 1) 비교하고 (1, 2) 비교하고 하면서 전체를 itearte한다.   
-물방울이 위로 뜨는 것처럼, 가장 큰 값을 뒤로 보내는 방식인 것 같다. 
-이 작업을 swap 없을 때까지 반복한다.
-동일한 값끼리는 바꾸지 않기 때문에 stable한 sorting이다.   
+- 시간 복잡도: O(N^2)
+- 공간 복잡도: O(1)
+- stable? Yes. 동일한 값끼리는 바꾸지 않는다.
+- 동작 원리
+  - 맨 앞 두 개부터 차례대로 비교를 하면서 앞에 element가 더 크면 swap한다.   
+  - (0, 1) 비교하고 (1, 2) 비교하고 하면서 전체를 itearte한다.   
+  - 물방울이 위로 뜨는 것처럼, 가장 큰 값을 뒤로 보내는 방식이다. 
+  - 이 작업을 swap 없을 때까지 반복한다.
+- selection sort 는 매 iteration 마다 전체를 탐색하고 왼쪽부터 최솟값이 채워진다. bubble sort 는 매 iteration 마다 인접 원소끼리만 비교하고 오른쪽부터 최댓값이 채워진다.
 
-질문: selection sort 와 유사한데 방향만 반대인가?
-
-
-O(N^2) / O(1)
 
 <details>
 
@@ -97,27 +99,30 @@ def bubbleSort(self, nums):
 
 ### Insertion Sort
 
-index 2 부터 오른쪽으로 iterate하면서 작업한다.   
-각 element마다 왼쪽으로 iterate하면서 자기 위치에 멈춘다.   
-이게 가능한 이유는, 우선 맨 처음 왼쪽 하나는 혼자니까 sorting 상태이고, 두 번째부터 차례대로 진행할 때는 그 index의 left array는 sorted된 것을 보장하기 때문이다.   
-동일한 값과 바꿀 일이 없기 때문에 stable sort이다.    
+- 시간 복잡도: O(N^2)
+- 공간 복잡도: O(1)
+- stable? Yes. 동일한 값과 바꿀 일이 없다.
+- 동작 원리
+  - index 2 부터 오른쪽으로 iterate하면서 작업한다.   
+  - 각 element마다 왼쪽으로 iterate 하면서 자기보다 큰 값들을 오른쪽으로 shift 시킨다. 크지 않은 값을 만나면 그 자리에 넣고 멈춘다.   
+  - 이게 가능한 이유는 왼쪽 subarray 는 정렬 상태를 보장하기 때문이다. 우선 맨 처음 왼쪽 하나는 혼자니까 sorting 상태이고, 두 번째부터도 sorting을 만족시킨다.
+- inversion이 적을 때 유리한 방법이다. best case는 O(N) 일 것 같은데.   
+- 작은 array의 경우에 더 효과적이다(empirical observation). 메모리를 순차적으로 접근하기 때문에 정렬 외의 오버헤드가 적다. (재귀 함수, 기타 로직들 등이 없음)
+- sorting function은 array size를 계산한 뒤에 특정 size 미만이면 insertion sort를 사용하기도 한다.(오..) python 의 timsort 는 64 미만이면 insertion sort, 그 이상이면 merge sort 를 쓴다.  
 
-inversion이 적을 때 유리한 방법이다. best case는 O(N) 일 것 같은데.   
-또한 작은 array의 경우에 더 효과적이다(empirical observation). sorting function은 array size를 계산한 뒤에 특정 size 미만이면 insertion sort를 사용하기도 한다.(신기하다..)   
 
-O(N^2) / O(1)
 
 <details>
 
 ```py
-    def insertionSort(self, nums): 
-        for i in range(1, len(nums)): 
-            key = nums[i]
-            j = i-1
-            while j >= 0 and key < nums[j] : 
-                    nums[j + 1] = nums[j] 
-                    j -= 1
-            nums[j + 1] = key
+def insertionSort(self, nums): 
+    for i in range(1, len(nums)): 
+        key = nums[i]
+        j = i-1
+        while j >= 0 and key < nums[j] : 
+                nums[j + 1] = nums[j] 
+                j -= 1
+        nums[j + 1] = key
 ```
 
 </details>
@@ -126,24 +131,21 @@ O(N^2) / O(1)
 
 ### Heap Sort
 
-selection sort에서는 매 iteration마다 minimum을 찾는데 minimum 찾는 게 O(N)의 시간복잡도를 갖는다.   
-minimum 찾는 걸 빨리 해주는 heap을 사용한 알고리즘이 heap sort이다.   
-
-min heap 도 사용할 수 있지만 max heap이 더 편하다. 
-
-1. unordered array를 bottom-up heapify 한다.
-   - array를 arr[0]가 root인 binary tree로 볼 수 있다.
-   - 목적은 arr[0]에 최댓값이 들어가게 하는 것이다.
-   - arr[i]의 left child는 arr[2 * i + 1] 이고 right child는 arr[2 * i + 2] 가 된다.
-   - 맨 뒤의 node부터 앞으로 차례대로 오면서 각자의 child node가 자기보다 더 값이 크다면 swap을 한다. swap하고도 더 큰 child가 있다면 또 swap해준다. 이렇게 함으로써 각 subtree들도 max heap을 만족하게 된다.
-2. arr[0]가 최댓값을 갖는다. arr[0]와 arr[len - 1] 를 swap한다. arr의 맨 마지막에는 최댓값이 들어가게 된다.
-3. arr[0:len-1] 에 대해 동일하게 heapify한다. 이 때는 a[0]에 대해서만 위치를 찾아주면 된다. 왜나하면 이미 a[1]과 a[2]는 각각을 root로 하는 subtree의 max 값이기 때문이다.
-   - heapify 할 때는 먼저 root에 대해 양 child와 비교한다. 그 중 right가 크다면 right와 swap한 뒤 그 right로 내려간 root 값에 대해 또 양 child와 비교한다. 이 과정을 swap이 일어나지 않을 때까지 반복한다.
-4. arr[0:len-1] 의 max가 arr[0]에 오게 되면 그 값을 arr[len-2]와 swap 한 뒤에 arr[0:len-2]에 대해 동일하게 작업을 해준다.
-
-대부분의 다른 comparison based sort보다 빠르다.   
-하지만 stable한 sort가 아니다.    
-그리고 실제로는 bad cache locality 때문에 O(N log N) 보다 느린 것으로 알려졌다. locations in heaps 를 기반으로 swap을 하는데 이는 무작위로 정렬된 곳에서 index를 접근하기 위해 많은 read operation이 필요하여서 cache miss가 발생한다.   
+- 시간 복잡도: O(N log N), 그러나 살제로는 배열을 순차적으로 접근하지 않기 때문에 bad cache locality 때문에 좀 느리다고 한다. 
+- 공간 복잡도: O(1)
+- stable? No.
+- 동작 원리
+  - selection sort에서는 매 iteration마다 minimum을 찾는데 minimum 찾는 게 O(N)의 시간복잡도를 갖는다. minimum 찾는 걸 빨리 해주는 heap을 사용한 알고리즘이 heap sort이다.   
+  - unordered array를 bottom-up heapify 한다.
+    - array를 arr[0]가 root인 binary tree로 볼 수 있다.
+    - 목적은 arr[0]에 최댓값이 들어가게 하는 것이다.
+    - arr[i] 입장에서 left child = arr[2 * i + 1],  right child = arr[2 * i + 2]
+    - 맨 뒤의 node부터 앞으로 차례대로 오면서 각자의 child node가 자기보다 더 값이 크다면 swap을 한다. swap하고도 더 큰 child가 있다면 또 swap해준다. 이렇게 함으로써 각 subtree들도 max heap을 만족하게 된다.
+  - arr[0]가 최댓값을 갖는다. arr[0]와 arr[len - 1] 를 swap한다. arr의 맨 마지막에는 최댓값이 들어가게 된다.
+  - arr[0:len-1] 에 대해 동일하게 heapify한다. 이 때는 a[0]에 대해서만 자기가 있을 위치를 찾아서 넣어주면 된다. 왜나하면 이미 a[1]과 a[2]는 각각을 root로 하는 subtree의 max 값이기 때문이다.
+  - heapify 할 때는 먼저 root에 대해 양 child와 비교한다. 그 중 right가 크다면 right와 swap한 뒤 그 right로 내려간 root 값에 대해 또 양 child와 비교한다. 이 과정을 swap이 일어나지 않을 때까지 반복한다.
+  - arr[0:len-1] 의 max가 arr[0]에 오게 되면 그 값을 arr[len-2]와 swap 한 뒤에 arr[0:len-2]에 대해 동일하게 작업을 해준다.
+- 오름차순 정렬할 때는 max heap이 더 편하다. 매 작업마다 최댓값을 맨 뒤로 보내면 되기 때문이다. 만약 minheap 을 쓴다면 매 작업마다 최솟값을 맨 앞으로 보내야하는데 그럼 root 값이 바뀌는 것이기 때문에 사용할 수 없고 별도의 메모리가 필요해지게 된다.
 
 
 <details>
@@ -186,6 +188,11 @@ def heap_sort(self, lst: List[int]) -> None:
 
 
 ### Merge Sort
+
+- 시간 복잡도: 
+- 공간 복잡도: 
+- stable? 
+- 동작 원리
 
 divide and conquer   
 
@@ -270,6 +277,11 @@ def mergeSort(arr, l, r):
 
 
 ### Quick Sort
+
+- 시간 복잡도: 
+- 공간 복잡도: 
+- stable? 
+- 동작 원리
 
 divide and conquer   
 
