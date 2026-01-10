@@ -189,23 +189,15 @@ def heap_sort(self, lst: List[int]) -> None:
 
 ### Merge Sort
 
-- 시간 복잡도: 
+- 시간 복잡도: O(N log N) 
+  - logN 번 merge를 해야한다.
+  - 
 - 공간 복잡도: 
-- stable? 
-- 동작 원리
-
-divide and conquer   
-
-- pointer들을 움직이면서 계속 절반씩 쪼갠다. 
-- 하나만 남으면 sort된 상태이니까 하나 남을 때까지 쪼갠다.
-- 쪼갠 거를 합치는데 각각의 subarray마다 포인터를 놓아서 비교해가며 채운다. O(N)
-
-
-Time: O(N logN)
-
-메모리가 많이 든다.
-
-stable
+- stable? Yes
+- 동작 원리: divide and conquer
+  - 전체 array를 절반씩 쪼개서 하나만 남을 때까지 멈춘다. 하나만 있을 땐 정렬이 되어 있다.
+  - 각각 정렬된 left subarray 와 right subarray 를 합친다. 각 subarray 마다 맨 앞에 포인터를 놓고 둘 중 작은 거를 뽑아서 새로 array를 만들면서 끝까지 iterate한다.
+  - 이 과정을 전체 array를 만들 때까지 한다.
 
 
 <details>
@@ -213,19 +205,18 @@ stable
 ```py
 # Merges two subarrays of arr[].
 # First subarray is arr[l..m]. Second subarray is arr[m+1..r]
-
 def merge(arr, l, m, r):
+    # Get size of each subarray
     n1 = m - l + 1
     n2 = r - m
  
-    # create temp arrays
+    # Create temp arrays
     L = [0] * (n1)
     R = [0] * (n2)
  
     # Copy data to temp arrays L[] and R[]
     for i in range(0, n1):
         L[i] = arr[l + i]
- 
     for j in range(0, n2):
         R[j] = arr[m + 1 + j]
  
@@ -255,9 +246,8 @@ def merge(arr, l, m, r):
         j += 1
         k += 1
  
+
 # l is for left index and r is right index of the sub-array of arr to be sorted
- 
- 
 def mergeSort(arr, l, r):
     if l < r:
         # Same as (l+r)//2, but avoids overflow for large l and h
