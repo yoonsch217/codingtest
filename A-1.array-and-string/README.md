@@ -189,11 +189,12 @@ def heap_sort(self, lst: List[int]) -> None:
 
 ### Merge Sort
 
-- 시간 복잡도: O(N log N) 
-  - logN 번 merge를 해야한다.
-  - 
-- 공간 복잡도: 
+- 시간 복잡도: O(N log N) , 들어오는 데이터와 상관 없이 일정하다.
+  - logN 번 merge를 해야한다. binary tree 로 나눈다고 했을 때 총 logN 의 층이 생기니까 각 층마다 merge가 이뤄진다고 생각하면 된다.
+  - 각 층마다 merge 할 때는 결국 포인터가 한 번씩 다 훑기 때문에 O(N) 의 시간이 소요된다.
+- 공간 복잡도: O(N) 
 - stable? Yes
+  - `L[i] <= R[j]` 이것처럼 동일할 때 왼쪽에 있던 원소가 먼저 들어가니까, 이 동점 처리 때문에 stability 가 보장된다. 
 - 동작 원리: divide and conquer
   - 전체 array를 절반씩 쪼개서 하나만 남을 때까지 멈춘다. 하나만 있을 땐 정렬이 되어 있다.
   - 각각 정렬된 left subarray 와 right subarray 를 합친다. 각 subarray 마다 맨 앞에 포인터를 놓고 둘 중 작은 거를 뽑아서 새로 array를 만들면서 끝까지 iterate한다.
@@ -263,28 +264,21 @@ def mergeSort(arr, l, r):
 
 
 
-
-
-
 ### Quick Sort
 
-- 시간 복잡도: 
-- 공간 복잡도: 
-- stable? 
-- 동작 원리
-
-divide and conquer   
-
-- 어떤 array 안에서 pivot을 정한다. 
-- pivot의 자기 위치를 찾아가며 그 값보다 작은 원소들은 left subarray로, 큰 원소들은 right subarray로 보낸다. 
-- recursive하게 진행을 한다.   
-
-특징   
-- unstable sort
-- 메모리를 많이 쓰지 않는다.    
-- cache hit 측면에서 merge sort보다 효과적이다.   
-- worst case는 pivot이 최소이거나 최대일 때이다. 따라서 배열이 이미 정렬/역정렬 되어 있다면 정렬이 n-1번 수행되어 최악의 경우이다.    
-- Best O(N logN), worst O(N^2)
+- 시간 복잡도: Best O(N logN), worst O(N^2)
+  - worst case는 pivot이 최소이거나 최대일 때이다. 따라서 배열이 이미 정렬/역정렬 되어 있다면 정렬이 n-1번 수행되어 최악의 경우이다. 
+- 공간 복잡도: in-memory 이지만 recursive 로 인한 stack memory 사용량이 있다.
+  - average: O(logN), worst: O(N)
+- stable? No 
+  - 병합 정렬은 인접한 값들을 비교하며 '차곡차곡' 합치지만, 퀵 정렬은 피벗을 기준으로 먼 거리의 원소를 점프하며 교환하기 때문에 원래의 상대적 순서를 보장할 수 없다. 
+- 동작 원리 
+  - divide and conquer
+  - 처음에 전체 array 에 대해서 하나의 pivot 값을 정한다. (보통 rightmost)
+  - 전체 array 를 iterate 하면서 그 값보다 작거나 같으면 왼쪽으로 보내고 크다면 그대로 둔다. left subarray 의 rightmost 포인터를 갖고 있어야한다.
+  - 이 iteration 이 끝나면 left subarray 의 rightmost 바로 오른쪽에 pivot 값을 넣는다. 그렇게 되면 pivot 의 왼쪽은 자기보다 작거나 같고 오른쪽은 다 크다.
+  - pivot 은 자기 위치를 찾아간 상태이다. 이제 pivot 을 기준으로 왼쪽 subarray 와 오른쪽 subarray 에 대해 동일하게 진행한다. 
+- cache hit 측면에서 merge sort보다 효과적이다.
 
 <details>
 
@@ -316,7 +310,7 @@ def quicksort(array, low, high):
     if low < high:
         # The element at pi index is at the right position.
         # All the elements in the left subarray are less than or equal to pi. Right subarray vice versa.
-        pi = partition(array, low, high)
+        pi = partition(array, low, high)  # pi is on the right position
  
         # Recursive call on the left of pivot
         quicksort(array, low, pi - 1)
@@ -328,39 +322,45 @@ def quicksort(array, low, high):
 </details>
 
 
-
-
-
 # 전략
 
 
 ### Sliding Window
 
-nested loop 대신에 single loop를 사용함으로써 time complexity를 줄이는 것이 목적이다.   
-window 크기가 정해져있는 경우에 사용할 수 있다.   
-시작 지점에 left와 right라는 포인터 두 개를 놓는다.   
-
-예를 들어 주어진 int 리스트에서 연속된 k개의 합이 최대인 값을 찾으라는 문제가 있을 때, size k의 window를 만든 후 한 칸씩 이동하면서 이전 값을 빼고 새로운 값을 추가한다.   
-이렇게 하면 매 작업마다 k번 더하는 연산을 할 필요 없이 두 번만 연산을 하면 된다.   
-어떤 연속된 범위에서의 계산들이 필요할 때 사용하면 될 것 같다.   
+- 개념 
+  - window 크기가 정해져있는 경우에 nested loop 대신에 single loop를 사용함으로써 time complexity를 줄이는 것이 목적이다.
+- 방법
+  - 시작 지점에 left와 right라는 포인터 두 개를 놓는다.
+  - 윈도우가 이동할 때 공통된 부분은 재사용하고, 새로 들어오는 데이터(Right)와 나가는 데이터(Left)만 처리하여 중복 계산을 제거한다.
+- 활용
+  - 예를 들어 주어진 int 리스트에서 연속된 k개의 합이 최대인 값을 찾으라는 문제가 있을 때, size k의 window를 만든 후 한 칸씩 이동하면서 이전 값을 빼고 새로운 값을 추가한다.    
+  - 어떤 연속된 범위에서의 계산들이 필요할 때 사용하면 될 것 같다.   
 
 ### prefix sum
 
-list를 traverse 하면서 지금까지의 합을 저장하는 prefix_sum_list를 생성한다.   
-그러면 idx1~idx2 범위의 값의 합을 구할 때 `pf[idx2] - pf[idx1-1]` 로 구할 수 있으므로 O(1)의 시간이 걸린다.   
-이럴 때 pf 리스트는 앞과 뒤에 buffer로 0을 추가하는 것이 좋다.    
-
-2d에서 prefix sum matrix를 구할 수도 있다.   
-이 때의 pf[i][j]의 값은 [i][j]보다 왼쪽에 있거나 위에 있는 모든 원소의 합이다.   
-그러면 `pf[i][j] = pf[i-1][j] + pf[i][j-1] - pf[i-1][j-1]`가 된다.   
-
+- 개념
+  - 배열의 요소들을 차례대로 더한 값을 미리 저장해두어, 특정 구간의 합을 O(1) 만에 구하는 것이 목적이다. 
+- 방법
+  - 원본 배열을 순회하며 각 지점까지의 누적 합을 담은 prefix_sum 리스트를 생성한다. (인덱스 계산을 위해 맨 앞에 0을 넣는 Buffer를 둘 수도 있다.)
+  - idx1부터 idx2까지의 구간 합은 pf[idx2 + 1] - pf[idx1] 공식을 사용하여 계산합니다.
+  - 2d에서 prefix sum matrix를 구할 수도 있다. 
+     - 이 때의 pf[i][j]의 값은 [i][j]보다 왼쪽에 있거나 위에 있는 모든 원소의 합이다. 
+     - 그러면 `pf[i][j] = pf[i-1][j] + pf[i][j-1] - pf[i-1][j-1]`가 된다.
+- 활용
+  - 배열 내에서 구간 합 쿼리가 매우 빈번하게 들어올 때 사용한다.
 
 
 ### Two pointers
 
-Brute force하게 2 depth iteration을 해야해서 O(N^2) 시간이 걸리는 상황에서 최적화를 고민할 때 two poitner를 생각해보자.   
-양 쪽에 pointer를 두고 greedy한 로직을 생각하면 one pass로 할 수도 있다.    
-O(N^2) 이 나올 거 같으면 O(2N), O(3N) 등으로 할 수 있을지 생각해본다.
+- 개념
+  - 주로 정렬된 배열에서 두 개의 포인터를 조작하여 원하는 조건을 찾음으로써, O(N^2) 의 완전 탐색 문제를 O(N) 으로 최적화하는 것이 목적이다. 
+- 방법
+  - 배열의 양 끝(left, right) 혹은 같은 방향에서 시작하는 두 포인터를 둔다. 
+  - 현재 두 포인터가 가리키는 값의 상태에 따라 포인터를 이동(Greedy하게 접근)시키며 탐색 범위를 좁혀나간다.
+  - O(N^2) 이 나올 거 같으면 O(2N), O(3N) 등으로 할 수 있을지 생각해본다.
+- 활용 
+  - 정렬된 리스트에서 두 수의 합이 특정 값 S가 되는 쌍을 찾을 때 사용한다.
+  - Container With Most Water 문제처럼 양쪽 끝에서 시작하여 면적을 비교하며 안쪽으로 좁혀 들어가는 최적화 문제에 유용하다. 
 
 ex) https://leetcode.com/problems/container-with-most-water
 
