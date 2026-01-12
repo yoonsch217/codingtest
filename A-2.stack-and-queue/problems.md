@@ -2,9 +2,10 @@
 
 https://leetcode.com/problems/evaluate-reverse-polish-notation
 
-문제: reverse polish notation으로 표현된 string인 tokens에 대해서 그 계산값을 반환하라. 
+문제: reverse polish notation으로 표현된 string인 tokens에 대해서 그 계산값을 반환하라.
 operator는 `+, -, *, /` 를 사용한다. 나누기는 소수를 버리고 정수만 남는다.    
-ex) `tokens = ["4","13","5","/","+"]` => `(4 + (13 / 5)) = 6`
+ex) `tokens = ["4","13","5","/","+"]` => `(4 + (13 / 5)) = 6`   
+reverse polish notation: 연산기호를 만나면 바로 전 두 개의 숫자로 연산을 함, The division between two integers always truncates toward zero.
 
 
 <details><summary>Approach 1</summary>
@@ -16,7 +17,6 @@ lambda를 쓰면 다르게 풀 수도 있다.
   
 ```python
 def evalRPN(self, tokens: List[str]) -> int:
-        
     operations = {
         "+": lambda a, b: a + b,
         "-": lambda a, b: a - b,
@@ -32,7 +32,7 @@ def evalRPN(self, tokens: List[str]) -> int:
             operation = operations[token]
             stack.append(operation(number_1, number_2))
         else:
-            stack.append(int(token))
+            stack.append(int(token))  # to truncate to zero for divide operation
     return stack.pop()
 ```
 
@@ -49,9 +49,13 @@ https://leetcode.com/problems/daily-temperatures
 
 문제: temperatures라는 리스트가 있는데 하루 간격의 기온이 저장되어 있다. 각 날짜에서 더 따뜻한 날이 올 때까지 기다려야하는 일수를 저장한 리스트를 반환하라. 더 따뜻한 날이 이후에 없다면 0을 저장하면 된다.
 
+- Input: temperatures = [73,74,75,71,69,72,76,73]
+- Output: [1,1,4,2,1,1,0,0]
+
 <details><summary>Approach 1</summary>
 
-decreasing monotonic stack을 사용한다.   
+직접 머릿속에서 푼다고 생각해보면, 앞에서부터 쭉 보면서 높은 온도가 나오면 그 이전에 있던 낮은 온도들의 답을 즉각 알 수 있고 처리 대상에서 지워버린다. 그 온도보다 높았던 날들만 남겨놓고 이후를 탐색한다.     
+이를 동일하게 구현한 게 decreasing monotonic stack 이다.   
 stack에는 아직 더 따뜻한 날을 못 만난 day가 저장되어 있다. 그러면 bottom에서 top으로 갈수록 덜 따뜻하다.   
 리스트를 iterate하면서 지금 보는 기온이 top보다 낮으면 그냥 push한다.   
 top보다 높으면 더 높은 top이 나올 때까지 pop하면서 pop된 날짜에 대해 답을 넣어준다.
@@ -67,9 +71,6 @@ class Solution:
         stack = []
         ans = [0] * n
         for i in range(n):
-            if not stack:
-                stack.append(i)
-                continue
             while stack and temperatures[stack[-1]] < temperatures[i]:
                 past_i = stack.pop()
                 ans[past_i] = i - past_i
@@ -101,7 +102,7 @@ class Solution:
 
         for i in range(n-1, -1, -1):
             cur = temperatures[i]
-            if cur >= hottest:
+            if cur >= hottest:  # 여기에 등호가 포함되어야 한다. 안 그러면 밑에 while 문에서 동일한 온도에서 무한루프에 갖힐 수 있다.
                 hottest = cur
                 continue
             comp_idx = i + 1
@@ -122,6 +123,8 @@ https://leetcode.com/problems/trapping-rain-water/
 
 문제: integer array가 주어지고 각 index의 값들은 그 index 위치에서의 bar 높이이다. 얼만큼의 물이 고일 수 있는지 구하라.
 
+- Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]
+- Output: 6
 
 <details><summary>Approach 1</summary>
 
@@ -206,13 +209,20 @@ O(N) / O(N)
 
 <details><summary>Approach 3</summary>
 
-위의 방법은 두 번 iterate해야하는데 decreasing monotonic stack을 쓰면 한 번의 iterate로 가능하다.    
-- 오른쪽으로 iterate하면서 decreasing monotonic stack을 만든다. 그러면 stack에는 left wall 후보들이 남게 된다.
-- stack 만들다가 pop해야할 상황, 즉 현재 높이가 stack의 top보다 높다면 pop을 한다. 그 pop된 위치의 bar는 자기보다 높은 left wall과 right wall이 있는 것이다.
-- stack이 비게 된다면 left wall이 없으므로 무시한다.
-- stack에 값이 남아있다면 stack의 top 값이 left wall이 된다. right wall은 current bar이다.
-- left bar와 right bar 사이에 popped bar보다 높은 건 없으므로 popped bar 높이 윗부분인 `min(left bar, right bar) - popped bar * width` 만큼 물이 찰 수 있다.
-- popped bar 보다 낮은 영역은 이미 이전 작업에서 처리됐다.    
+위의 방법은 two pointer로 두 번 iterate해야하는데 decreasing monotonic stack을 쓰면 한 번의 iterate로 가능하다.   
+이 스택 방식은 "웅덩이를 층별로 가로로 썰어서" 계산한다. 물이 고일 수 있을 때마다 그만큼을 미리 계산하고 버리는 거다.
+
+알고리즘의 직관적 원리
+- 감소할 때 (Descending): 벽의 높이가 낮아지는 동안은 물이 고일 수 없다. 나중에 '왼쪽 벽'이 될 후보들이므로 인덱스를 스택에 계속 쌓는다.
+- 상승할 때 (Ascending): 현재 벽(current)이 스택의 top보다 높다면, 웅덩이의 바닥을 찾은 것이다.
+- top = pop(): 방금 꺼낸 이 위치가 웅덩이의 바닥이 된다.
+- 왼쪽 벽 찾기: 스택에 남은 그 다음 top이 왼쪽 벽이 된다. decreasing monotonic stack 에 따라서, 지금 top 이 가장 첫 번째의 왼쪽 높은 벽이다.
+- 오른쪽 벽 찾기: 현재 조사 중인 current가 현재 벽을 pop 하게 만들었기 때문에 오른쪽 벽이 된다.
+
+물의 양 계산 방식 (가로 층 단위 계산)
+- 웅덩이는 바닥, 왼쪽 벽, 오른쪽 벽이 모두 있어야 형성된다.
+- 가로 길이(Distance): 오른쪽 벽 인덱스 - 왼쪽 벽 인덱스 - 1
+- 세로 높이(Bounded Height): min(왼쪽 벽 높이, 오른쪽 벽 높이) - 바닥 높이
 
 어렵다. 신박하다.
 
@@ -222,17 +232,30 @@ O(N) / O(N)
         n = len(height)
         total = 0
         stack = []
-
         current = 0
-        while current < n:
+        
+        while current < len(height):
+            # 현재 벽이 이전 벽보다 높으면 웅덩이 처리 시작
             while stack and height[current] > height[stack[-1]]:
-                top = stack.pop()
-                if not stack:
+                top = stack.pop() # 웅덩이의 '바닥' 위치
+                
+                if not stack: # 왼쪽 벽이 없으면 물이 고일 수 없음
                     break
-                distance = current - stack[-1] - 1
-                bounded_height = min(height[current], height[stack[-1]]) - height[top]
+                
+                # 웅덩이의 구성 요소 정의
+                left_wall_idx = stack[-1]
+                right_wall_idx = current
+                
+                # 1. 가로 길이: 양쪽 벽 사이의 거리
+                distance = right_wall_idx - left_wall_idx - 1
+                
+                # 2. 세로 높이: 양쪽 벽 중 낮은 쪽까지만 물이 참 (이미 계산된 바닥 높이는 제외)
+                bounded_height = min(height[left_wall_idx], height[right_wall_idx]) - height[top]
+                
+                # 3. 면적 추가
                 total += distance * bounded_height
-            stack.append(current)
+                
+            stack.append(current) # 현재 벽을 다음의 왼쪽 벽 후보로 추가
             current += 1
         
         return total
@@ -250,43 +273,48 @@ O(N) / O(N)
 https://leetcode.com/problems/score-of-parentheses/
 
 문제: balanced parentheses string s가 주어졌을 때 점수를 구하라. () 형태로 붙어 있는 짝이 1점이다.
-A와 B를 각각 subpart의 점수라고 할 때 (A) 처럼 감싸고 있으면 A*2이고 AB처럼 연속되어 있으면 A+B이다.   
-`"(())"` => 2점, `"()()"` => 2점
+A와 B를 각각 subpart의 점수라고 할 때 (A) 처럼 감싸고 있으면 A*2이고 AB처럼 연속되어 있으면 A+B이다.
+- "()" has score 1.
+- AB has score A + B, where A and B are balanced parentheses strings.
+- (A) has score 2 * A, where A is a balanced parentheses string.
+- `"(())"` => 2점, `"()()"` => 2점
 
 
 <details><summary>Approach 1</summary>
 
-stack을 사용해서 풀 수 있다.   
-string을 iterate하면서 괄호 혹은 계산된 숫자를 stack에 넣는다. 
-그러면 제일 마지막에는 결괏값 하나만 stack에 존재하게 된다.
+stack을 사용해서 풀 수 있다. left 괄호는 그냥 push 하고 right 괄호가 나올 때만 처리한다.
+
+```
+직접 머리로 푼다고 생각하고 그걸 로직화시키는 연습
+((()())())
+((11)())  # for right prths, when the top is left prths, pop and push 1
+((2)())  # for right prths, when the top is not left, pop and sum until left prths appears, and double the sum and push
+(41)
+```
+
 
 ```py
-    def scoreOfParentheses(self, s: str) -> int:
-        stack = []
-        for c in s:
-            if c == '(':
-                # left paranthesis면 stack에 추가만 한다.
-                stack.append('(')
-            if c == ')':
-                # right paranthesis면 계산을 해야한다.
-                left = stack.pop()
-                if left == '(':
-                    # stack의 제일 위에 open이 있었다면 현재의 close와 합쳐서 1을 넣는다.
-                    stack.append(1)
-                else:
-                    # 숫자가 있었다면 그 숫자를 두 배한다. 
-                    # stack에는 연속된 숫자가 없음이 보장되므로 그 다음의 pop은 open일 것이다. 합쳐서 2배해서 넣는다.
-                    stack.pop()
-                    stack.append(left * 2)
-            # 각 iteration마다 stack의 top들에 연속된 숫자가 없도록 압축해준다. 
-            if stack and stack[-1] != '(':
-                tmp = stack.pop()
-                if stack and stack[-1] != '(':
+def scoreOfParentheses(self, s: str) -> int:
+    stack = []
+    for cur in s:
+        if cur == '(':
+            stack.append(cur)
+        else:
+            # 괄호가 서로 마주보고 있는 경우는 항상 1이 된다. 
+            if stack[-1] == '(':
+                stack.pop()
+                stack.append(1)
+            else:
+                tmp = 0
+                while stack and stack[-1] != '(':
                     tmp += stack.pop()
-                    stack.append(tmp)
-                else:
-                    stack.append(tmp)
-        return stack[0]
+                stack.pop()
+                stack.append(tmp * 2)
+    res = 0
+    while stack:
+        res += stack.pop()
+    return res
+
 ```
 
 </details>
@@ -298,6 +326,7 @@ stack의 다른 방법도 있다. 각 뎁스마다 값을 저장하는 것이다
 left parenthesis 나올 때마다 depth가 늘어나니까 stack에 추가하고 right parenthesis 나올 때마다 depth 하나 탈출한다.    
 depth 줄일 때마다 stack을 pop 한다. 
 이전 depth의 값에 추가해준다.   
+이건 직관적이지가 않네. 좋은 방법인가?
 
 
 ```python
@@ -325,23 +354,24 @@ def solve(s: str) -> int:
 O(1) space
 
 마지막 방법은 power로 생각하는 것이다. 특정 depth에 있는 ()는 밖으로 나올 때마다 2가 곱해진다.   
-그러면 왼쪽부터 linear하게 탐색하면서 열릴 때마다 depth를 증가시킨다. 닫힐 때 depth를 확인해서 pow(2, depth)를 결과에 더해준다. 바로 붙어있는 괄호들에 대해서만 처리하면 되는 듯.
+그러면 왼쪽부터 linear하게 탐색하면서 열릴 때마다 depth를 증가시킨다. 닫힐 때 depth를 확인해서 pow(2, depth)를 결과에 더해준다.    
+이건 수학이네. 각 항마다 독립적으로 계산하고 마지막에 더하기. 분배법칙?
 
 ```py
-    def scoreOfParentheses(self, s: str) -> int:
-        depth = -1
-        res = 0
-        prev_left = -1
-        for i, c in enumerate(s):
-            if c == '(':
-                depth += 1
-                prev_left = i
-                continue
-            if c == ')':
-                if prev_left == i - 1:
-                    res += 2 ** depth
-                depth -= 1
-        return res
+def scoreOfParentheses(self, s: str) -> int:
+    depth = -1
+    res = 0
+    prev_left = -1
+    for i, c in enumerate(s):
+        if c == '(':
+            depth += 1
+            prev_left = i
+            continue
+        if c == ')':
+            if prev_left == i - 1:
+                res += 2 ** depth
+            depth -= 1
+    return res
 ```
 
 </details>
@@ -361,47 +391,41 @@ MinStack의 member function: `push`, `pop`, `top`, `getMin`
 
 <details><summary>Approach 1</summary>
 
-스택은 계속해서 위로 쌓이는 자료구조이다. 어떤 최솟값이 있고 그 이후로 그보다 작은 값이 없다면 그 위의 모든 값들에 대해서는 get_min이 그 최솟값이다.   
-따라서 stack에 (cur_val, prev_min) 의 tuple을 넣어주면 된다.   
-push할 때와 pop할 때 self.min을 업데이트 해주면 된다.   
-push할 때는 현재와 비교해서 더 작으면 min이 업데이트 되는 것이고, pop할 때는 pop값이 min하고 똑같으면 prev_min으로 업데이트 해야하는 것이다.
+stack이 있고, 특정 지점에서의 최솟값들을 저장한 min_stack이 있다고 하면 min_stack은 내림차순일 것이다.   
+stack 을 탐색하다가 기존의 min 보다 작으면 그 값으로 채워지기 시작한다. 
 
-위 방법대로 하면 중복된 값이 많이 저장될 수 있다. 메모리 효율을 위해서 스택을 두 개 관리하는 방법도 있다. 하나는 그냥 스택, 다른 하나는 min 값이 바뀔 때만 저장하는 스택이다.   
-따라서 pop을 할 때는 min stack의 위에 있는 값과 같으면 둘 다 pop을 하는 식으로 한다.   
+이렇게 스택 두 개를 같은 길이로 사용하는 것보다 조금 더 메모리 효율적인 방법은 min_stack 에서 값이 바뀔 때만 append 하는 것이다. 그러면 pop 할 때, 두 stack이 동일할 때만 min_stack 에서 pop을 한다.
 
 
 ```py
 class MinStack:
-
     def __init__(self):
-        self.min = math.inf
-        self.stack = []  # list of (current value, min value before getting current value)
-
+        self._stack = []
+        self._min_stack = []
 
     def push(self, val: int) -> None:
-        self.stack.append((val, self.min))  # min 업데이트 전에 넣어야 prev_min이 된다.
-        self.min = min(self.min, val)
+        self._stack.append(val)
+        if not self._min_stack or val < self._min_stack[-1]:
+            self._min_stack.append(val)
+        else:
+            self._min_stack.append(self._min_stack[-1])
         
 
     def pop(self) -> None:
-        val, prev_min = self.stack.pop()
-        self.min = max(prev_min, self.min)  # pop 된 값이 있기 전의 최솟값이 prev_min이다. 이 값이 현재의 min보다 크다면 이 popped value가 push될 때 min이 업데이트 된 거니까 pop할 때도 업데이트가 된다.
+        self._stack.pop()
+        self._min_stack.pop()
         
 
     def top(self) -> int:
-        return self.stack[-1][0]
+        return self._stack[-1]
         
 
     def getMin(self) -> int:
-        return self.min
+        return self._min_stack[-1]
+        
 ```
 
 </details>
-
-
-
-
-
 
 
 
@@ -412,44 +436,10 @@ https://leetcode.com/problems/largest-rectangle-in-histogram/description/
 
 문제: Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in the histogram.
 
+
 <details><summary>Approach 1</summary>
 
-내 solution: TLE    
-- stack을 두고 (i, h) 값을 넣는다. 인덱스 i 이후부터 지금까지 가장 낮은 wall의 높이는 h인 것을 보장한다. 
-- i가 늘어났는데 h가 작아진다면 의미가 없다. 따라서 stack은 monotonic stack으로서 h 값이 점점 커져야한다.
-- 리스트를 traverse하면서 right end는 현재 index로 잡는다. 
-- 현재 높이가 stack에 있는 높이보다 작다면 stack에서 현재 높이보다 큰 값들을 다 pop한다. right end 높이보다 큰 값들은 더 이상 쓰이지 못 하기 때문이다. 
-- stack을 구성하면 그 stack을 iterate하면서 `ans = max(ans, (right_end - stack_index) x stack_height )` 로 계산한다. 현재 자리(right_end) 기준으로 stack_index까지 중 가장 높은 공통 높이는 stack_height이기 때문이다.
-
-
-Time Complexity: O(N^2). 최악의 경우 increasing stack이 만들어질 수 있다.
-
-
-
-```py
-    def largestRectangleArea(self, heights: List[int]) -> int:
-        """
-        From index idx, it is guaranteed that height is the shortest.
-        If idx becomes larger, heigh with shorter value is no need. Only looks for higher value.
-        """
-        stack = []  # (idx, height), 
-        ans = 0
-        for i, height in enumerate(heights):
-            last_idx = i
-            while stack and height <= stack[-1][1]:
-                last_idx, _ = stack.pop()
-            stack.append((last_idx, height))
-
-            for _idx, _height in stack:
-                ans = max(ans, (i + 1 - _idx) * _height)
-        
-        return ans
-```
-
-</details>
-
-<details><summary>Approach 2</summary>
-
+접근을 잘 해야한다. 머릿속에서 풀더라도 어떻게 해야 최소한으로 건들고 풀 수 있을지를 생각하자.   
 어떤 지점 i를 기준으로, 해당 bar를 높이로 갖는 최대 rectangle을 구해보자. 그러면 해당 bar에서 왼쪽으로 봤을 때 처음으로 낮은 bar가 나오는 곳이 left index가 되고 반대가 right index가 된다.   
 이렇게 각 i를 대상으로 하게 되면 모든 rectangle을 구할 수 있다.   
 
@@ -492,6 +482,37 @@ right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
         return ans
 ```
 
+increasing monotonic stack 의 성질을 살린 solution
+
+```py
+def largestRectangleArea(self, heights: List[int]) -> int:
+    left_ends = [-1] * len(heights)  # first index that has a lower height than the current index's height
+    right_ends = [len(heights)] * len(heights)
+    #  2,  1, 5, 6, 2, 3
+    # -1, -1, 1, 2, 1, 4
+    # 만약 increasing monotonic stack 이라면, 점점 증가하다가, 낮은 게 들어오면 다 pop
+    # pop 되는 것 입장에서는 현재 값이 나보다 작은 첫 오른쪽 원소이다.
+    # push 되는 것 입장에서는 top 값이 나보다 작은 첫 왼쪽 원소이다.
+
+    stack = []
+    for i, h in enumerate(heights):
+        while stack and stack[-1][1] > h:
+            prev_i, prev_h = stack.pop()
+            right_ends[prev_i] = i
+        if stack:
+            left_ends[i] = stack[-1][0]
+        stack.append((i, h))
+    
+    largest = 0
+    for i, h in enumerate(heights):
+        cur = ((right_ends[i]-1) - (left_ends[i]+1) + 1) * h
+        largest = max(largest, cur)
+    return largest
+
+
+
+```
+
 약간의 최적화
 - shortest 라는 변수 넣어서 shortest보다 작거나 같다면 shortest 업데이트하고 바로 넘어가기(옆 index랑 비교할 필요 없이)
 - 오른쪽 iterate loop를 합치기
@@ -508,12 +529,13 @@ right_barriers 생성한 뒤 이를 이용해서 답을 구한다.
 https://leetcode.com/problems/next-greater-element-ii/description/
 
 문제: Given a circular integer array nums (i.e., the next element of nums[nums.length - 1] is nums[0]), return the next greater number for every element in nums. 
-The next greater number of a number x is the first greater number to its traversing-order next in the array, which means you could search circularly to find its next greater number. If it doesn't exist, return -1 for this number.
+The next greater number of a number x is the first greater number to its traversing-order next in the array, which means you could search circularly to find its next greater number. 
+If it doesn't exist, return -1 for this number.
 
 
 <details><summary>Approach 1</summary>
 
-monitonic stack을 활용한다.
+monotonic stack을 활용한다.
 
 - 뒤에서부터 iterate하면서 decreasing monotonic stack을 만든다.
 - 현재 값보다 큰 값이 나올 때까지 pop을 한다. stack이 비게 되면 -1을 넣고 그렇지 않다면 top을 넣는다.
@@ -521,30 +543,46 @@ monitonic stack을 활용한다.
 - circular list이기 때문에 이 과정을 두 번 반복한다. stack이 비게 되는 순간은 바로 break할 수 있다.
 
 ```py
-    def nextGreaterElements(self, nums: List[int]) -> List[int]:
-        stack = []
-        res = deepcopy(nums)
-        for i in range(len(nums)-1, -1, -1):
-            num = nums[i]
-            while stack and num >= stack[-1]:
-                stack.pop()
-            if stack:
-                res[i] = stack[-1]
-            else:
-                res[i] = -1
-            stack.append(num)
-        
-        for i in range(len(nums)-1, -1, -1):
-            num = nums[i]
-            while stack and num >= stack[-1]:
-                stack.pop()
-            if stack:
-                res[i] = stack[-1]
-            else:
-                break
-            stack.append(num)
-        
-        return res
+def nextGreaterElements(self, nums: List[int]) -> List[int]:
+    stack = []
+    res = deepcopy(nums)
+    for i in range(len(nums)-1, -1, -1):
+        num = nums[i]
+        while stack and num >= stack[-1]:
+            stack.pop()
+        if stack:
+            res[i] = stack[-1]
+        else:
+            res[i] = -1
+        stack.append(num)
+    
+    for i in range(len(nums)-1, -1, -1):
+        num = nums[i]
+        while stack and num >= stack[-1]:
+            stack.pop()
+        if stack:
+            res[i] = stack[-1]
+        else:
+            break
+        stack.append(num)
+    
+    return res
+```
+
+나는 그냥 두 배로 늘린 다음에 monotonic stack 한 번 쓰는 게 편했다.
+
+```python
+def nextGreaterElements(self, nums: List[int]) -> List[int]:
+    linked_nums = nums + nums
+    res = [-1] * len(nums)
+    stack = []
+    for i, num in enumerate(linked_nums):
+        while stack and stack[-1][1] < num:
+            prev_i, prev_num = stack.pop()
+            if prev_i < len(nums):
+                res[prev_i] = num
+        stack.append((i, num))
+    return res
 ```
 
 </details>
@@ -567,18 +605,17 @@ arr = [3,1,2,4], Subarrays are [3], [1], [2], [4], [3,1], [1,2], [2,4], [3,1,2],
 brute force하게 N^2 Time 알고리즘을 생각했다.   
 
 ```py
-    def sumSubarrayMins(self, arr: List[int]) -> int:
-        n = len(arr)
-        res = 0
-        for i in range(n):
-            cur_min = arr[i]
-            for j in range(i, n):
-                cur_min = min(cur_min, arr[j])
-                res += cur_min
-        
-        return res % (pow(10,9) + 7)
+def sumSubarrayMins(self, arr: List[int]) -> int:
+    n = len(arr)
+    res = 0
+    for i in range(n):
+        cur_min = arr[i]
+        for j in range(i, n):
+            cur_min = min(cur_min, arr[j])
+            res += cur_min
+    
+    return res % (pow(10,9) + 7)
 ```
-
 
 </details>
 
@@ -604,7 +641,9 @@ brute force하게 N^2 Time 알고리즘을 생각했다.
 `503. Next Greater Element II` 를 활용해야한다.    
 
 - 어떤 index를 기준으로 했을 때, 왼쪽에서 자기보다 처음으로 작은 값이 나오는 위치를 l, 오른쪽에 처음 나오는 위치를 r이라 하자.
-- `arr[l+1:r] 범위에서는 어떤 contiguos subarray도 min 값은 arr[index]가 된다.
+- `arr[l+1:r] 범위에서는 어떤 contiguous subarray도 min 값은 arr[index]가 된다.
+  - 결과를 iterate 하면서 각 index 위치마다 (left length * right length * nums[index]) 를 하면 된다.
+  - 그 구간에서 만들어질 수 있는 모든 subarray는 index를 중심으로 왼쪽으로 left length 만큼 경우의 수가 있고 오른쪽으로 right length 만큼 경우의 수가 있기 때문이다.
 - duplicate value에 대한 처리를 고려해야한다. 이게 어렵다.
   - 양 쪽 다 if greater, pop 을 하면 duplicate
 
@@ -619,7 +658,6 @@ left:   N N 1 2 2 4
 right:  1 N 4 4 N N
 
 [2, 3, 2]로 extend 되는 건 빠진다.
-
 ```
 
 ```
@@ -720,15 +758,7 @@ Approach 3는 각 원소 당 최대 2번 접근한다.
         return sum(result) % (10**9+7)
 ```
 
-
-
-
-
-
 </details>
-
-
-
 
 
 
@@ -748,25 +778,6 @@ Return the max sliding window.
 
 <details><summary>Approach 1</summary>
 
-brute force
-
-```py
-    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
-        l, r = 0, k
-        res = []
-        #cur_window = nums[0:k]
-        while l <= len(nums) - k:
-            r = l + k
-            res.append(max(nums[l:r]))
-            l += 1 
-        return res
-```
-
-</details>
-
-
-<details><summary>Approach 2</summary>
-
 monotonic queue를 활용한다.   
 
 - 큐에는 작아지는 순서로 데이터가 들어가게 된다.
@@ -775,25 +786,25 @@ monotonic queue를 활용한다.
 - 버려진 값들은 지금 값보다 작으면서 왼쪽에 존재하는 거니까 앞으로의 답에 영향을 줄 수 없다.
 
 ```py
-    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
-        m_queue = deque()
-        res = []
-        for i, num in enumerate(nums):
-            while m_queue and m_queue[0][1] <= i - k:
-                # 여기는 index만 봐도 된다. 남은 건 유효한 max니까.
-                m_queue.popleft()
-                
-            while m_queue and (m_queue[-1][0] <= num or m_queue[-1][1] <= i - k):
-                # 여기는 값만 비교해도 되긴 되는데 그냥 정리해주자.
-                m_queue.pop()
+def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+    m_queue = deque()
+    res = []
+    for i, num in enumerate(nums):
+        while m_queue and m_queue[0][1] <= i - k:
+            # 여기는 index만 봐도 된다. 남은 건 유효한 max니까.
+            m_queue.popleft()
+            
+        while m_queue and (m_queue[-1][0] <= num or m_queue[-1][1] <= i - k):
+            # 여기는 값만 비교해도 되긴 되는데 그냥 정리해주자.
+            m_queue.pop()
 
-            m_queue.append((num, i))
-            if i < k-1:
-                continue
+        m_queue.append((num, i))
+        if i < k-1:
+            continue
 
-            res.append(m_queue[0][0])
-        
-        return res
+        res.append(m_queue[0][0])
+    
+    return res
 ```
 
 O(N) / O(N)
