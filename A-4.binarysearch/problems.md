@@ -34,6 +34,29 @@ while loop을 나왔을 때 답은 left가 된다.
         return l
 ```
 
+혹은 동일한 방식을 find_first 방식으로 풀 수도 있다.
+
+```python
+def minEatingSpeed(self, piles: List[int], h: int) -> int:
+    left = 1
+    right = max(piles)
+    # x x x o o o
+    # find first o
+    res = -1  # if condition meets, update res and expand to left
+    while left <= right:
+        mid = (left + right) // 2
+        time_taken = 0
+        for pile in piles:
+            time_taken += math.ceil(pile / mid)
+        if time_taken <= h:
+            res = mid
+            right = mid - 1
+        else:
+            left = mid + 1
+    return res
+```
+
+
 </details>
 
 
@@ -43,7 +66,8 @@ while loop을 나왔을 때 답은 left가 된다.
 https://leetcode.com/problems/furthest-building-you-can-reach
 
 문제: heights, bricks, ladders 가 주어진다. 건물들을 왼쪽부터 이동하는데 높은 건물로 갈 때는 높이 차이만큼 brick을 쓰든가 ladder 하나를 써야한다. 가장 멀리 갈 수 있는 건물을 찾아라.
-
+- Input: heights = [4,2,7,6,9,14,12], bricks = 5, ladders = 1
+- Output: 4
 
 <details><summary>Approach 1</summary>
 
@@ -84,7 +108,8 @@ class Solution:
         return len(heights) - 1
 ```
 
-<details>
+</details>
+
 
 <details><summary>Approach 2</summary>
 
