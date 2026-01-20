@@ -11,12 +11,16 @@ chr(숫자): 숫자에 해당하는 문자 반환한다. ord 에 대응하는 �
 
 ### sort, sorted
 
-sorted는 새로운 리스트를 반환한다. list 뿐만 아니라 dict의 경우도 사용할 수 있다.   
-key라는 parameter에 lambda 함수를 넣어서 어떤 key로 정렬할지를 정할 수 있다.    
-reverse=True 라는 parameter를 넣어서 역으로 정렬할 수도 있다.
-
-
+sorted는 새로운 리스트를 반환한다. list 뿐만 아니라 dict의 경우도 사용할 수 있다.
 sort의 경우는 list의 내장함수이다. 
+
+둘 다 공통적으로 (cPython 기준)
+- key라는 parameter에 lambda 함수를 넣어서 어떤 key로 정렬할지를 정할 수 있다.    
+- reverse=True 라는 parameter를 넣어서 역으로 정렬할 수도 있다.
+- Timsort를 사용한다. merge sort 와 insertion sort 의 혼합이고 stable 하다.
+
+
+
 
 
 

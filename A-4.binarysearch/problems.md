@@ -78,17 +78,18 @@ ladders 개수 L 을 크기로 갖는 힙을 생성하고 앞에서부터 높이
 현재 필요한 벽돌 수가 더 적으면 벽돌 소진하면 되는 것이고, 힙에 있는 최솟값이 더 작으면 예전에 썼던 사다리를 지금 쓰고 예전 작업은 벽돌로 하면 된다.   
 이렇게 해서 벽돌 수가 음수가 되면 더이상 못 가는 것이다.   
 
-
+- time: O(N log L)
+  - N 번 iteration, 각 iteration 마다 heap 연산 log L
+- space: O(L)
 
 ```py
 class Solution:
     def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:
         mheap = []
         prev_h = heights[0]
-        pos = 0
         for i, h in enumerate(heights):
             diff = h - prev_h
-            prev_h = h 
+            prev_h = h  # 이걸 바로 업데이트해줘야한다. loop 마지막에 하려니까 이미 continue 로 넘어갈 때가 있다. 
 
             if diff <= 0:
                 continue
@@ -120,6 +121,13 @@ class Solution:
 이 특성을 이용해서 binary search를 사용할 수 있다.    
 o o o x x x    => Get right pointer    
 
+시간은 더 걸린다.
+
+- time: O(N^2 log N)
+  - is_reachable O(idx) + O(idx log idx) => idx 는 평균 N/2
+  - binary search O(log N) 번
+- space: O(N)
+  - diff list
 
 ```py
     def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:
@@ -170,8 +178,12 @@ O(N logN)
 https://leetcode.com/problems/find-peak-element/
 
 문제: 서로 다른 값을 갖는 integer array가 주어졌을 때 peak의 위치를 반환하라. peak란 주변보다 strictly greater한 값을 가지는 곳을 말하며 `nums[-1] = nums[n] = -math.inf` 으로 간주한다. O(log n) 의 알고리즘을 구하라.
+`nums[i] != nums[i + 1] for all valid i.`
+
 
 <details><summary>Approach 1</summary>
+
+동일한 숫자가 붙어있지 않으니까 그냥 쉽다 이건.
 
 left, right를 초기화하고 nums에 -math.inf 를 append한다. 이렇게 함으로써 `nums[-1] = nums[n] = -math.inf`를 자연스럽게 적용시킬 수 있다.   
 mid 기준에서 왼쪽이 더 크면 left half에 peak가 있어야한다. nums[-1]은 -inf이고 nums[cur] 보다 nums[cur-1] 이 더 크기 때문이다. 오른쪽에도 있을 수 있지만 왼쪽엔 보장이 된다.   
