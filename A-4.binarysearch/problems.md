@@ -390,6 +390,24 @@ https://leetcode.com/problems/find-smallest-letter-greater-than-target/
         return letters[l]
 ```
 
+이런 건 res 저장소를 사용하면 편하다. find_first 기법 유용하고 편하다.
+
+```python
+def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+    left = 0
+    right = len(letters) - 1
+    res = letters[0]
+
+    while left <= right:
+        mid = (left + right) // 2
+        if ord(letters[mid]) > ord(target):
+            res = letters[mid]
+            right = mid - 1
+        else:
+            left = mid + 1
+    return res
+```
+
 </details>
 
 
@@ -407,21 +425,53 @@ https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
 
 <details><summary>Approach 1</summary>
 
-데이터를 먼저 이해하자. mid가 각 상황일 때 어떤 의미인지를 충분히 생각하고 깔끔하게 분류한 걸 글로 정리한 뒤에 코드를 생각해보자.
+데이터를 먼저 이해하자. mid가 각 상황일 때 어떤 의미인지를 충분히 생각하고 케이스를 분류한다.   
+기본적인 binary search 알고리즘을 구현하고, 예외 케이스들을 고려해서 처리한다.
 
-start < end면 rotated가 안 된거니까 그거에 대한 처리를 먼저 한다.    
-rotated 된 경우에 대해서는 index 0의 value를 기준으로 잡는다. 아래와 같이 우선 데이터를 이해한다.
-- `[index 1, rotated point-1]`: index 0의 값보다 큰 값이다.   
-- `[rotated point, last]`: index 0의 값보다 작은 값이다.    
+`4, 5, 6, 1, 2, 3`
 
-이해한 데이터를 바탕으로 아래 로직으로 찾는다. Using binary search
-- nums[l] < nums[r] 라면 sorting 된 상태이기 때문에 nums[l] 반환
-- mid가 nums[l]보다 작다면 mid 위치는 `[rotated point, r]` 범위의 값이다.   
-  - mid보다 한 칸 낮은 nums[mid-1]이 nums[l]보다 크거나 같으면 mid-1은 `[rotated point, last]` 범위의 왼쪽이라는 뜻이다. 따라서 mid가 rotated point이다. => nums[mid]를 반환    
-  - mid-1 이 out of index가 되려면 mid가 0이어야하는데 이런 상황은 발생하지 않는다. 이미 첫 번째 조건에서 반환되었을 것이기 때문이다.
-  - 위 조건이 아니라면 mid는 `[rotated point, last]` 범위 중간에 있다는 것이고 mid 왼쪽에 rotated point가 있기 때문에 left half를 탐색한다. `right = m - 1`
-- 위 조건이 아니라면 right half를 탐색한다. `left = m + 1`   
+- min 값을 구하기 위해서는 min 값이 시작되는 rotated point 를 구하면 된다.
+- 리스트는 오름차순으로 정렬이 되어 있고 딱 한 군데에서만 값이 떨어진다. 즉, nums[mid] < nums[mid-1] 일 때 nums[mid] 가 rotated point 인 것이다.
+- 어떤 지점이 rotated point가 아닐 때, 왼쪽을 탐색할지 오른쪽을 탐색할지 정해야한다. 현재 mid 값이 끝 값보다 작다면 mid ~ end 까지는 정렬이 되어 있는 것이다. mid 값이 끝 값보다 크다면 mid ~ end 사이에 rotated point가 있다. 
+- 이 조건으로 binary search 를 구현할 수 있다.
+  - if nums[mid] < nums[mid-1], return nums[mid]
+  - else if nums[mid] < nums[-1], search left subarray
+  - else, search right subarray
+- 이제 코너 케이스들을 고려한다. 길이가 1이라면? mid 값이 0일 때는?
+  - 길이가 1이면 그냥 그대로 반환한다.
+  - mid 값이 0이라면 알 수가 없다. 대신 최솟값이 0에 위치하려면 nums[0] < nums[-1] 이어야한다. 따라서 nums[0] < nums[-1] 이 아니라면 0은 정답이 아니란 걸 보장할 수 있다.
 
+
+```python
+def findMin(self, nums: List[int]) -> int:
+    left = 0
+    right = len(nums) - 1
+    if len(nums) == 1:
+        return nums[0]
+
+    # When index 0 is rotated (no rotation)
+    if nums[0] < nums[-1]:
+        return nums[0]  
+    
+    # Otherwise (index 0 is not the rotated point)
+    while left <= right:
+        mid = (left + right) // 2
+        if mid == 0:
+            left = mid + 1
+            continue
+
+        if nums[mid-1] > nums[mid]:
+            return nums[mid]
+        if nums[mid] > nums[-1]:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+        
+    
+```
+
+아래는 위 알고리즘을 좀 더 간략하고 압축적으로 고친 것이다.
 
 ```py
     def findMin(self, nums: List[int]) -> int:
@@ -509,7 +559,7 @@ def findMin(self, nums: List[int]) -> int:
             return nums[l]
         mid = (l + r) // 2
 
-        if nums[mid] < nums[l]:
+        if nums[mid] < nums[l]:  # 이게 nums[0] 이랑 비교하는 게 아니라 nums[l] 하고 비교해야한다. [l, r] 까지만 있다고 생각해야하니까.
             if nums[mid-1] > nums[mid]:
                 return nums[mid]
             r = mid - 1
@@ -519,7 +569,6 @@ def findMin(self, nums: List[int]) -> int:
             l += 1
 ```
 
-어렵다.
 
 </details>
 
@@ -536,28 +585,34 @@ https://leetcode.com/problems/search-a-2d-matrix-ii/
 
 <details><summary>Approach 1</summary>
 
-- 어떤 위치에서 target보다 크다면, 해당 위치 기준 righter, lower elements는 다 무시할 수 있다. 이 때는 왼쪽으로 한 칸 이동해야한다.
-- 어떤 위치에서 target보다 작다면, 해당 위치 기준 lefter, upper elements는 다 무시할 수 있다. 이 때는 아래로 한 칸 이동해야한다.
-- binary search로 target을 찾으면 return True, 못 찾고 loop를 나오면 return False
+데이터의 이해
+- 어떤 mid point 기준으로 4사분면을 그린다고 했을 때, 2사분면은 mid point 보다 작은 값들만 있고 4사분면은 mid point 보다 큰 값들만 있다.
+- 1사분면과 3사분면은 알 수가 없다. 그러면 좌우 위아래 어떤 방향으로 줄여나갈지 알 수 없기 때문에 1사분면과 3사분면 중 하나를 없애야 탐색이 가능하다.
+- scan 시작점을 오른쪽 위 구석으로 둔다. 그러면 1사분면이 사라진다.
 
-이게 왜 binary search지?
+구현
+- scan point 값이 target 보다 크다면, scan point 의 column 에는 target 이 있을 수 없다. column 의 아래 부분은 모두 scan point 보다 크기 때문이다.
+- scan point 값이 target 보다 작다면, scan point 의 row 에는 target 이 있을 수 없다. row 의 왼쪽 부분은 모두 scan point 보다 작기 때문이다.
+- 이렇게 맨 끝에서부터 한 겹씩 없애나가면서 탐색을 한다.
+
 
 ```python
 def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
-    m, n = len(matrix), len(matrix[0])
-    row, col = 0, n - 1
+    n_row = len(matrix)
+    n_col = len(matrix[0])
 
-    while row < m:
-        while col >= 0:
-            cur = matrix[row][col]
-            if cur == target:
-                return True
-            if cur > target:
-                col -= 1
-            if cur < target:
-                break
-        row += 1
-    
+    cur_row = 0
+    cur_col = n_col - 1
+
+    # scan from top right to bottom left
+    while cur_row <= n_row-1 and cur_col >= 0:
+        if matrix[cur_row][cur_col] == target:
+            return True
+        if matrix[cur_row][cur_col] < target:
+            # discard all the elements that are left to the current column
+            cur_row += 1
+        else: 
+            cur_col -= 1
     return False
 ```
 
