@@ -20,7 +20,7 @@ def backtrack(candidate):
         return
     
     for next_candidate in list_of_candidates:
-        if is_valid(next_candidate):
+        if is_valid(next_candidate):  # 이 길이 정답이 될 가능성이 있는가?
             mark_decision()  # 이 조건에 대해 설정을 한다.
             backtrack()  # 더 탐색을 한다. solution에 한 step 더 가까이 간다.
             revert_decision()  # 추가한 설정을 제거해서 원 상태로 돌려놓는다.
@@ -33,10 +33,18 @@ def backtrack(candidate):
 
 복잡도를 계산하기 위한 이론
 
+다음과 같은 재귀식에만 적용이 가능하다.
 
-```python
+- T(n) = aT(n/b) + f(n)
+  - a: 분할된 문제의 개수 (a >= 1)
+  - b: 문제를 나눌 때 크기가 줄어드는 비율 (b > 1)
+  - f(n): 문제를 나누고 합치는 데 드는 비용
 
-def solve(n):
+이 때, 재귀적으로 쪼개지는 노드의 총합은 n^(logb a) 이고, 현재 단계에서 밖에서 하는 일은 f(n) 이다. 따라서 이 두 개를 비교해야한다.   
+- case 1: n^(logb a) > f(n)
+  - T(n) = O(n^(logb a))
+- case 2: n^(logb a) == f(n)
+  - T(n) = O(n^(logb a) * log n)
+- case 3: n^(logb a) < f(n)
+  - T(n) = O(f(n)) 
 
-
-```

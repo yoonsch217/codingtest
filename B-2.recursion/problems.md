@@ -54,8 +54,54 @@ recursion으로 row를 늘려가면서 invalid한 순간 멈추고 backtracking�
 ```
 
 Complexity:   
-- O(N!) / O(N) set 비교하는 건 O(1)이니까 처음에 N개, 그 다음에 N-1, ... 해서 N!이다.    
+- Time: O(n!)
+  - 백트래킹 O(n!), 유효성 검사는 set 사용하는 거니까 O(1)
+  - 백트래킹이 n!인 이유: 처음에 n개, 그 다음에는 동일 column 과 대각을 제외하고 n-2개 등등으로 가니까 n * (n-2) * ... 하면 대략 n! 과 유사하다.
+- Space: O(n)
+  - 3개의 set O(n), 재귀스택 O(n)
 
+
+복잡도 면에서는 더 안 좋지만 좀 더 직관적인 코드인 이렇게도 풀었다.
+- 놓았던 말 위치를 occupied 라는 리스트에 (i, j) 형태로 보관
+- 한 depth 지날 때마다 row는 하나 늘리고 모든 column 에 대해 대각선에 있는지, 같은 column 에 있는지 검증한다.
+
+```python
+def totalNQueens(self, n: int) -> int:
+
+    def backtrack(occupied, cur_row):
+        if cur_row == n:
+            return 1
+        res = 0
+        for cur_col in range(n):
+            cur_pos = (cur_row, cur_col)
+
+            # backtrack if invalid
+            is_valid = True
+            for prev_row, prev_col in occupied:
+                if cur_col == prev_col:
+                    is_valid = False
+                    break
+                if abs(cur_row - prev_row) == abs(cur_col - prev_col):
+                    is_valid = False
+                    break
+            
+            # proceed if valid
+            if not is_valid:
+                continue
+            occupied.append((cur_row, cur_col))
+            res += backtrack(occupied, cur_row + 1)
+            occupied.pop()
+
+        return res
+
+    return backtrack([], 0)
+```
+
+Complexity
+- Time: O(n! * n)
+  - 백트래킹 O(n!), 각 단계에서의 유효성 검사 O(n) 
+- Space: O(n)
+  - occupied list O(n), recursion stack O(n) 
 
 </details>
 
@@ -150,6 +196,23 @@ def myPow(self, x: float, n: int) -> float:
     return float(f) if n >= 0 else 1/f
 ```
 
+```python
+@lru_cache()
+def myPow(self, x: float, n: int) -> float:
+    """
+    x^n = x^(n//2) * x^(n//2) * x^(n%2)
+    """
+    if n == 0:
+        return 1
+    if x == 0:
+        return 0
+    if n == -1:
+        return 1/x
+    if n == 1:
+        return x
+    return self.myPow(x, n//2) * self.myPow(x, n//2) * self.myPow(x, n%2)
+```
+
 </details>
 
 
@@ -198,7 +261,7 @@ def restoreIpAddresses(self, s: str) -> List[str]:
             for k in range(j+1, n-1):
                 if k >= j+4:
                     break
-                first = get_valid_value_or_none(0, i)
+                first = get_valid_value_or_none(0, i)  # consider early exit
                 second = get_valid_value_or_none(i+1, j)
                 third = get_valid_value_or_none(j+1, k)
                 fourth = get_valid_value_or_none(k+1, n-1)
@@ -263,67 +326,6 @@ dots 위치 리스트를 갖고 다니면서 backtrack 시작하기 전에 dots.
         backtrack(0, 3)
         return ans
 ```
-
-
-내 솔루션. 어떻게 풀긴 풀었네. 80%
-
-
-```py
-    def restoreIpAddresses(self, s: str) -> List[str]:
-        if len(s) < 4:
-            return []
-        
-        def is_valid(target):
-            if len(target) == 1:
-                return True
-            if len(target) == 2 and target[0] != '0':
-                return True
-            if len(target) == 3 and target[0] != '0' and int(target) < 256:
-                return True
-            return False
-        
-        def get_ip(raw_str, dots):
-            tmp = []
-            prev = 0
-            for dot in dots:
-                tmp.append(raw_str[prev:dot+1])
-                prev = dot + 1
-            tmp.append(raw_str[prev:])
-            return '.'.join(tmp)
-
-
-        def get_possible_ips(cur_idx, dots, res):
-            # if last_dot_idx is i, it means that there's a dot just after i-th character
-            if len(dots) > 3:
-                return
-            if len(dots) == 0:  
-                # initial condition
-                last_dot_idx = -1
-            else:
-                last_dot_idx = dots[-1]
-
-            if cur_idx == len(s):
-                # when reached the right end, add to the result if the last section is valid
-                if len(dots) == 3:
-                    if is_valid(s[last_dot_idx+1:]):
-                        res.append(get_ip(s, dots))
-                return
-
-            if cur_idx - last_dot_idx > 3:
-                return
-            if is_valid(s[last_dot_idx+1:cur_idx+1]):
-                get_possible_ips(cur_idx+1, dots, res)
-                dots.append(cur_idx)
-                get_possible_ips(cur_idx+1, dots, res)
-                dots.pop()
-        
-        res = []
-        get_possible_ips(0, [], res)
-        return res
-```
-
-</details>
-
 
 
 
