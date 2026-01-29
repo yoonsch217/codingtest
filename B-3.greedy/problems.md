@@ -13,8 +13,9 @@ limit 보다 무거운 사람은 없다.
 오른쪽부터 무거운 사람을 태우면서 left pointer 몸무게가 더 태울 수 있는 무게면 태우고 안 되면 만다.    
 right pointer 이동할 때마다 보트를 사용하는 거니까 결과값을 1 늘린다.
 
-무게 순서대로 a b c d 가 있을 때, d를 골랐다면 a와 b 중 a를 먼저 태워야한다. 
-a+d가 불가하다면 b+d도 불가하다. a+d가 가능하고 b+d가 불가한 경우, b+d를 먼저 해버리면 a+c가 되냐 안 되냐에 따라 다른 결과가 나온다.
+나는 처음에 가장 무거운 사람의 짝으로, limit을 안 넘는 가장 무거운 사람을 골랐었다. 이렇게 하면 N^2 의 시간이 필요하다.   
+하지만 지금 문제의 경우는 인원수 limit이 있기 때문에 매 순간 보트를 꽉꽉 채워서 보내지 않아도 된다. 이럴 때는 같이 탈 수 있는 사람을 누구라도 골라서 태워 보내면 되기 때문에 left pointer, right pointer 를 두고 선형적으로 탐색할 수 있다.    
+무거운 것부터 A, B, C, D 사람이 있었을 때: A+C 와 A+D 모두 가능하다고 해보자. 그럴 때 A+C가 가능하다면 B+C도 가능하다. 따라서 A는 D랑 바로 짝을 지으면 된다.
 
 
 ```py
@@ -33,7 +34,7 @@ a+d가 불가하다면 b+d도 불가하다. a+d가 가능하고 b+d가 불가한
         return cnt
 ```
 
-이 방법은 at most 두 명까지 태울 수 있어서 가능한 것 같다. 두 명 제한이 없고 weight sum limit만 있다면? 
+이 방법은 at most 두 명까지 태울 수 있어서 가능한 것 같다. 두 명 제한이 없고 weight sum limit만 있다면? 그러면 처음 보낼 때부터 최대한 빡빡하게 무게를 채워서 보내야할 것이다. 
 
 
 </details>
@@ -50,6 +51,15 @@ https://leetcode.com/problems/perfect-squares/
 
 dp에 정리해놨다.
 
+<details>
+
+BFS 를 사용하는 방법이 가장 직관적인 것 같다.
+n 보다 작은 perfect square 를 모두 구해놓고 각 iteration 마다 가능한 경우의 수를 구한다.
+각 iteration 지날 때마다 count 가 하나 늘어난다.
+n 이 만들어지는 순간의 count 가 답이다.
+
+
+</details>
 
 
 
@@ -72,7 +82,15 @@ Greedy한 접근을 생각해본다.
 너비와 높이가 중요하고, 하나를 포기하게 되면 다른 하나는 더 좋아져야한다.   
 너비를 가장 넓게 시작을 해본다. 그러면 left와 right를 양 끝으로 잡는다.    
 거기서 left와 right를 가운데로 움직이면 height는 무조건 높아져야한다.    
-left와 right 중 낮은 wall을 갖는 걸 옮겨야한다. 높은 wall을 갖는 걸 옮겨봤자 height = min(left, right)이기 때문에 이 값이 높아질 수가 없다.   
+left와 right 중 낮은 wall을 갖는 걸 옮겨야한다. 높은 wall을 갖는 걸 옮겨봤자 height = min(left, right)이기 때문에 이 값이 높아질 수가 없다.
+
+Greedy approach 증명
+- Greedy Choice Property: elimination strategy + opportunity cost
+  - 매 순간 낮은 쪽을 옮기는 게 나중에 후회할 일이 없다.
+  - 높은 쪽을 옮겼을 때, min(left wall, right wall) 은 항상 left wall 보다 작거나 같다. left wall 은 고정이니까. 하지만 width 는 현재보다 좁아진다. 
+  - 그러면 left wall 을 고정시킨 모든 케이스는 정답이 될 수 없기 때문에 left wall 을 고정시키는 경우를 버리는 것이다.
+- Optimal Substructure
+  - 전체 문제의 최적해는 left 를 옮기거나 right를 옮겨서 만든 부분 문제의 최적해 중 하나이다.
 
 
 ```py
