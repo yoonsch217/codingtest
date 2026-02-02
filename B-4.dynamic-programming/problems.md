@@ -36,6 +36,8 @@ https://leetcode.com/problems/maximum-sum-circular-subarray
 
 <details><summary>Approach 1</summary>
 
+처음에는 array 를 두 배로 늘리고 cnt라는 변수를 두고 cnt < len(nums) 조건을 추가해서 Kadane's algorithm 을 쓰려고 했다. 그러면 `[5, -3, 5]` 같은 케이스에 실패한다. 왜냐하면 cnt 라는 제약이 들어가는 순간 greedy 한 속성을 적용할 수 없기 때문이다. 
+
 두 가지 case로 나눌 수가 있다. 아래 둘 중 큰 값이 답이다.
 - array 안에 포함되는 subarray 중 답이 있는 경우
 - for i > j, nums[i:] 와 nums[:j+1] 을 연결한 array 중 답이 있는 경우 
@@ -173,11 +175,16 @@ Explanation: transactions = [buy, sell, cooldown, buy, sell]
 
 <details><summary>Approach 1</summary>
 
+처음에는 buy, sell, cooldown 이렇게 세 가지의 action 에 대해 메모리를 만들고 진행해보니까 어려웠다. sells[i] 에 대해서 계산할 때 cooldowns[i-1] 이 주식이 있는지 없는지 알 수가 없기 때문이다. 
+
 state가 복잡할 때는 각각을 나누고 서로의 상관관계를 구하라.
-결국에는 얼마나 복잡하든 특정 상태의 i 시점에 대해 과거와의 점화식을 구하는 문제인 것이다.
+결국에는 얼마나 복잡하든 특정 상태의 i 시점에 대해 과거와의 점화식을 구하는 문제인 것이다.   
+데이터를 잘 이해해야한다. 주식을 동시에 두 개 이상 갖고 있을 수 없기 때문에 주식이 있다는 건 최근 거래가 buy 보다는 sell 이 최근이라는 뜻이다.   
+상태를 잘 나누는 것도 중요하다. 서로 독립적이면서 모든 case를 cover 할 수 있는 최소한의 state를 구해야한다.   
+접근 방식을 알고 있었는데도 state를 적절히 못 나눠서 헤맸다.
 
 There can exist three states:   
-- Not having any stock   
+- Not having any stock and cooldown has passed   
 - Having a stock   
 - Just after selling a stock   
 
@@ -187,12 +194,10 @@ There can exist three states:
 
 ```
 s[i]: Maximum profit for the state at the time i. When buying a stock, the profit is decreased by the amount of the price
-no_stock[i] = max(no_stock[i-1], after_sell[i-1])
-have_stock[i] = max(have_stock[i-1], no_stock[i-1] - prices[i])
+no_stock_after_cooldown[i] = max(no_stock_after_cooldown[i-1], after_sell[i-1])
+have_stock[i] = max(have_stock[i-1], no_stock_after_cooldown[i-1] - prices[i])
 after_sell[i] = have_stock[i-1] + prices[i]
 ```
-
-
 
 ```py
     def maxProfit(self, prices: List[int]) -> int:
@@ -238,7 +243,7 @@ if not hodling: max(buy, doNothing)
 ```py
     def maxProfit(self, k: int, prices: List[int]) -> int:        
         # holding, not holding
-        dp = [[[0, 0] for _ in range(k+1)] for _ in range(len(prices)+1)]
+        dp = [[[0, 0] for _ in range(k+1)] for _ in range(len(prices)+1)]  # shallow copy 되지 않도록 주의! [[[0]*2] * (k+1)] * n 이런 식으로 하면 shallow copy 된다.
         
         for i in range(len(prices)-1, -1, -1):
             for j in range(1, k+1):
@@ -261,22 +266,64 @@ if not hodling: max(buy, doNothing)
 
 내가 이후에 관계식 구해본 것.
 
+```python
+    def maxProfit(self, k: int, prices: List[int]) -> int:
+        """
+        state variables
+        - position
+        - remaining transactions: decreases when sell action is done
+        - has stock
+
+        dp[i][j][False] = max( dp[i-1][j][False], dp[i-1][j+1][True] + price )
+        dp[i][j][True] = max( dp[i-1][j][True], dp[i-1][j][False] - price )
+        """
+        n = len(prices)
+        dp = [[[0,0] for _ in range(k+1)] for _ in range(n)]
+        res = -math.inf
+
+        for i in range(n):
+            price = prices[i]
+            for j in range(k+1):
+                if i == 0:
+                    dp[i][j][1] = -price
+                elif j == k:
+                    dp[i][j][0] = dp[i-1][j][0]
+                    dp[i][j][1] = max(dp[i-1][j][1], dp[i-1][j][0] - price)
+                else:                    
+                    dp[i][j][0] = max(dp[i-1][j][0], dp[i-1][j+1][1] + price)
+                    dp[i][j][1] = max(dp[i-1][j][1], dp[i-1][j][0] - price)
+
+                res = max(res, dp[i][j][0])
+                res = max(res, dp[i][j][1])
+        return res
 ```
-구매할 때 transaction count가 증가하고 판매할 땐 영향 없다고 정하자.
 
-have_stock(i, k): i까지 k 번의 transaction이 일어났을 때 최댓값
-no_stock(i, k)
+잘 살펴보면 state reduction 이 가능하다. 가장 최근의 i-1 만 바라보기 때문이다.
 
-have_stock(i, k) = max( have_stock(i-1, k) , no_stock(i-1, k+1) - prices[i-1] )
-no_stock(i, k) = max( no_stock(i-1, k) , have_stock(i-1, k) + prices[i-1] )
+```python
+        n = len(prices)
+        dp = [[0,0] for _ in range(k+1)]
+        res = -math.inf
+
+        for i in range(n):
+            price = prices[i]
+            for j in range(k+1):
+                prev_no_stocks = dp[j][0]
+                prev_has_stocks = dp[j][1]
+                if i == 0:
+                    dp[j][1] = -price
+                elif j == k:
+                    dp[j][0] = prev_no_stocks
+                    dp[j][1] = max(prev_has_stocks, prev_no_stocks - price)
+                else:                    
+                    dp[j][0] = max(prev_no_stocks, dp[j+1][1] + price)
+                    dp[j][1] = max(prev_has_stocks, prev_no_stocks - price)
+
+                res = max(res, dp[j][0])
+                res = max(res, dp[j][1])
+        return res
 ```
 
-초깃값 세팅을 해놓고 이걸로 할 수 있을 것 같다. 근데 모든 i에 대해 모든 k에 대해 리스트를 만드는 게 비효율적이다.
-왜냐하면, i가 0일 때는 k가 0 혹은 1인데 안 쓰는 이후 부분을 만들 필요가 없다. 
-이후 작업에도 마찬가지이다.
-초깃값을 잘 만들어놓고 거기서 확장을 잘 하는 구조로 만들면 좋을 것 같은데 다음에 해보자.
-
-어렵다.
 
 </details>
 
@@ -310,7 +357,18 @@ https://leetcode.com/problems/climbing-stairs/
 
 dp(i)를 i개 올라가는 distinct way의 수라고 하자.   
 그러면 dp(i) = dp(i-2) + dp(i-1)이 된다.   
-어떤 계단에 가기 위해서는 한 계단 아래에서 한 계단 올라오든가 두 계단 아래에서 두 계단 올라와야 하기 때문이다.   
+어떤 계단에 가기 위해서는 한 계단 아래에서 한 계단 올라오든가 두 계단 아래에서 두 계단 올라와야 하기 때문이다.
+
+```python
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        dp = [0] * (n+1)
+        dp[0] = 1
+        dp[1] = 1
+        for i in range(2, n+1):
+            dp[i] = dp[i-1] + dp[i-2]
+        return dp[n]
+```
 
 </details>
 
@@ -352,6 +410,23 @@ dp(i)를 i-th step의 위치까지 올라갈 수 있는 상태가 되는 데까�
 
 복잡도는 O(N) / O(N) 일 것이다.
 
+```python
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        n = len(cost)
+        two_before = cost[0]
+        one_before = cost[1]
+        for i in range(2, n):
+            current = min(one_before, two_before) + cost[i]
+            two_before = one_before
+            one_before = current
+            
+        
+        return min(two_before, one_before)
+```
+
+O(N) / O(1)
+
 </details>
 
 
@@ -367,7 +442,52 @@ https://leetcode.com/problems/word-break/
 
 <details><summary>Approach 1</summary>
 
-적당히 잘 쪼개는 게 중요하다.
+직관적으로 접근한 뒤 memoization 으로 구현했다.   
+사전에 있는 각 단어들을 다 대본다. 그러고 앞 부분이 매치하면 그걸 바탕으로 남은 substring을 다시 recursive 하게 판단한다.
+
+```python
+class Solution:
+    def wordBreak(self, s: str, word_dict: List[str]) -> bool:
+        """
+        brute force: iterate wordDict everytime, if any of the word matches the first part of the remaining string, 
+        use it and make branches based on that.
+        """
+
+        @lru_cache(maxsize=None)
+        def helper(target):
+            for word in word_dict:
+                if len(target) >= len(word) and word == target[:len(word)]:
+                    if len(target) == len(word):
+                        return True
+                    cur_res = helper(target[len(word):])
+                    if cur_res:
+                        return cur_res
+            return False
+        
+        return helper(s)
+```
+
+- Time
+  - s의 길이 N, 사전의 길이 W, 단어 최대 길이 L 일 때,
+  - O(NWL)
+
+근데 만약 dict 의 길이가 엄청 길다면 dict 를 매번 iterate 하는 게 비용이 많이 들 것이다. 그럴 땐 dict 를 set 으로 바꾼다. 그러고는 target 의 substring 이 set에 있는지를 체크하는 것이다.
+
+```python
+for i in range(1, len(target) + 1):
+    if target[:i] in word_set:
+        if helper(target[i:]): return True
+```
+
+- Time
+  - O(N^2 L)
+
+</details>
+
+
+<details><summary>Approach 2 - bottom up</summary>
+
+bottom up 으로 하려면 우선 state 에 따라 메모리를 할당해놓고 base 정의 & 점화식을 사용하여 위로 올라가야한다.
 
 - dp(i): index i 까지의 substring이 word_dict 로 구성이 가능하면 True, 아니면 False    
 - dp(i) is True when: `s[0:i+1] in word_dict` or `s[j:i+1] in word_dict and dp(j-1) for any j in range(1, i)`   
@@ -391,7 +511,7 @@ def wordBreak(self, s: str, wordDict: List[str]) -> bool:
     return memo[n-1]
 ```
 
-O(N^2) /  O(N)
+O(N^2 L) /  O(N)
 
 </details>
 
