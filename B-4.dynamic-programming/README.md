@@ -145,8 +145,22 @@ https://leetcode.com/problems/maximum-sum-circular-subarray
 ### Knapsack algorithm
 
 - 물건을 쪼갤 수 없을 때(넣거나 안 넣거나) 사용하는 패턴이다.
-- 점화식: `dp[i][w] = max(dp[i-1][w], dp[i-1][w - weight[i]] + value[i])`
+- dp[i][j]: 0번부터 i번째 물건까지 고려했을 때, 배낭의 용량이 j일 때 얻을 수 있는 최대 가치
 - 공간 최적화: 1차원 배열로 풀 때는 뒤에서부터(reverse) 채워야 중복 선택을 방지할 수 있다.
+- permutation 문제가 아니라 combination 문제인 경우는 다르게 접근해야한다. (eg. Coin Change 2)
+  - 동전의 순서가 달라도 같은 case로 봐야하기 때문에 case를 셀 때 동전의 사용 순서를 강제해야한다.
+  - 따라서 동전 종류에 대한 루프나 인덱스 j가 필요하다.
+  - 순서를 강제하기 위해서 state 정의에 어디까지 고려했는가를 포함시켜야한다.
+- 종류
+  - 0/1 knapsack problem
+    - 물건을 한 번만 사용한다. (partition equal subset sum)
+    - 점화식: `dp[i][w] = max(dp[i-1][w], dp[i-1][w - weight[i]] + value[i])`
+    - 1차원 최적화 점화식: `dp[w] = max(dp[w], dp[w - weight[i]] + value[i]), 단 w는 역순으로 순회`
+  - unbounded knapsack problem 
+    - 물건을 무제한 사용한다. (coin change 2)
+    - 점화식: `dp[i][w] = max(dp[i-1][w], dp[i][w - weight[i]] + value[i])`
+      - 현재 행인 i 를 참조해야한다. 방금 담았던 무게를 또 담을 수 있다는 뜻이다.
+    - 1차원 최적화 점화식: `dp[i][w] = max(dp[w], dp[w - weight[i]] + value[i]), 단 w는 정방향으로 순회`
 
 todo: https://leetcode.com/problems/last-stone-weight-ii/description/
 https://leetcode.com/discuss/study-guide/1152328/01-Knapsack-Problem-and-Dynamic-Programming

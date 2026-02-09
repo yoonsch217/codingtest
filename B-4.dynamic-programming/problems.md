@@ -331,6 +331,244 @@ if not hodling: max(buy, doNothing)
 
 
 
+### 518. Coin Change II
+
+https://leetcode.com/problems/coin-change-ii
+
+문제: coins 라는 리스트는 사용할 수 있는 coin 종류가 있고 amount라는 int가 있다. coins에 있는 coin으로 amount를 만드는 조합의 수를 구하라.
+
+<details><summary>Approach 1</summary>
+
+dp(i)를 i 금액을 만들기 위한 방법 수라고 하자.    
+처음에 `dp(i) = sum of dp(i-coin) for coin in coins` 라고 생각했는데 이렇게 하면 동일한 조합도 순서가 다르면 다른 way로 처리를 한다.    
+
+knapsack problem이라고 한다.   
+조합 문제이기 때문에 {1, 2} 와 {2, 1} 는 동일하게 취급해야한다. 따라서 이럴 때는 동전의 사용 순서를 강제해야한다. => **동전 종류에 대한 루프나 인덱스 j 가 필요하다.**
+ 
+```
+- dp(i, j): number of combinations to make up i with using coins[:j+1]
+  - 이렇게 하면 coins[j] 를 사용하는 단계에서는 절대 coins[j+1] 이후의 동전이 개입할 수 없으므로 동전이 섞일 수 없다.
+  - 즉, 동전을 하나씩만 꺼내면서 각각이 만들 수 있는 모든 경우의 수를 만들어놓고, 거기에 새로운 동전을 추가하면서 경우의 수를 확장시키는 방법이다. 
+- dp(i, j) = `coin[j]를 하나도 안 쓰고 만드는 법` + `coin[j]를 하나라도 쓰고 만드는 법`
+  - 전자는 dp(i, j-1)이 된다.    
+  - 후자는 `dp(i-coin[j], j-1) + dp(i-2*coin[j], j-1), ...`이다.   
+```
+
+```py
+    def change(self, amount: int, coins: List[int]) -> int:
+        @lru_cache(maxsize=None)
+        def helper(i, j):  # Number of ways to make up i with coins[:j+1]
+            if i == 0:
+                return 1
+            if i < 0 or j < 0:
+                return 0
+            res = helper(i, j-1)
+
+            cnt = 1  # number of coins[j] uses
+            while i - coins[j] * cnt >= 0:
+                res += helper(i - coins[j] * cnt, j-1)
+                cnt += 1
+            return res
+        
+        return helper(amount, len(coins)-1)
+```
+
+accept은 되는데 너무 느리다. 
+amount를 N, len(coins)를 M이라고 할 때 시간은 `O(MxNxN)`이다. recursion은 `MxN` 번 있고 recursion 안에서 iteration이 N번 있다.   
+
+</details>
+
+
+<details><summary>Approach 2</summary>
+
+Solution    
+dp(i, j)를 두 개로 나눈다.   
+
+```
+- dp(i, j): number of combinations to make up i with using coins[:j+1]   
+- dp(i, j) = `coin[j]를 하나도 안 쓰고 만드는 법` + `coin[j]를 하나라도 쓰고 만드는 법`
+  - 전자는 dp(i, j-1)이 된다.    
+  - 후자는 `i-coin[j]` 까지 j를 쓰든 안 쓰든 만들면 거기서 coin[j]만 추가하면 된다. 그러면 coin[j] 를 하나라도 쓰는 방법이 된다.     
+
+=> dp(i, j) = dp(i, j-1) + dp(i-coins[j], j)
+```
+
+
+```py
+    def change(self, amount: int, coins: List[int]) -> int:
+        @lru_cache(maxsize=None)
+        def helper(i, j):  # Number of ways to make up i with coins[:j+1]
+            if i == 0:
+                return 1  # base case: reached the amount
+            if i < 0 or j < 0:
+                return 0
+            return helper(i, j-1) + helper(i-coins[j], j)
+        return helper(amount, len(coins)-1)
+```
+
+O(MN)
+
+</details>
+
+
+<details><summary>Approach 3</summary>
+
+bottom up
+
+```python
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        """
+        dp(i, j): number of combinations to make up i, using coins from 1st coin to j-th coin
+        dp(i, j) = dp(i, j-1) + dp(i-coins[j], j)
+        """
+
+        dp = [[0] * len(coins) for _ in range(amount+1)] 
+        for j in range(len(coins)):
+            dp[0][j] = 1
+
+        for i in range(1, amount+1):
+            for j in range(len(coins)):
+                if j > 0:
+                    dp[i][j] += dp[i][j-1]
+                if i-coins[j] >= 0:
+                    dp[i][j] += dp[i-coins[j]][j]
+
+        return dp[amount][len(coins)-1]
+```
+
+</details>
+
+
+
+
+<details><summary>Approach 4</summary>
+
+space optimized from bottom up solution     
+
+점화식
+- `dp[i] = dp[i] + dp[i-coin]` 
+- 다만 coin 사용 순서가 고려되어야 한다. 좌변의 new dp[i] 는 coin 이 사용된 값이고, 우변의 old dp[i] 는 coin 사용되기 전의 값이다.   
+
+```python
+def change(self, amount: int, coins: List[int]) -> int:
+    dp = [0] * (amount + 1)
+    dp[0] = 1
+    
+    for coin in coins:
+        for x in range(coin, amount + 1):
+            """
+            dp[x - coin]: 지금 dp(x-1) 까지는 답이 구해진 상태이다. climbing stairs 처럼 생각을 하면 된다.
+            현재 coin을 더 사용할 수 있다면 dp(x)는 기존의 dp(x)에다가 dp(x-coin)을 더한 게 된다.
+            climbing stairs 같은 경우는 permutation이지만 지금은 combination이기 때문에 coin을 순서대로 사용해야한다.
+            """
+            dp[x] += dp[x - coin]  
+    return dp[amount]
+```
+
+ 
+
+Time: O(len(coins) * amount), Space: O(amount)
+
+</details>
+
+
+
+
+
+
+### 416. Partition Equal Subset Sum
+
+https://leetcode.com/problems/partition-equal-subset-sum/
+
+문제: Given an integer array nums, return true if you can partition the array into two subsets such that the sum of the elements in both subsets is equal or false otherwise.
+
+- Input: nums = [1,5,11,5]
+- Output: true 
+- Explanation: The array can be partitioned as [1, 5, 5] and [11].
+
+
+<details><summary>Approach 1</summary>
+
+knapsack problem
+
+```python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+
+        """
+        dp(i)(j): using coins from 0 to i, if it can make up to amount of j
+        dp[i][j] = dp[i-1][j] || (dp[i-1][j-nums[i]])
+        """
+
+        total_sum = sum(nums)
+        if total_sum / 2.0 != total_sum // 2:
+            return False
+        dp = [[False for _ in range(total_sum//2 + 2)] for _ in range(len(nums))]
+
+        for i in range(len(nums)):
+            for j in range(total_sum//2 + 1):
+                if j == 0:
+                    dp[i][j] = True
+                    continue
+                if i == 0:
+                    if j == nums[i]:
+                        dp[i][j] = True
+                    continue
+                if nums[i] > j:
+                    dp[i][j] = dp[i-1][j]  # 여기를 그냥 continue 하면 안 되고 만족하는 조건은 꼭 챙겨야 함!
+                    continue
+                dp[i][j] = dp[i-1][j] or dp[i-1][j-nums[i]]
+        
+        return dp[len(nums)-1][total_sum//2]
+```
+
+- Complexity
+  - Time: O(len(nums) * total_sum//2)
+  - Space: O(len(nums) * total_sum//2)
+
+
+공간 최적화하기
+
+```python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        total_sum = sum(nums)
+        if total_sum / 2.0 != total_sum // 2:
+            return False
+        #dp = [[False for _ in range(total_sum//2 + 1)] for _ in range(len(nums))]
+        dp = [False for _ in range(total_sum//2 + 1)]
+
+        # [t, t, t, t, f]
+
+        for i in range(len(nums)):
+            #for j in range(total_sum//2 + 1):
+            for j in range(total_sum//2, -1, -1):  # 뒤에서부터 iterate 한다. dp[j-nums[i]]는 previous state 임이 보장된다.
+                if j == 0:
+                    #dp[i][j] = True
+                    dp[j] = True
+                    continue
+                if i == 0:
+                    if j == nums[i]:
+                        #dp[i][j] = True
+                        dp[j] = True
+                    continue
+                if nums[i] > j:
+                    #dp[i][j] = dp[i-1][j]
+                    continue
+                #dp[i][j] = dp[i-1][j] or dp[i-1][j-nums[i]]
+                dp[j] = dp[j] or dp[j-nums[i]]
+        
+        #return dp[len(nums)-1][total_sum//2]
+        return dp[total_sum//2]
+```
+
+
+</details>
+
+
+
+
 
 
 
@@ -471,7 +709,8 @@ class Solution:
   - s의 길이 N, 사전의 길이 W, 단어 최대 길이 L 일 때,
   - O(NWL)
 
-근데 만약 dict 의 길이가 엄청 길다면 dict 를 매번 iterate 하는 게 비용이 많이 들 것이다. 그럴 땐 dict 를 set 으로 바꾼다. 그러고는 target 의 substring 이 set에 있는지를 체크하는 것이다.
+근데 만약 dict 의 길이가 엄청 길다면 dict 를 매번 iterate 하는 게 비용이 많이 들 것이다.    
+❗️그럴 땐 dict 를 set 으로 바꾼다. 그러고는 target 의 substring 이 set에 있는지를 체크하는 것이다.
 
 ```python
 for i in range(1, len(target) + 1):
@@ -563,10 +802,7 @@ min_dp(i) = min(min_dp(i-1) * num, min_dp(i-1) * num, num)
 ```
 
 어차피 직전 값만 사용하니까 list 대신 prev_max, prev_min를 사용할 수도 있다.   
-근데 이 때는 prev_max를 업데이트할 때 new_max 라는 값을 만들어서 업데이트해준 뒤 마지막에 바꿔야한다.   
-prev_max = ...
-prev_min = ...
-이런 식으로 하면 prev_min 계산할 때 업데이트 된 prev_max, 즉 new_max를 사용해서 업데이트를 할 위험이 있다.
+근데 이 때는 prev_max를 업데이트할 때 new_max 라는 값을 만들어서 업데이트해준 뒤 마지막에 바꿔야한다.
 
 </details>
 
@@ -667,13 +903,19 @@ root가 target이라고 할 때 tree 구조로 내려오는 걸 생각해본다.
         return cnt
 ```
 
+visited 라는 메모리를 사용하면 중복이 없다.
+- Time Complexity
+  - BFS 에서의 시간 복잡도는 O(V x E) 이다.
+  - V는 도달 가능한 상태의 수: N
+  - E는 각 상태에서 파생될 수 있는 edge의 수: square 이 수만큼이니까 root(N)
+  - 따라서 O(N * sqrt(N))
+  - visited 가 없었다면? 각 square 탐색을 지수적으로 하니까 O(sqrt(N) ^ N) 
+
 </details>
 
 
 <details><summary>Approach 3</summary>
 
-더 빠른 답   
-greedy 방식을 사용할 수도 있다. 근데 아래 방식은 dp 아닌가?   
 
 ```
 dp(target, k): target을 k개의 square로 만들 수 있으면 True
@@ -684,7 +926,9 @@ dp(target, k) = dp(target-num, k-1) for num in square_nums
 `result = dp(n, k) for n in [i, .. n]` 이고 dp(n, k)는 k 개의 perfect square로 n을 만들 수 있으면 true를 반환하고 그게 그때의 최적의 답이다.   
 `dp(n, k) = dp(n-squarenum, k-1) + 1`      
 이걸 증명하는 건 contradiction을 이용할 수 있다. dp(n, i)가 있고 그 뒤에 dp(n, j)가 나왔고 dp(n, j)가 더 작은 수라고 하자. dp(n, j)의 답은 j인데 이는 i보다 작아야한다. 그런데 먼저 수행된 i가 더 작아야하므로 모순이다.   
-Time Complexity: O(n^(h/2)) where h is the maximal number of recursion that could happen   
+Time Complexity: O(n^(h/2)) where h is the maximal number of recursion that could happen
+
+라그랑주 정리에 의해서 모든 수는 4개 이하의 제곱수로 표현이 가능하다. 그래서 실제로 아래 코드에서 for i in range(1, n+1) 은 최대 네 번만 돌고, 그렇기에 빠른 것이다.
 
 ```python
     def numSquares(self, n: int) -> int:
@@ -721,134 +965,38 @@ greedy 방식을 n-ary tree로 생각할 때, 각 레벨을 BFS로 탐색하는 
 
 ### 276. Paint Fence
 
-https://leetcode.com/problems/paint-fence
+https://leetcode.com/problems/paint-fence (locked)
 
 문제: n 개의 기둥과 k 개의 색깔이 있다. 연속해서 세 개의 기둥을 동일한 색으로 칠하지 않으면서 모든 기둥을 칠할 수 있는 방법의 수를 구하라.
 
 <details><summary>Approach 1</summary>
 
-일반식을 생각하기 위해서는 케이스를 잘 쪼개야한다.   
-dp(i)를 i 개를 칠하는 방법의 수라고 하자.   
-i번째를 칠하는 방법의 수는 "i-1번째와 다른 색으로 칠하는 방법의 수"와 "i-1번째와 같은 색으로 칠하는 방법의 수"의 합이다.   
-i-1번째와 다른 색으로 칠하는 방법의 수는, dp(i-1) * k-1이 된다.   
-i-1번째와 같은 색으로 칠하는 방법의 수는, i와 i-1이 같기 때문에 i-2는 달라야한다. 따라서 i-2와 i-1을 서로 다른 색으로 칠하는 방법의 수와 같다. 따라서 dp(i-2) * (k-1)이 된다.    
-따라서 dp(i) = (k-1) * (dp(i-1) + dp(i-2))이다.   
+틀린 접근
+- i-2 와 비교한다.
+- i-1 에는 i-2 와 다른 색이 올 수도 있고 같은 색이 올 수도 있다.
+- 다른 색이 오는 경우의 수 (k-1) 인 경우, i는 모든 수 가 올 수 있다. 이 때는 (k-1) * k
+- 같은 색이 오는 경우의 수 1인 경우는 i는 그 색 빼고 올 수 있다. 이 때는 (k-1)
+- dp[i]: i까지 칠할 수 있는 방법의 수
+- dp[i] = dp[i-2] * ( (k-1)*k + (k-1)) = dp[i-2] *( k^2 - 1)
+- 틀린 이유:
+  - dp[i-1] 에서 dp[i-2] 와 같은 색이 오려면 dp[i-2] 가 dp[i-3] 과 다르다는 전제가 필요하다. 이게 빠졌다.
+
+점화식 구하기
+- dp[i] 가 dp[i-1] 과 다른 색이라면 항상 된다: dp[i-1] * (k-1)
+- dp[i] 가 dp[i-1] 과 같은 색이려면 dp[i-1] 과 dp[i-2] 는 달라야한다. dp[i-2] * (k-1)
+- dp[i] = dp[i-1]*(k-1) + dp[i-2]*(k-1)
+
+점화식 구하기
+- 상태 정의
+  - same[i]: i번째 울타리가 i-1번째 울타리와 같은 색인 경우
+  - diff[i]: i번째 울타리가 i-1번째 울타리와 다른 색인 경우
+  - total[i]: i번째 울타리까지 칠하는 전체 방법의 수 (same[i] + diff[i])
+- diff[i] = total[i-1] * (k-1)
+- same[i] = diff[i-1]  (i-1 때는 i-2 와 달랐어야 i 에서 i-1 과 같은 색으로 칠할 수 있다.)
+- total[i] = diff[i] + same[i]
+
 
 </details>
-
-
-
-
-
-### 518. Coin Change II
-
-https://leetcode.com/problems/coin-change-ii
-
-문제: coins 라는 리스트는 사용할 수 있는 coin 종류가 있고 amount라는 int가 있다. coins에 있는 coin으로 amount를 만드는 조합의 수를 구하라.
-
-<details><summary>Approach 1</summary>
-
-dp(i)를 i 금액을 만들기 위한 방법 수라고 하자.    
-처음에 `dp(i) = sum of dp(i-coin) for coin in coins` 라고 생각했는데 이렇게 하면 동일한 조합도 순서가 다르면 다른 way로 처리를 한다.    
-
-knapsack problem이라고 한다.   
-일반식 구할 때 적절히 나누자.   
-
-내 풀이    
-```
-dp(i, j): number of combinations to make up i with using coins[:j+1]   
-dp(i, j) = `coin[j]를 하나도 안 쓰고 만드는 법` + `coin[j]를 하나라도 쓰고 만드는 법`
-- coin[j]를 하나도 안 쓰고 i를 만드는 법은 dp(i, j-1)이 된다.    
-- coin[j]를 하나라도 쓰고 만드는 법은 `dp(i-coin[j], j-1) + dp(i-2*coin[j], j-1), ...`이다.   
-```
-
-```py
-    def change(self, amount: int, coins: List[int]) -> int:
-        @lru_cache(maxsize=None)
-        def helper(i, j):  # Number of ways to make up i with coins[:j+1]
-            if i == 0:
-                return 1
-            if i < 0 or j < 0:
-                return 0
-            res = helper(i, j-1)
-
-            cnt = 1  # number of coins[j] uses
-            while i - coins[j] * cnt >= 0:
-                res += helper(i - coins[j] * cnt, j-1)
-                cnt += 1
-            return res
-        
-        return helper(amount, len(coins)-1)
-```
-
-accept은 되는데 너무 느리다. amount를 N, len(coins)를 M이라고 할 때 시간은 `O(MxNxN)`? recursion은 `MxN` 번 있고 recursion 안에서 iteration이 N번 있는 거 아닌가.   
-
-</details>
-
-<details><summary>Approach 2</summary>
-
-Solution    
-dp(i, j)를 두 개로 나눈다.   
-
-
-```
-dp(i, j): number of combinations to make up i with using coins[:j+1]   
-dp(i, j) = `coin[j]를 하나도 안 쓰고 만드는 법` + `coin[j]를 하나라도 쓰고 만드는 법`
-- 전자는 dp(i, j-1)이 된다.    
-- 후자는 `i-coin[j]` 까지 만들면 거기서 coin[j]만 추가하면 된다. `i-coin[j]`를 만들 땐 coin[j]를 써도 되니까 dp(i-coin[j], j) 이다.    
-
-=> dp(i, j) = dp(i, j-1) + dp(i-coins[j], j)
-```
-
-
-```py
-    def change(self, amount: int, coins: List[int]) -> int:
-        @lru_cache(maxsize=None)
-        def helper(i, j):  # Number of ways to make up i with coins[:j+1]
-            if i == 0:
-                return 1
-            if i < 0 or j < 0:
-                return 0
-            res = helper(i, j-1) + helper(i-coins[j], j)
-            return res
-        return helper(amount, len(coins)-1)
-```
-
-</details>
-
-
-<details><summary>Approach 3</summary>
-
-Optimized Solution     
-
-처음에 dp array는 모두 0으로 초기화한다.   
-어떤 특정 coin a로 갈 수 있는 위치를 미리 다 체크해놓고 이 coin은 다시 쓰지 않는다.    
-위치를 이동할 때 원래 있던 곳에서 a만큼 이동을 할텐데 `dp(i) += dp(i-a)`가 된다.    
-기존의 dp(i)는 coin a 없이 만들어진 값이기 때문에 dp(i-a)에서 coin a를 써서 i로 오는 방법은 기존의 dp(i)를 만들었던 값과 중복이 없다는 것이 보장된다.    
-이 작업을 모든 coin에 대해 다 해준다.   
-
-```python
-def change(self, amount: int, coins: List[int]) -> int:
-    dp = [0] * (amount + 1)
-    dp[0] = 1
-    
-    for coin in coins:
-        for x in range(coin, amount + 1):
-            """
-            dp[x - coin]: 지금 dp(x-1) 까지는 답이 구해진 상태이다. climbing stairs 처럼 생각을 하면 된다.
-            현재 coin을 더 사용할 수 있다면 dp(x)는 기존의 dp(x)에다가 dp(x-coin)을 더한 게 된다.
-            climbing stairs 같은 경우는 permutation이지만 지금은 combination이기 때문에 coin을 순서대로 사용해야한다.
-            """
-            dp[x] += dp[x - coin]  
-    return dp[amount]
-```
-
-Time: O(len(coins) * amount), Space: O(amount)
-
-</details>
-
-
-
 
 
 
@@ -910,6 +1058,36 @@ def numDecodings(self, s: str) -> int:
         one_back = current
     
     return one_back
+```
+
+is_valid 함수를 따로 빼서 한 내 솔루션
+
+```python
+class Solution:
+    def numDecodings(self, s: str) -> int:
+        two_before = 1
+        one_before = 1
+        current = 0
+
+        def is_valid(num_str):
+            if len(num_str) > 2:
+                return False
+            if len(num_str) == 2:
+                return 10 <= int(num_str) <= 26
+            return int(num_str) != 0
+        
+        for i in range(len(s)):
+            current = 0
+            if i > 0 and is_valid(s[i-1:i+1]):
+                current += two_before
+            if is_valid(s[i]):
+                current += one_before
+            two_before = one_before
+            one_before = current
+            
+        return current
+
+
 ```
 
 </details>

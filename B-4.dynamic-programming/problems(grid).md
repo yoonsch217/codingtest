@@ -43,6 +43,33 @@ top down
 bottom up
 
 ```python
+class Solution:
+    def uniquePathsWithObstacles(self, grid: List[List[int]]) -> int:
+        num_rows = len(grid)
+        num_cols = len(grid[0])
+
+        dp = [[0 for _ in range(num_cols)] for _ in range(num_rows)]  # num_rows 가 뒤에 loop 에 있어야 한다.
+
+        if grid[0][0] == 1:
+            return 0
+        dp[0][0] = 1
+
+        for r in range(num_rows):
+            for c in range(num_cols):
+                if grid[r][c] == 1:
+                    continue
+                if r != 0:
+                    dp[r][c] += dp[r-1][c]
+                if c != 0:
+                    dp[r][c] += dp[r][c-1]
+        
+        return dp[num_rows-1][num_cols-1]
+
+
+
+```
+
+```python
     def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
         m, n = len(obstacleGrid), len(obstacleGrid[0])
         if  obstacleGrid[0][0] == 1:  # 이 부분을 빠뜨리지 말자. 답도 틀리고 수행 시간도 길어진다.
@@ -158,6 +185,7 @@ https://leetcode.com/problems/maximal-square/
 - 왼쪽 점 (i, j-1), 위쪽 점 (i-1, j) 이 겹치는 부분은 현재 점을 기준으로도 연장될 수가 있다.
 - 만약, 4, 4 라면 현재 점 기준으로 왼쪽 4개, 위쪽 4개를 더 포함할 수 있다는 건데, 제일 왼쪽 위 꼭지점은 아직 알 수 없다.
 - (i-1, j-1) 도 만약 4라면 제일 왼쪽 위 꼭지점도 포함한다는 뜻이다. 왜나하면 바로 왼쪽 점인 (i, j-1) 과 동일하게 왼쪽으로 뻗어나가는데 한 칸 위까지 뻗어나가기 때문이다.
+  - dp(i-1, j-1) 은 dp(i-1, j) 에서 가로축 시작이 동일하고 세로축이 하나 올라간 것이고, dp(i, j-1)과 세로축 시작이 동일하고 가로축이 하나 옮겨진 것이다. 따라서 딱 모서리가 cover된다.
 
 ```
 dp(i, j): matrix[i][j] 위치를 오른쪽 아래 꼭지점으로 두어서 왼쪽 위로 만들 수 있는 최대의 정사각형의 한 변 길이    
@@ -197,6 +225,36 @@ prev_row, cur_row 두 개를 쓰는 게 아니라 prev_row, left_value 이렇게
 그런데 row를 오른쪽으로 이동하면서 prev_row의 자기 위치를 업데이트해야하는데 그렇게 하면 (i-1, j-1) 위치를 구하기가 어렵다.     
 왜냐하면 prev_row[j-1]은 left_value와 동일하기 때문이다.    
 그냥 row 두 개를 쓰자.   
+
+아니면 아래처럼 row 하나만 쓰기도 했다.
+
+```python
+class Solution:
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        n_rows, n_cols = len(matrix), len(matrix[0])
+        prev_rows = [0] * n_cols
+        largest = 0
+
+        for i in range(n_rows):
+            for j in range(n_cols):
+                if matrix[i][j] == '0':
+                    prev_rows[j] = 0
+                    continue
+
+                if i == 0 or j == 0 or prev_rows[j-1] == 0 or prev_rows[j] == 0:
+                    prev_rows[j] = 1
+                elif prev_rows[j-1] == prev_rows[j]:
+                    if matrix[i-prev_rows[j-1]][j-prev_rows[j-1]] == '1':
+                        prev_rows[j] = prev_rows[j-1] + 1
+                    else:
+                        prev_rows[j] = prev_rows[j-1]
+                else:
+                    prev_rows[j] = 1 + min(prev_rows[j-1], prev_rows[j])
+                largest = max(largest, prev_rows[j])
+            
+        return largest * largest
+                    
+```
 
 
 </details>
