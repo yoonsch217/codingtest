@@ -145,7 +145,7 @@
   - vertex 0에서 나머지로 가는 edge들을 heap에 넣는다.
   - heap에 있는 edge 중 최소 weight edge를 뽑는다. 상대 vertex가 unvisited라면(맨 처음은 무조건 unvisited일 것이다.) 그 vertex를 visited에 넣는다.
   - 해당 vertex에서 갈 수 있는 edge들을 heap에 넣는다. 그럼 vertex 0에서 나가는 edge와 새로 추가된 vertex에서 나가는 edge가 모두 heap에 있다.
-  - 그 중 최소를 뽑아서 unvisited인 vetex인지 확인하고 visited면 넘어간다. unvisited면 visited set의 크기가 N이 될 때까지 이를 반복한다.
+  - 그 중 최소를 뽑아서 unvisited인 vertex인지 확인하고 visited면 넘어간다. unvisited면 visited set의 크기가 N이 될 때까지 이를 반복한다.
 - greedy strategy를 사용한다.   
 - visited set, unvisited set은 visited라는 boolean list를 사용해서 할 수 있다.
 - Time Complexity
@@ -171,6 +171,8 @@
 
 ### Dijkstra's Algorithm
 
+개념
+
 - non-negative weight의 weighted directed graph 에서 사용할 수 있다.   
 - Greedy approach를 사용한다. 각 단계에서 갈 수 있는 vertex를 보면서 그 vertex로 가기 위한 최소의 weight를 구한다.
 - 어떤 최단 경로는 최단 경로들의 합이다. 즉, d까지의 최단 경로는 d로 갈 수 있는 모든 vertex들까지의 각 최단 경로에서 d로 이동할 수 있는 걸 합한 게 최소인 경로이다.
@@ -188,15 +190,22 @@
       - s가 필요한 이유는 경로를 back tracking 하기 위함이다. 목적지에서부터 `min_dist` 를 확인해서 하나씩 역추적하면 된다.  
       - 처음 시작할 땐 `(0, src, src)` 를 넣는다.
   - `edge_heap` 에서 최소 weight를 갖는 `(dist_to_d1, s1, d1)` 을 뽑는다.
-  - `dist_to_d1` 이 `min_dist[d1]` 값보다 크다면 이번 경로는 더 짧지 않으므로 무시한다.
-  - 그게 아니라면 `min_dist[d1]` 을 업데이트한 뒤, `d1`을 거쳐가는 새로운 경로들이 기존보다 짧은지 확인하기 위해 인접 노드 `v`들을 조사한다. 
+    - 여기서 뽑힌 (s1, d1) 경로는 source 로부터 가장 가까운 노드로 확정된 것이다. 즉, d1까지의 경로의 최솟값이 확정된 것이다. dist_to_d1 이 source 로부터의 거리이기 때문에 가능하다.
+  - 중복 작업을 제거하기 위한 방법이 있다.
+    - `dist_to_d1` 이 `min_dist[d1]` 값보다 크다면 이미 업데이트 된 노드이고 이번 경로는 더 짧지 않으므로 무시한다.
+    - 혹은 모든 노드는 한 번씩만 업데이트가 되기 때문에 min_dist[d1] 이 math.inf 인지 아닌지를 체크해도 된다.
+  - 중복 작업이 아니라면 `min_dist[d1]` 을 업데이트한 뒤, `d1`을 거쳐가는 새로운 경로들이 기존보다 짧은지 확인하기 위해 인접 노드 `v`들을 조사한다. 
   - `min_dist[v] vs (min_dist[d1] + d1에서 v로 가는 edge weight)` 를 비교해서, d1 노드를 거치는 게 더 짧다면 `min_dist[v]` 을 업데이트하고 `(min_dist[v], d1, v)` 를 heap에 넣는다.
   - heap의 크기가 0이 될 때까지 반복을 한다. heap의 크기가 0이라는 건 `min_dist` 더 이상 영향을 줄 edge가 없다는 뜻이다.
+
+특징
+
 - Time Complexity
   - O(ElogE) when a Binary heap is used.
     - E < V^2 이므로 O(E log V^2) = O(E * 2 log V) = O(ElogV) 로 쓸 수도 있다.
   - O(E+VlogV) when a Fibonacci heap is used
-  - heap에 최대 V개의 값이 들어갈 수 있으므로 heappop에 logV가 걸리고, edge만큼 수행하니까 ElogV이다. 
+  - heap에 최대 V개의 값이 들어갈 수 있으므로 heappop에 logV가 걸리고, edge만큼 수행하니까 ElogV이다.
+  - 
 - Space Complexity: O(V)
   - min_dist 크기가 O(V)이다.
   - heap 크기가 
@@ -215,6 +224,8 @@ Proof skip...
 
 
 ### Bellman-Ford Algorithm
+
+개념
 
 - Bellman-Ford 알고리즘은 기본적으로 dp인데 최적화를 시킨 알고리즘이다.   
 - 모든 weighted directed graph에서 사용할 수 있다.   
@@ -253,6 +264,8 @@ Proof skip...
 
 ### SPFA Algorithm(The Shortest Path Faster Algorithm based on Bellman-Ford)
 
+개념
+
 - Bellman-Ford 알고리즘의 비효율적인 부분이 있는데 이 부분을 큐를 사용하여 최적화시킨 알고리즘이다.    
 - Bellman-Ford에서는 각 업데이트마다 모든 edge를 다 iterate했는데 그럴 필요 없이 업데이트 된 vertex에 연결된 edge만 iterate한다.(queue 이용)
 - 동작
@@ -264,11 +277,16 @@ Proof skip...
   - 업데이트 된다면 그 노드는 다시 큐에 넣어야한다. 그 노드에서 나가는 edge들을 통해 업데이트할 게 남아있을 수 있다. `is_queued` 에 있다면 넣지 않음으로써 불필요한 중복을 막아준다.
   - 큐가 비게 되면 더 이상 업데이트할 게 없다는 뜻이므로 res를 반환한다.
 - Dijkstra에서 heap 대신 queue를 사용한 느낌이다.
+
+트징
+
 - 활용
   - count 배열을 만들어서 노드가 큐에 push 될 때마다 증가시킨다. 이 값이 V를 넘으면 negative cycle이 있다는 것이다.
 - Time Complexity
   - worst O(VE), avg O(V+E): 모든 노드에 대해 한 번씩은 작업하는데 모든 에지를 작업 
-  - worst 는 수많은 경로가 얽힌 격자형 그래프의 경우 동일한 노드가 큐에 계속 들어갔다 나오기 때문에 벨만포드와 동일한 O(VE)가 된다.
+  - worst 는 하나의 노드에 대해 주변 노드 업데이트하는데 항상 업데이트될 때이다. 하나의 노드가 큐에 여러 번 들어가게 된다. 최대 V번.
+  - 일반적으로는 한 노드가 큐에 들어가는 횟수는 평균적으로 2회 내외의 상수로 알려져있다.
+  - 반면 다익스트라는 최적의 순서로 사용하게 된다.
 - Space Complexity
   - O(V)
 

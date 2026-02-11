@@ -17,6 +17,7 @@ Dijkstra's Algorithm 문제이다. source는 k가 되고 k로부터 각각 노�
 class Solution:
     def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
         # Dijkstra's Algorithm으로 source로부터의 최소 cost를 다 구하고 그것들의 max를 구한다.
+        # 근데 이건 엄밀히 말하면 다익스트라가 아니다. 같은 노드를 여러 번 업데이트할 수 있기 때문이다.
         d = {}  # key: destination, value: distance, 만약 path가 필요하다면 (distance, previous) 이렇게 넣으면 된다.
         for i in range(n):
             d[i+1] = math.inf
@@ -43,7 +44,88 @@ class Solution:
         return res if res != math.inf else -1
 ```
 
+다익스트라는 distance from source 를 넣는다고 한다. 그래야 각 노드가 한 번씩만 업데이트 됨이 보장된다.
+
+```python
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        heap = []
+        min_dist = [math.inf for _ in range(n+1)]
+        min_dist[0] = 0
+        #min_dist[k] = 0
+
+        adj_list = [[] for _ in range(n+1)]
+        for u, v, w in times:
+            adj_list[u].append((v, w))
+        
+        heapq.heappush(heap, (0, k, k))
+        
+        while heap:
+            w, u, v = heapq.heappop(heap)
+            current_dist = w
+            if min_dist[v] != math.inf:
+            #if min_dist[v] <= current_dist:  # 둘 다 가능
+                continue
+            min_dist[v] = current_dist
+            for next_v, next_w in adj_list[v]:
+                heapq.heappush(heap, (min_dist[v] + next_w, v, next_v))
+        
+        biggest = max(min_dist)
+        if biggest == math.inf:
+            return -1
+        return biggest
+
+
+```
+
 </details>
+
+
+<details><summary>Approach 2</summary>
+
+BFS 처럼 생각하고 풀었는데 SPFA 라고 한다.
+
+```python
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        queue = deque([k])
+        min_list = [math.inf for _ in range(n+1)]
+        min_list[k] = 0
+        min_list[0] = 0  # 이거 빠뜨려서 틀렸다. 이런 것 좀 조심하자..
+
+        adjacency_list = [[] for _ in range(n+1)]
+        is_queued = [False for _ in range(n+1)]  # 이걸로 성능 개선 가능
+        is_queued[k] = True
+
+        for u, v, w in times:
+            adjacency_list[u].append((v, w))
+
+        while queue:
+            current_node = queue.popleft()
+            is_queued[current_node] = False
+            adjacencies = adjacency_list[current_node]
+            for v, w in adjacencies:
+                current_weight = min_list[current_node] + w
+                if current_weight < min_list[v]:
+                    min_list[v] = current_weight
+                    if not is_queued[v]:
+                        queue.append(v)
+                        is_queued[v] = True
+
+        res = max(min_list)
+        if res == math.inf:
+            return -1
+        return res
+
+
+```
+
+
+
+</details>
+
+
+
 
 
 
@@ -150,10 +232,10 @@ cost가 더 작다면 costs[node]와 stops[node] 를 업데이트한 후에 heap
 
 
 
-Simple Dijkstra => 이거 그냥 BFS 아냐?
+Simple Dijkstra => 이거 그냥 BFS 아냐? 벨만포드 알고리즘인가.
 
 - dist 값을 inf로 초기화하고 dist[src]만 0으로 한다. adj_list도 만들어놓는다.
-- queue에 (stops, cur_node, price)를 넣는다. 초기에는 (0, src, 0)이 들어갈 것이다.
+- queue에 (cur_node, price)를 넣는다. 초기에는 (src, 0)이 들어갈 것이다.
 - while queue 조건동안 queue를 pop하면서 반복한다. stops가 k+1보다 크면 그 이후에 queue에 들어간 값은 다 k+1보다 크므로 break한다.
 - cur_node에서 reachable한 node들의 dist를 확인해서 업데이트할 수 있는지 확인한다. `dist[reachable] > dist[cur_node] + price` 라면 거기로 갈 수 있는 거니까 업데이트하고 queue에 추가한다. (안 가는 거에 대한 건 저장을 안 해도 되나? 굳이 안 줄여도 될 수도 있잖아.)
 - break가 되거나 queue가 비어서 loop를 빠져나오면 그 결과를 반환한다.
@@ -165,21 +247,25 @@ Simple Dijkstra => 이거 그냥 BFS 아냐?
         adj_list = [[] for _ in range(n)]
         for _from, _to, _price in flights:
             adj_list[_from].append((_to, _price))
-        dist = [math.inf] * n
+
+        queue = deque([(src, 0)])  # (src, cost sum)
+        dist = [math.inf for _ in range(n)]
         dist[src] = 0
-        queue = deque([(0, src, 0)])  # stops, node, price
 
-        while queue:
-            stops, cur, price = queue.popleft()
-            if stops > k:
-                break
-            for _to, _price in adj_list[cur]:
-                if dist[_to] <= price + _price:
-                    continue
-                dist[_to] = price + _price
-                queue.append((stops+1, _to, dist[_to]))
+        stops = 0
+        while queue and stops <= k:
+            for _ in range(len(queue)):
+                current, cost_sum = queue.popleft()
 
-        return -1 if dist[dst] == math.inf else dist[dst]
+                for target, cost in adj_list[current]:
+                    if dist[target] > cost_sum + cost:
+                        dist[target] = cost_sum + cost
+                        queue.append((target, dist[target]))
+            stops += 1
+
+        return dist[dst] if dist[dst] != math.inf else -1
+            
+
 ```
 
 
