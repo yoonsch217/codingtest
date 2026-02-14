@@ -412,7 +412,7 @@ Time: O(V+E), Space: O(V+E)이다.
 </details>
 
 
-<details><summary>Approcah 2</summary>
+<details><summary>Approach 2</summary>
 
 white, gray, black coloring을 이용한 DFS로도 풀 수 있다.
 
@@ -422,6 +422,41 @@ white, gray, black coloring을 이용한 DFS로도 풀 수 있다.
 - 어떤 gray vertex에서 더 이상 outbound가 없다면 그 course에 dependent한 게 없기 때문에 가장 나중에 들어야하는 course일 것이다. 그럼 그 vertex는 black으로 바꾸고 결과 stack에 추가한다.   
 - 이후에 black vertex는 이미 처리가 됐으므로 없는 vertex라고 생각하면 된다. 즉, 어떤 gray vertex의 outbound가 black만 있다면 outbound가 없다고 생각하면 되므로 stack에 추가한다.   
 - gray vertex의 outbound에 gray vertex가 있다면 cycle이 있는 것이기 때문에 순서를 정할 수가 없는 graph이다.   
+
+
+```python
+class Solution:
+    def findOrder(self, num_courses: int, prerequisites: List[List[int]]) -> List[int]:
+        status = [0] * num_courses  # 0: unvisited, 1: visited, 2: finished
+
+        adj_list = [[] for _ in range(num_courses)]
+        for next_course, prev_course in prerequisites:
+            adj_list[prev_course].append(next_course)
+
+        stack = []
+        def dfs(cur):
+            status[cur] = 1
+            for next_course in adj_list[cur]:
+                if status[next_course] == 2:
+                    continue
+                if status[next_course] == 1:
+                    return False
+                if not dfs(next_course):
+                    return False
+            stack.append(cur)
+            status[cur] = 2
+            return True
+            
+        for i in range(num_courses):
+            if status[i] != 0:
+                continue
+            is_success = dfs(i)
+            if not is_success:
+                return []
+        
+        stack.reverse()
+        return stack
+```
 
 Time: O(V+E), Space: O(V+E)이다.
 
@@ -457,22 +492,44 @@ BFS
 
 최적화된 BFS가 필요하다. BFS에서 상태를 deepcopy 해서 넘기는 건 웬만하면 틀렸다고 생각하자.    
 
-처음에는 queue를 두고 각 element는 (row, col, remained, visited) 을 넣었다.    
-그러고는 매 iteration마다 모든 방향을 탐색한 뒤에 이동 가능하면 visited을 deepcopy하고 큐에 추가했다.    
-(next_row, next_col) 이 목적지라면 len(visited)-1 만큼 이동한 것이다.    
-그런데 이렇게 하면 동작은 하는데 TLE 제한에 걸린다.      
+```python
+    def shortestPath(self, grid: List[List[int]], k: int) -> int:
+        queue = deque([(0, 0, 0)])  # (i, j, num_obstacles)
+        if len(grid) == 1 and len(grid[0]) == 1:
+            return 0
+
+        directions = [(0,1), (1,0), (-1,0), (0, -1)]
+        cnt = 0
+        while queue and cnt < len(grid) * len(grid[0]):
+            cnt += 1
+            for _ in range(len(queue)):
+                prev_i, prev_j, obs_cnt = queue.popleft()
+                for di, dj in directions:
+                    next_i = prev_i + di
+                    next_j = prev_j + dj
+                    if not (0 <= next_i < len(grid)) or not (0 <= next_j < len(grid[0])):
+                        continue
+                    if next_i == len(grid)-1 and next_j == len(grid[0]) - 1:
+                        return cnt
+                    if grid[next_i][next_j] == 0:
+                        queue.append((next_i, next_j, obs_cnt))
+                    else:
+                        if obs_cnt == k:
+                            continue
+                        queue.append((next_i, next_j, obs_cnt+1))
+        return -1
+```      
+
+잘 돌아가는데 Memory Limit Excceded 가 발생한다.
 
 보완된 BFS     
-loc_to_remained_and_steps 라는 dict를 정의해서 key는 (row, col), value는 (remained, steps)로 둔다.    
-next location을 탐색할 때 `if (next_remained <= _remained and next_steps >= _steps) for any _remained, _steps in loc_to_remained_and_steps[(next_row, next_col)]` 이라면 이미 방문한 방법보다 무조건 비효율적일 수 밖에 없으므로 더 탐색을 하지 않아도 된다.    
-즉, visited라는 상태를 복사해가는 대신 모든 case를 안고 가는데, 비효율적일 case는 버리고 가는 방식이다. 
-
-그리고 k 값이 Manhattan distance보다 크다면 최단 거리로 갈 수 있으므로 그런 case를 처음에 처리하는 것도 도움이 된다. => 시간 확 줄었다.  
-
-k 개의 다른 state를 가질 수 있기 때문에 각 노드마다 at most k번 방문한다. 
-- Time Complexity: O(NK)
-- Space Complexity: O(NK) 
-
+- visited 를 정의한다. key는 위치 (row, col)이고 value 는 그 위치에 도달했을 때의 최대 remained 값이다.
+- 탐색하다가 이번의 remained 값이 visited에 있는 remained 값보다 작거나 같다면 이 경로는 이미 이전에 방문했었고 그때에 비해 효율적인 게 없기 때문에 버린다.
+- 목적지에 다다르면 바로 return 한다.
+- 추가로, k 값이 Manhattan distance보다 크다면 최단 거리로 갈 수 있으므로 그런 case를 처음에 처리하는 것도 도움이 된다. => 시간 확 줄었다.
+- 복잡도 분석
+  - Time Complexity O(NK): 각 노드마다 최대 k번의 상태 경우의 수만큼 방문한다.
+  - Space Complexity: O(N): N의 수만큼 remained 값이 저장되어 있다.
 
 약간 787. Cheapest Flights Within K Stops 의 simple Dijkstra 방식과 비슷해보인다? 상태를 deepcopy해가는 BFS가 실패한 것도 동일하고.   
 787하고 다른 점은, 787의 경우는 stops 수만 고려하면 되어서 stops 수를 1부터 시작하여 bottom up을 할 수 있었다. 그래서 dp의 memo롤 1d로 만들 수 있었다.   
@@ -482,70 +539,53 @@ k 개의 다른 state를 가질 수 있기 때문에 각 노드마다 at most k�
 ```py
     def shortestPath(self, grid: List[List[int]], k: int) -> int:
         m, n = len(grid), len(grid[0])
-        directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-        queue = deque([(0, 0, 0, k)])  # row, col, steps, remained
-        
-        if m == 1 and n == 1:
-            return 0
         
         if k >= (m + n - 2):
             # if k is greater than or equal to Manhattan distance, return the minimum
             return m + n - 2
 
-        """
-        loc_to_remained_and_steps 변수
-        key: (row, col), value: (remained, steps)
-        탐색하다가 (next_row, next_col)이 loc_to_remained_and_steps 안에
-          - 없으면 새로 넣는다.
-          - 있고 지금 계산하는 상태가 갖고 있는 remained, steps가 loc_to_remained에 있는 어떤 데이터의 remained 보다 작고 steps도 많다면 더 비효율적으로 접근하는 것이기 때문에 멈춘다.
-          - 아니라면 큐에 넣고 이후 작업을 계속 진행한다.
-        """
-        loc_to_remained_and_steps = defaultdict(list)
-        loc_to_remained_and_steps[(0, 0)].append((k, 0))
+        if len(grid) == 1 and len(grid[0]) == 1:
+            return 0
 
-        res = math.inf
+        visited = dict()  # key: (row, col), value: maximum remained
+        directions = [(0,1), (1,0), (-1,0), (0, -1)]
 
+        queue = deque([(0, 0, k)])  # (row, col, remained)
+
+        steps = 0
         while queue:
-            cur_row, cur_col, cur_steps, cur_remained = queue.popleft()
-
-            for d_row, d_col in directions:
-                next_row, next_col, next_remained = cur_row + d_row, cur_col + d_col, cur_remained
-
-                if not (0 <= next_row < m and 0<= next_col < n):
-                    # out of index
-                    continue
-                
-                if grid[next_row][next_col] == 1:
-                    # if encountered a block, reduce next_remained variable
-                    next_remained = cur_remained - 1
-                
-                if next_remained < 0:
-                    # cannot break block
-                    continue
-                
-                if next_row == m-1 and next_col == n-1:
-                    # arrived the target
-                    res = min(res, cur_steps + 1)
-                    continue
-                
-                is_visited = False
-                for _remained, _steps in loc_to_remained_and_steps[(next_row, next_col)]:
-                    if next_remained <= _remained and cur_steps+1 >= _steps:
-                        # previously visited in a more effective way => do not have to do further operations
-                        is_visited = True
-                        break
-                if is_visited:
-                    continue
-                    
-                queue.append((next_row, next_col, cur_steps + 1, next_remained))
-                loc_to_remained_and_steps[(next_row, next_col)].append((next_remained, cur_steps+1))
-
-        if res == math.inf:
-            return -1
-        return res
+            steps += 1
+            for _ in range(len(queue)):
+                row, col, remained = queue.popleft()
+                for drow, dcol in directions:
+                    new_row = row + drow
+                    new_col = col + dcol
+                    if not(0 <= new_row < len(grid)) or not(0 <= new_col < len(grid[0])):
+                        continue
+                    if new_row == len(grid) - 1 and new_col == len(grid[0]) - 1:
+                        return steps
+                    if grid[new_row][new_col] == 1:
+                        new_remained = remained - 1
+                    else:
+                        new_remained = remained
+                    if new_remained < 0:
+                        continue
+                    if (new_row, new_col) in visited and visited[(new_row, new_col)] >= new_remained:
+                        continue
+                    visited[(new_row, new_col)] = new_remained
+                    queue.append((new_row, new_col, new_remained))
+        return -1
 ```
 
 A* algorithm도 있다는데 이건 우선 skip
+
+queue 대신 heap을 사용하는 방법도 있다. steps 기준으로 heap 만들어서 steps 작은 순서대로 뽑는다. 근데 이건 시간이 좀 더 걸리긴 한다.
+
+- 처음에는 dp도 고려했었다.
+  - `dp[i][j][k]: k번 장애물을 부수고 (i, j) 까지 가는 최소 step의 수`
+- 근데 dp[i][j]를 구하려면 dp[i+1][j] (아래)가 필요한데, dp[i+1][j]는 아직 계산 전일 수 있다. 이를 해결하려면 while문으로 전체 테이블을 계속 훑어야 하는데, 이는 엄청난 중복 연산이 생긴다.
+- 따라서 방향이 오른쪽 혹은 아래로 두 가지만 가능하다면 dp가 유용하겠지만 지금은 비효율적이다.
+
 
 </details>
 
@@ -560,9 +600,10 @@ A* algorithm도 있다는데 이건 우선 skip
 
 ### 1059.All Paths from Source Lead to Destination
 
-https://leetcode.com/problems/all-paths-from-source-lead-to-destination
+https://leetcode.com/problems/all-paths-from-source-lead-to-destination (locked)
 
-문제: edges 라는 directed graph가 주어진다. edges[i] = [ai, bi] 는 ai에서 bi로 가는 edge가 있다는 걸 의미한다. source와 destination이 주어졌을 때 source에서 시작되는 모든 path는 destination으로 가는지를 구하라.
+문제: edges 라는 directed graph가 주어진다. edges[i] = [ai, bi] 는 ai에서 bi로 가는 edge가 있다는 걸 의미한다. 
+source와 destination이 주어졌을 때 source에서 시작되는 모든 path는 결국 destination 에서 끝나는지 구하라.
 
 
 <details><summary>Approach 1</summary>
@@ -602,6 +643,50 @@ dfs를 사용했다.
 ```
 
 TLE 실패
+이미 destination 으로 가는 path 임을 아는 노드도 중복 계산하게 된다.
+
+이를 보완하기 위해 각 노드의 상태를 unvisited, visiting, calculated 이렇게 세 가지로 나눈다.
+
+```python
+class Solution:
+    def leadsToDestination(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        adj_list = defaultdict(list)
+        for u, v in edges:
+            adj_list[u].append(v)
+            
+        # 규칙 1: 목적지 노드는 나가는 간선이 없어야 함
+        if len(adj_list[destination]) > 0:
+            return False
+            
+        # status: 0 (미방문), 1 (현재 경로에서 방문 중 - 사이클 감지용), 2 (검증 완료 - Safe)
+        status = [0] * n
+        
+        def helper(cur):
+            # 현재 경로에서 다시 만났다면 사이클 발생!
+            if status[cur] == 1:
+                return False
+            # 이미 검증이 끝난 안전한 노드라면 True
+            if status[cur] == 2:
+                return True
+            
+            # 목적지가 아닌데 막다른 길이라면 False
+            if len(adj_list[cur]) == 0:
+                return cur == destination
+            
+            status[cur] = 1 # 탐색 시작 (현재 경로에 포함)
+            for next_node in adj_list[cur]:
+                if not helper(next_node):
+                    return False
+            
+            status[cur] = 2 # 탐색 종료 및 안전함 확인 (메모이제이션)
+            return True
+
+        return helper(source)
+```
+
+- 복잡도 분석
+  - Time Complexity O(V+E): 모든 노드는 status를 갖고 2로 한 번씩만 업데이트 된다. 
+  - Space Complexity O(V+E): adj list 에 O(V+E), recursion에 O(V) 
 
 </details>
 
