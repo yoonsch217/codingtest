@@ -50,14 +50,14 @@ def generateTrees(self, n: int) -> List[Optional[TreeNode]]:
 
 ### 366. Find Leaves of Binary Tree
 
-https://leetcode.com/problems/find-leaves-of-binary-tree/
+https://leetcode.com/problems/find-leaves-of-binary-tree/ (locked)
 
 문제: binary tree가 주어졌을 때, leaf 노드 리스트를 구하고, 그 leaf 노드를 없앤 tree의 leaf 노드 리스트를 구하면서 tree가 사라질 때까지의 leaf 노드 리스트를 순서대로 리스트에 넣은 2d array를 반환하라.
 
-<details><summary>Approach</summary>
+<details><summary>Approach 1</summary>
 
 기본적으로 트리에는 height 0부터 max까지 있고 각각의 height에는 빈 리스트가 아님이 보장된다.    
-traverse하면서 자기 height를 구하고 자기 위치에 맞는 곳에 들어간다.
+traverse하면서 자기 height를 구하고 자기 위치에 맞는 곳에 들어간다. 맞는 위치에만 들어가면 되고 문제에서 순서는 중요하지 않다.
 
 `height(root)=1+max(height(root.left), height(root.right))` 를 생각한다.   
 그러려면 어떤 함수의 f(leftchild)와 f(rightchild) 값이 구해진 상태여야 현재 height를 구할 수 있기 때문에 left와 right 후에 자기 노드를 처리하는 post order를 사용한다.    
@@ -82,16 +82,16 @@ https://leetcode.com/problems/step-by-step-directions-from-a-binary-tree-node-to
 start_value를 갖는 노드에서 dest_value를 갖는 노드로 가는 최단 경로를 찾아라. 
 위로 가야한다면 U, 왼쪽 아래로 가야한다면 L, 오른쪽 아래로 가야한다면 R을 넣는다.
 
+- Input: root = [5,1,2,3,null,6,4], startValue = 3, destValue = 6
+- Output: "UURL"
+- Explanation: The shortest path is: 3 → 1 → 5 → 2 → 6.
+
 
 
 <details><summary>Approach 1</summary>
 
-내가 처음 풀은 solution은 시간이 느리게 측정된다. 각 node까지의 path를 구한 다음에 그 두 path를 비교해서 겹치는 건 없앴다. 그 다음 남은 걸로 답을 만들었다.   
-복잡도는 O(N) / O(N) 인 것 같은데. 전체 트리 한 번 훑으면서 path 찾고, 그 path 한 번 더 작업하고.   
-
-솔루션도 비슷한 거 같은데 각각의 path 구할 때 root 기준의 L, R을 애초에 넣었다.    
-객체를 직접 다루고 가져가기보다는 필요한 결과만 다루도록 하자. 메모리도 많이 차지하고 비효율적이다.    
-그리고 deque 쓸 필요도 없었다. 어차피 한 쪽으로만 넣고 한 쪽으로만 빼니까 list로 간단히 할 수 있었다.
+- 각각의 path를 구한 뒤 겹치는 부분을 제외한다.
+- 공통 조상을 찾은 뒤, start 부터 공통조상 까지는 U 을 추가하고, 공통조상에서 dest 까지는 그 경로를 추가한다.
 
 ```py
 class Solution:
@@ -155,14 +155,13 @@ child node로 갈 때 left 먼저 갈지 right 먼저 갈지의 순서만 바꿨
 
 역시 solution이 더 깔금하다...   
 
-큐를 하나 두고 처음에는 `[left_root, right_root]`를 넣는다. left_root는 왼쪽 subtree에 대한 root, right_root는 right subtree에 대한 root이다.   
-그러고 두 개씩 pop을 하면서 left와 right를 동시에 비교한다.  
-두 개씩 빼면 한상 첫 번째 값은 left subtree, 두 번째 값은 right subtree 에서 온 게 보장이 된다.    
-동일하다면 popped 노드에 대해 child node를 큐에 넣어줘야한다.   
-left subtree에 있는 노드에 대해서는 left, right 순서로 큐에 넣고, right subtree에 있는 노드는 반대 순서로 넣는다.   
-
-이것도 전체 노드를 한 번씩 방문해야하고, 큐의 크기도 N이다. 그래도 전체 traverse할 필요가 없고, 각 level마다 가 아니라 각 node마다 검증하는 거니까 더 빨리 validate가 될 것 같다.    
-O(N) / O(N) 
+- 큐를 하나 두고 처음에는 `[left_root, right_root]`를 넣는다. left_root는 왼쪽 subtree에 대한 root, right_root는 right subtree에 대한 root이다.   
+- 두 개씩 pop을 하면서 left와 right를 동시에 비교한다.  
+- 두 개씩 빼면 한상 첫 번째 값은 left subtree, 두 번째 값은 right subtree 에서 온 게 보장이 된다.    
+- 동일하다면 popped 노드에 대해 child node를 큐에 넣어줘야한다.   
+- left subtree에 있는 노드에 대해서는 left, right 순서로 큐에 넣고, right subtree에 있는 노드는 반대 순서로 넣는다.   
+- 이것도 전체 노드를 한 번씩 방문해야하고, 큐의 크기도 N이다. 그래도 전체 traverse할 필요가 없고, 각 level마다 가 아니라 각 node마다 검증하는 거니까 더 빨리 validate가 될 것 같다.
+- O(N) / O(N) 
 
 
 ```python
@@ -237,7 +236,7 @@ class BSTIterator:
     def __init__(self, root: TreeNode):
         self.stack = []
         self._leftmost_inorder(root)
-
+        
     def _leftmost_inorder(self, root):
         while root:
             self.stack.append(root)
@@ -270,7 +269,7 @@ space는 O(h)이 필요하다. 처음에 h만큼 넣고, _h만큼 올라갔다�
 
 ### 250. Count Univalue Subtrees
 
-https://leetcode.com/problems/count-univalue-subtrees
+https://leetcode.com/problems/count-univalue-subtrees (locked)
 
 문제: root node가 주어졌을 때 uni value subtree의 수를 구하라. uni value subtree란 모든 노드의 값이 동일한 subtree를 말한다.
 
