@@ -1,22 +1,28 @@
 ## 개념
 
-정렬된 순서가 아닌, 최댓값 혹은 최솟값만 필요한 경우 사용한다.   
-priority queue라는 개념이 있는데 이는 abstract data type이고 실제 자료 구조는 아니다.   
-priority queue를 구현하는 방법에 linked list, heap 등이 있는 것이다.   
-
-linked list의 경우 insertion, deletion에 대해 O(1)의 시간이 걸리지만 검색에는 O(N)의 시간이 걸린다.   
-heap의 경우는 insertion, deletion에 대해 O(logN)의 시간이 걸리지만 min/max 값을 찾는 데는 O(1)의 시간이 걸린다.
+- 정렬된 순서가 아닌, 최댓값 혹은 최솟값만 필요한 경우 사용한다.   
+- priority queue라는 개념이 있는데 이는 abstract data type이고 실제 자료 구조는 아니다.   
+- priority queue를 구현하는 방법에 linked list, heap 등이 있는 것이다.   
+- linked list의 경우 insertion, deletion에 대해 O(1)의 시간이 걸리지만 검색에는 O(N)의 시간이 걸린다.   
+- heap의 경우는 insertion, deletion에 대해 O(logN)의 시간이 걸리지만 min/max 값을 찾는 데는 O(1)의 시간이 걸린다.
 
 
 ### Implementation
 
-heap은 complete binary tree이고 각 노드의 값은 자식 노드보다 큰 값을 갖지 않는다.   
+heap은 complete binary tree이고 각 노드의 값은 자식 노드보다 큰 값을 갖지 않는다. 
+left, right 포인터 없이 index로만 부모 자식을 찾기 위해 complete binary tree 를 사용한다.   
 
 complete binary tree의 특징
+- 마지막 레벨을 제외한 모든 레벨이 노드로 꽉 차 있어야 한다.
+- 마지막 레벨은 왼쪽부터 빈틈없이 차례대로 채워져야 한다.
 - root index가 1이고 현재 노드가 arr[n]일 때 
   - parent node: arr[n//2]
   - left child node: arr[n*2]
   - right child node: arr[n*2+1]
+- root index가 0일 때,
+  - 부모 인덱스: (자식 인덱스 - 1) // 2 
+  - 왼쪽 자식 인덱스: (부모 인덱스 * 2) + 1 
+  - 오른쪽 자식 인덱스: (부모 인덱스 * 2) + 2
 - arr[1] ~ arr[len(arr)//2] 까지는 leaf node가 아니다.
 
 insertion
@@ -47,9 +53,9 @@ import heapq
 
 myheap = [3, 1, 2]
 heapq.heapify(myheap)  # 기본적으로는 minheap이기 때문에 maxheap을 구현하려면 -1을 곱해서 저장해야한다.
-heapq.heappush(myheap, 5)
+heapq.heappush(myheap, 5)  # myheap 이 heapify 되지 않아도 동작은 하지만 myheap 배열이 heap 의 성격을 갖지는 못 한다.
 heapq.heappop(myheap)
-heapq.nlargest(2, myheap)  # k개의 큰 원소를 리스트로 반환한다.
+heapq.nlargest(2, myheap)  # k개의 큰 원소를 리스트로 반환한다. 내부적으로 k 크기의 heap을 유지해서 동작한다. 따라서 O(N logk) 의 시간을 갖는다.
 
 # count라는 dictionary에서 value가 큰 기준으로 nlargest 사용하기
 count = {"a": 4, "b": 1, ...}
@@ -57,9 +63,9 @@ heapq.nlargest(k, count.keys(), key=count.get)
 ```
 
 heapify의 complexity   
-O(N) time, O(N) space   
-O(NlogN)으로 생각할 수 있는데 O(N)이다. 각 노드의 heapify는 O(h)의 시간이 들고 h의 높이를 갖는 노드는 n/pow(2, h+1) 만큼 있다. 극한으로 보내면 upper bound는 O(N)이다.   
-https://www.geeksforgeeks.org/time-complexity-of-building-a-heap/   
+- O(N) time, O(N) space   
+- O(NlogN)으로 생각할 수 있는데 O(N)이다. 각 노드의 heapify는 O(h)의 시간이 들고 h의 높이를 갖는 노드는 n/pow(2, h+1) 만큼 있다. 극한으로 보내면 upper bound는 O(N)이다.   
+- https://www.geeksforgeeks.org/time-complexity-of-building-a-heap/   
 
 ![image](image.png)
 
@@ -67,9 +73,9 @@ big O notation이니까 n을 infinity로 보낸 것 이하의 시간이 걸려�
 
 ## 전략
 
-**top k problems / k-th largest element**   
-size k의 min heap을 만들고 k+1개째 부터는 넣어야할 값을 root와 비교해서 크면 root를 빼고 넣는다.   
-전체 값들에 대해 완료했을 때 root가 k-th largest element이고 heap의 리스트가 top k elements이다.   
-O(Nlogk) / O(k) => 처음 k minheap 만드는 시간 k, 그 이후 작업 (N-k) * logk
+#### top k problems / k-th largest element   
+- size k의 min heap을 만들고 k+1개째 부터는 넣어야할 값을 root와 비교해서 크면 root를 빼고 넣는다.   
+- 전체 값들에 대해 완료했을 때 root가 k-th largest element이고 heap의 리스트가 top k elements이다.   
+- O(Nlogk) / O(k) => 처음 k minheap 만드는 시간 k, 그 이후 작업 (N-k) * logk
 
 
