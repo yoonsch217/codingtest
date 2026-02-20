@@ -86,46 +86,135 @@ Output: ["cats and dog","cat sand dog"]
 
 
 
-```py
-    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
-        trie = {}
+```python
+def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+    trie = {}
 
-        def insert_into_trie(d, w, i):
-            c = w[i]
-            if c not in d:
-                d[c] = {}
-            if i == len(w)-1:
-                d[c]['is_end'] = True
-                return
-            insert_into_trie(d[c], w, i+1)
+    def insert_into_trie(d, w, i):
+        c = w[i]
+        if c not in d:
+            d[c] = {}
+        if i == len(w)-1:
+            d[c]['is_end'] = True
+            return
+        insert_into_trie(d[c], w, i+1)
 
-        for word in wordDict:
-            insert_into_trie(trie, word, 0)
+    for word in wordDict:
+        insert_into_trie(trie, word, 0)
 
-        ans = []
+    ans = []
 
-        def get_answer(s, i, ans, trie, d, tmp_ans):
-            if i == len(s):
-                return
-            c = s[i]
-            if c not in d:
-                return
-            if 'is_end' in d[c]:
-                tmp_ans.append(c)
-                tmp_ans.append(' ')
-                if i == len(s)-1:
-                    ans.append(''.join(tmp_ans).strip())
-                get_answer(s, i+1, ans, trie, trie, tmp_ans)
-                tmp_ans.pop()
-                tmp_ans.pop()
-            
+    def get_answer(s, i, ans, trie, d, tmp_ans):
+        if i == len(s):
+            return
+        c = s[i]
+        if c not in d:
+            return
+        if 'is_end' in d[c]:
             tmp_ans.append(c)
-            get_answer(s, i+1, ans, trie, d[c], tmp_ans)
+            tmp_ans.append(' ')
+            if i == len(s)-1:
+                ans.append(''.join(tmp_ans).strip())
+            get_answer(s, i+1, ans, trie, trie, tmp_ans)
+            tmp_ans.pop()
             tmp_ans.pop()
         
-        get_answer(s, 0, ans, trie, trie, [])
-        return ans
+        tmp_ans.append(c)
+        get_answer(s, i+1, ans, trie, d[c], tmp_ans)
+        tmp_ans.pop()
+    
+    get_answer(s, 0, ans, trie, trie, [])
+    return ans
 
+```
+
+trie + memoization
+
+```python
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+        # 1. 반복문을 이용한 효율적인 Trie 구성
+        trie = {}
+        for word in wordDict:
+            node = trie
+            for char in word:
+                if char not in node:
+                    node[char] = {}
+                node = node[char]
+            node['is_end'] = True
+
+        # 2. 메모이제이션을 위한 딕셔너리
+        memo = {}
+
+        def dfs(start_idx):
+            # 이미 계산된 결과가 있다면 반환
+            if start_idx in memo:
+                return memo[start_idx]
+            
+            # 문자열 끝에 도달하면 빈 문자열을 담은 리스트 반환 (조합의 기초)
+            if start_idx == len(s):
+                return [""]
+
+            res = []
+            node = trie
+            
+            # 현재 인덱스부터 Trie를 따라가며 가능한 단어 탐색
+            for i in range(start_idx, len(s)):
+                char = s[i]
+                if char not in node:
+                    break  # Trie에 없는 문자면 더 이상 탐색 불가능
+                
+                node = node[char]
+                
+                # 단어를 하나 찾았다면, 그 이후의 문자열에 대해 재귀 호출
+                if 'is_end' in node:
+                    word = s[start_idx : i + 1]
+                    sub_results = dfs(i + 1)
+                    
+                    for sub in sub_results:
+                        if sub == "": # 끝에 도달한 경우
+                            res.append(word)
+                        else: # 뒤에 이어질 문장이 있는 경우
+                            res.append(word + " " + sub)
+            
+            memo[start_idx] = res
+            return res
+
+        return dfs(0)
+```
+
+</details>
+
+
+<details><summary>Approach 2</summary>
+
+내가 제일 먼저 생각난 건 dp였다.
+
+```python
+def wordBreak(self, s: str, word_dict: List[str]) -> List[str]:
+    """
+    dp[i] = list of all possible outputs using s[:i+1]
+    dp[i] = for all word in dict, dp[i - len(word) + 1] + " " + word
+    """
+
+    dp = []
+    for i, c in enumerate(s):
+        cur_list = []
+        for word in word_dict:
+            if len(word) > i + 1:
+                continue
+            if s[i-len(word)+1:i+1] != word:
+                continue
+            prev_idx = i - len(word)
+            if prev_idx == -1:
+                cur_list.append(word)
+                continue
+            if len(dp[prev_idx]) == 0:
+                continue
+            for prev_s in dp[prev_idx]:
+                cur_list.append(' '.join([prev_s, word]))
+        dp.append(cur_list)
+    return dp[len(s)-1]
 ```
 
 </details>
