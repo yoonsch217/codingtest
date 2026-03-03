@@ -18,6 +18,8 @@
   - o o o x x x => left: condition을 만족하지 않는 최소 index, right: 만족하는 최대 index
   - Find k closest elements: mid의 의미 정하기, subarray 크기를 하나 더 늘려서 어딜 버릴지 정하기
   - Find Minimum in Rotated Sorted Array: 리스트 데이터에 대한 이해
+- 2차원 matrix 에서 index를 1차원으로 관리하기
+  - (i, j) 의 tuple 형태로 관리하는 것보다 i * n_cols + j 로 관리하는 게 더 효율적이다.
 
 
 ### Algorithmic Techniques
@@ -47,7 +49,7 @@
   - Optimization on Space in Grid Problems: grid 자체를 업데이트하면 공간을 줄인다. 혹은 직전 row만 보관해도 가능한지 확인해본다.
 
 
-### Grapshs and Trees
+### Graphs and Trees
 
 - Graph
   - all possible paths 수는 O(2^N)
@@ -68,6 +70,12 @@
 - Trie
 - Disjoint Set
 
+
+### Checkpoints
+
+- 코드 확정 전에 sample input 들로 테스트를 반드시 해보기
+- index를 사용하는 경우 out of bound 가 나지 않는지 꼼꼼히 확인하기
+- dictionary 를 사용하는 경우 key가 존재하지 않는 경우에 대한 처리를 확인하기
 
 
 ### 풀어볼 문제들

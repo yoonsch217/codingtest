@@ -214,6 +214,11 @@ dp[skills] = skills를 만족하기 위한 최소 인원의 team
 바꿔쳤는데 나중에 이전 값이 필요할 때가 있을까? 없다. key가 skill 목록이다보니까 어찌됐든 그 skill 목록을 만들기만 하면 된다.
 ```
 
+어려웠던 점
+- dp 업데이트하는 iteration
+  - 각 person 마다 iterate 하면서, 각 person 마다 기존에 만들어진 dp를 iterate 하면서 업데이트한다.
+  - 즉, 각 사람마다 iterate 하면서 업데이트할 수 있는 모든 걸 업데이트하는 것이다.
+
 
 
 ```py

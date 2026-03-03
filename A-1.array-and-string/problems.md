@@ -426,11 +426,240 @@ one pass algorithm이 있다.
 </details>
 
 
+### 15. 3Sum
+
+문제: Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+
+Notice that the solution set must not contain duplicate triplets.
+
+Example 1:
+- Input: nums = [-1,0,1,2,-1,-4]
+- Output: [[-1,-1,2],[-1,0,1]]
+- Explanation: 
+  - nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.
+  - nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.
+  - nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.
+  - The distinct triplets are [-1,0,1] and [-1,-1,2].
+  - Notice that the order of the output and the order of the triplets does not matter.
+
+
+<details><summary>Solution</summary>
+
+Two pointers
+
+헤맨 포인트
+- 처음에 중복된 답도 찾아야하는 줄알고 pointer 옮기는 게 어려웠다. 근데 중복된 답 제거하는 것이기 때문에 ans 를 찾았을 때 left, right 둘 다 옮기면 된다.
+- 중복을 제거하는 게 헷갈렸다. start index 기준에서도 이전과 동일한 값이라면 건너뛰어야하고, left 와 right 기준에서도 이전과 동일한 값을 다 건너뛰도록 해야한다.
+
+```python
+class Solution:
+    def threeSum(self, nums: list[int]) -> list[list[int]]:
+        """
+        nums = [-1, 0, 1, 2, -1, -4]
+        output = [[-1, -1, 2]. [-1, 0, -1]]
+
+        Approach 1:
+        brute force: Get all the combinations with three different numbers, and add to the output if it sums up to zero
+        Time: (N^3)
+
+        Approach 2
+        Get the sum of every two numbers, and if the sum is k, find -k with binary search
+        Time: (N^2 * logN)
+
+        Approach 3
+        Sort and use pointers
+        nums = [-4, -3, -2, -2, -1, -1, 0, 1, 3, 5, 6]
+        Set left and right pointers
+        For each left pointer, iterate right pointer from the rightmost to left, getting all the possible answers with [left, right_iter, mid_iter]. We can find mid_iter with bs.
+        Repeat until left is not over 0.
+        
+        N^2 * log N
+
+        Approach 4
+        Sort and use two pointers
+        Fix left pointer, and find all the pairs of numbers that make up to (-nums[left_pointer])
+        When answer found, move both left and right, because we don't need duplicate answers.
+        O(N^2)
+        """
+        nums.sort()
+        start = 0
+
+        res = []
+
+        while start < len(nums) and nums[start] <= 0:
+            if start > 0 and nums[start-1] == nums[start]:
+                start += 1
+                continue
+
+            target = -nums[start]
+            left = start + 1
+            right = len(nums) - 1
+            while left < right:
+
+                if nums[left] + nums[right] == target:
+                    res.append([nums[start], nums[left], nums[right]])
+                    left += 1
+                    right -= 1
+
+                    # 중복 제거
+                    while left < right and nums[left] == nums[left-1]:
+                        left += 1
+                    while left < right and nums[right] == nums[right+1]:
+                        right -= 1
+
+                elif nums[left] + nums[right] < target:
+                    left += 1
+                else:
+                    right -= 1
+            start += 1
+        
+        return res
+```
+
+</details>
 
 
 
 
+### 56. Merge Intervals
 
+문제: Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, 
+and return an array of the non-overlapping intervals that cover all the intervals in the input.
+
+Example 1:
+- Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
+- Output: [[1,6],[8,10],[15,18]]
+- Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+
+
+
+<details><summary>Solution</summary>
+
+처음에 union find 기법으로 풀었다. 
+근데 비효율적이다. O(N^2) 의 시간이 걸리기도 하고, union 및 find 작업이 자주 일어나는 상황이 아니라 처음 그룹화에만 필요했다.
+
+```python
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        roots = [i for i in range(len(intervals))]
+
+        def find(idx):
+            if idx == roots[idx]:
+                return idx
+            roots[idx] = find(roots[idx])
+            return roots[idx]
+        
+        def union(idx1, idx2):
+            root1 = find(idx1)
+            root2 = find(idx2)
+            if root1 == root2:
+                return
+            roots[root1] = root2
+            return
+
+        for i, interval in enumerate(intervals):
+            start_1, end_1 = interval
+            for j in range(i+1, len(intervals)):
+                start_2, end_2 = intervals[j]
+                if (end_1 >= start_2 and end_2 >= end_1) or (end_2 >= start_1 and end_1 >= end_2):
+                    union(i, j)
+        
+        root_to_range = {}
+        for i, interval in enumerate(intervals):
+            root = find(i)
+            if root not in root_to_range:
+                root_to_range[root] = interval
+            else:
+                prev_start, prev_end = root_to_range[root]
+                cur_start, cur_end = interval
+                root_to_range[root] = [min(prev_start, cur_start), max(prev_end, cur_end)]
+
+        return list(root_to_range.values())
+```
+
+더 간편한 방법이 있다.: sort + greedy
+- start 기준으로 정렬을 한다.
+- 앞에서부터 iterate 하면서 바로 뒷 범위와 overlap 이 있는지 확인한다.
+- overlap 이 있으면 업데이트를 하면서 결과 리스트를 만든다.
+- Complexity
+  - Time: O(N logN) 정렬
+  - Space: O(1)
+
+```python
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key = lambda x: x[0])
+        
+        res = []
+        cur = intervals[0]
+        for i in range(1, len(intervals)):
+            cur_start, cur_end = cur  # 여기가 cur 를 참조해야한다. 처음에는 intervals[i] 와 intervals[i+1] 를 사용했는데 그러면 지금까지 만들어놓은 리스트를 기준으로 비교할 수가 없다.
+            next_start, next_end = intervals[i]
+            # check overlap
+            if cur_end >= next_start:
+                cur = [cur[0], max(next_end, cur_end)]
+            else:
+                res.append(cur)
+                cur = intervals[i]
+        res.append(cur)
+        return res
+```
+
+
+</details>
+
+
+
+
+### 347. Top K Frequent Elements
+
+문제: Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.
+
+Example 1:
+- Input: nums = [1,1,1,2,2,3], k = 2
+- Output: [1,2]
+
+
+<details><summary>Solution</summary>
+
+heap 방식은 간단하다. O(N logN) 의 시간 복잡도를 갖는다.
+
+아래와 같이 bucket 을 사용한 방법도 있다. 최적일 때 O(N) 의 시간이 걸린다. 
+
+```python
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        max_freq = 0
+        num_to_frequency = defaultdict(int)
+        for num in nums:
+            prev = num_to_frequency[num]
+            num_to_frequency[num] = prev + 1
+            max_freq = max(max_freq, prev + 1)
+        
+        count_to_nums = [[] for _ in range(max_freq+1)]
+        for num, freq in num_to_frequency.items():
+            count_to_nums[freq].append(num)
+
+        res = []
+        count_idx = len(count_to_nums) - 1
+        filled = 0
+        while filled < k:
+            cur_nums = count_to_nums[count_idx]
+            if len(cur_nums) == 0:
+                count_idx -= 1
+                continue
+            if len(cur_nums) + filled <= k:
+                res.extend(cur_nums)
+                filled += len(cur_nums)
+            else:
+                res.extend(cur_nums[:k-filled])
+                filled += (k-filled)
+            count_idx -= 1
+        
+        return res
+```
+
+</details>
 
 
 
