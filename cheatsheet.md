@@ -5,83 +5,158 @@
 ### Array & String
 - **Sliding Window**: O(N) 시간에 부분 배열/문자열 문제 해결
   - Two pointers로 window 크기 조절
+  - 구현 원리: left, right 포인터로 window 범위 조절하며 조건 만족하는 최적의 window 찾기
+  - 사용 시점: 연속된 부분 배열/문자열의 최대/최소, 개수 세기 문제
   - 예: Longest Substring Without Repeating, Fruit Into Baskets
 - **Two Pointers**: 정렬된 배열에서 효율적인 탐색
+  - 구현 원리: 정렬된 양 끝에서 시작하여 합/차이에 따라 포인터 이동
+  - 사용 시점: 정렬된 배열에서 합/차이/거리 관련 문제
   - 예: 3Sum, Container With Most Water
 - **Prefix Sum**: 구간 합 빠르게 계산 O(1)
+  - 구현 원리: 누적 합 배열 미리 계산, 구간 합 = prefix[j] - prefix[i-1]
+  - 사용 시점: 반복적인 구간 합 계산이 필요한 문제
 - **Dutch National Flag**: 세 가지 값으로 분류 (Sort Colors)
+  - 구현 원리: low, mid, high 세 포인터로 0,1,2 구역 분할하며 정렬
+  - 사용 시점: 세 가지 값으로 분류/정렬해야 하는 O(N) 문제
 
 ### Stack & Queue
 - **Monotonic Stack**: 감소/증가 순서 유지
+  - 구현 원리: 스택에 증가하는 순서 유지, 현재 원소보다 큰 원소들 pop하며 처리
+  - 사용 시점: 다음 큰/작은 원소 찾기, 범위 계산 문제
   - Daily Temperatures: 뒤에서부터 탐색 O(N)
   - Trapping Rain Water: 웅덩이 층별 계산
 - **Monotonic Queue**: Sliding Window Maximum
+  - 구현 원리: deque 사용, window 내 최대값 유지하며 오래된/작은 원소 제거
+  - 사용 시점: sliding window 내 최대/최소값 빠르게 찾기
 - **Min Stack**: 추가 스택으로 최솟값 관리 O(1)
+  - 구현 원리: 보조 스택에 현재까지의 최솟값들 저장, pop 시 동기화
+  - 사용 시점: 스택 연산 중 최솟값을 O(1)에 조회해야 할 때
 
 ### Hash Table
 - **Anagram 그룹화**: 문자열 정렬 또는 문자 빈도수
+  - 구현 원리: 정렬된 문자열이나 문자 빈도수를 key로 사용하여 같은 그룹끼리 묶기
+  - 사용 시점: 문자열 그룹화, 빠른 검색, 중복 제거 필요 시
 
 ### Binary Search
 - **Pattern**: `oooxxx` 형태에서 경계 찾기
+  - 구현 원리: 조건 만족/불만족 구간에서 중간값으로 경계 좁혀나가기
+  - 사용 시점: 정렬된 데이터에서 특정 조건의 경계값 찾기
   - left: 조건 만족하지 않는 최소 index
   - right: 조건 만족하는 최대 index
 - **응용**: K closest elements, rotated array 최솟값
 - find_first 문제
-  - 조건을 만족하는 경우 res에 임시 저장하고 다시 right = mid - 1 로 옮겨서 진행한다.
+  - 구현 원리: 조건을 만족하는 경우 res에 임시 저장하고 다시 right = mid - 1 로 옮겨서 진행하기
+  - 사용 시점: 조건을 만족하는 첫 번째/가장 왼쪽 원소 찾기
 
 ### Graph
 - **BFS**: 최단 경로, 레벨 탐색 O(V+E)
+  - 구현 원리: queue 사용, 레벨별 탐색하며 최단 경로 보장
+  - 사용 시점: 최단 경로, 레벨 탐색, 연결성 확인
 - **DFS**: 사이클 감지, 위상 정렬
+  - 구현 원리: stack/recursion 사용, 깊이 우선 탐색하며 경로 추적
+  - 사용 시점: 사이클 감지, 경로 찾기, 위상 정렬
 - **Dijkstra**: 최단 경로 (양수 가중치) O(E log V)
+  - 구현 원리: priority queue 사용, 최단 거리 확정된 노드부터 처리
+  - 사용 시점: 양수 가중치 그래프에서 최단 경로
 - **Bellman-Ford**: 음수 가중치, K stops 제한 O(VE)
+  - 구현 원리: 모든 간선 V-1번 relaxation, 음수 사이클 감지 가능
+  - 사용 시점: 음수 가중치, K stops 제한, 음수 사이클 감지
 - **Topological Sort**: Kahn's Algorithm (in-degree), DFS (white/gray/black)
+  - 구현 원리: in-degree 0인 노드부터 순서대로 제거하거나 DFS 후위 순회
+  - 사용 시점: 작업 순서, 의존성 관계, 사이클 없는 방향 그래프
 - **MST**: Kruskal (Union-Find), Prim
+  - 구현 원리: Kruskal은 가중치 순 정렬 후 Union-Find로 사이클 방지, Prim은 임의 노드부터 최소 간선 선택
+  - 사용 시점: 최소 비용으로 모든 노드 연결, 네트워크 설계
 
 ### Tree
 - **BST**: 삽입/삭제 O(log n)
+  - 구현 원리: 왼쪽 < 현재 < 오른쪽 속성 유지하며 재귀적으로 탐색
+  - 사용 시점: 동적 집합, 빠른 검색/삽입/삭제 필요 시
 - **Morris Traversal**: O(N)/O(1) 공간 순회
+  - 구현 원리: 중위 후계자 포인터 조작으로 스택 없이 트리 순회, 현재 노드의 오른쪽 자식이 null이면 오른쪽으로 이동, 아니면 중위 후계자 찾아서 오른쪽 포인터를 현재 노드로 연결
+  - 사용 시점: 공간 제한이 심할 때 트리 순회
 - **Trie**: 문자열 검색, 접두사
+  - 구현 원리: 각 노드가 문자를 저장, 공통 접두사 공유하여 검색 효율화
+  - 사용 시점: 문자열 검색, 자동완성, 접두사 관련 문제
 
 ### Heap
-- **우선순위 큐**: 최대/최솟값 빠른 접근 O(log n)
-- **Top K Frequent**: Bucket sort O(N)
+- **우선순위 큐**: 최대/최솟값 빠른 접근
+  - 구현 원리: 완전 이진 트리, 부모-자식 관계로 우선순위 유지
+  - 사용 시점: 동적으로 최대/최소값을 자주 조회/추가할 때
+- **Top K Frequent using heap**: O(N log K)
+  - 구현 원리: 빈도수 계산 후 max-heap에 (빈도수, 원소) 저장, K번 pop
+  - 사용 시점: 빈도수 기반 상위 K개 원소 찾기
+- **Top K Frequent using bucket sort**: O(N)
+  - 구현 원리: 빈도수를 인덱스로 하는 bucket 배열, 높은 빈도부터 K개 선택. bucket 배열의 크기는 N을 넘지 않는 것을 활용한 방법
+  - 사용 시점: 빈도수 기반 상위 K개 원소 찾기
 
 ### Dynamic Programming
 - **State Reduction**: 최근 n개만 필요한지 확인
+  - 구현 원리: DP 테이블 전체 대신 필요한 상태만 저장하여 공간 최적화
+  - 사용 시점: DP 테이블이 너무 클 때 공간 최적화 필요
 - **Kadane's Algorithm**: 최대 부분합 O(N)
+  - 구현 원리: 현재까지의 최대 부분합과 현재 원소만으로 시작하는 부분합 비교 `cur_sum = max(num, cur_sum + num)`
+  - 사용 시점: 최대 부분합, 최대 부분곱 등 연속된 구간 최적화
 - **Knapsack**: 조합 문제
+  - 구현 원리: 물건별로 포함/미포함 경우 고려하여 최적값 갱신
+  - 사용 시점: 무게/용량 제한 하의 최대 가치/조합 문제
+  - **0/1 Knapsack**: 각 물건은 한 번만 사용 가능, 역순 탐색
+  - **Unbounded Knapsack**: 동전 등 중복 사용 가능, 정순 탐색
 - **State Machine**: 여러 상태 간 전환 (Stock problems)
+  - 구현 원리: 각 시점별 상태(보유/미보유)를 DP로 관리하며 최적화
+  - 사용 시점: 여러 상태 간 전환, 제약 조건이 있는 최적화
 
 ### Greedy
 - **매 선택이 최적해로 이어짐**
+  - 구현 원리: 현재 최적 선택이 전체 최적해를 보장하는 증명 기반 접근
+  - 사용 시점: 현재 선택이 미래에 영향을 주지 않는 최적화 문제
 - **Activity Selection, Fractional Knapsack**
+  - 구현 원리: 종료시간/단위무게 가치 기준 정렬 후 greedy 선택
+  - 사용 시점: 활동 선택, 분할 가능한 배낭 문제
 
 ### Bit Manipulation
 - **기본 연산**: `&`, `|`, `^`, `<<`, `>>`, `~`
+  - 구현 원리: 비트 단위 연산으로 플래그, 마스크, 상태 표현
+  - 사용 시점: 플래그 관리, 마스킹, 상태 표현
 - **Bit Mask**: 정수로 상태 표현
+  - 구현 원리: 각 비트를 특정 상태나 플래그로 사용하여 메모리 효율화
+  - 사용 시점: 여러 상태를 하나의 정수로 표현, 부분 집합 열거
 - **n & (n-1)**: 가장 낮은 1 비트 제거
+  - 구현 원리: n의 2진표현에서 가장 오른쪽 1을 0으로 만드는 효과
+  - 사용 시점: 1의 개수 세기, 2의 거듭제곤 확인
 
 ## 🎯 핵심 패턴 & 문제 유형
 
 ### 1. Subarray Problems
+**문제**: 배열에서 연속된 subarray의 합이 가장 큰 값을 구하라 (Maximum Subarray)
 ```python
 # Maximum Subarray (Kadane)
 max_sum = cur_sum = nums[0]
 for num in nums[1:]:
     cur_sum = max(num, cur_sum + num)
     max_sum = max(max_sum, cur_sum)
-
+```
+    
 # Sliding Window Fixed Size
+**문제**: 크기가 k인 sliding window를 움직이며 각 window의 최대값들을 배열로 구하라
+**시간복잡도**: O(N*k) - 각 window마다 max() 함수 호출
+```python
 from collections import deque
 window = deque()
+result = []
 for i in range(len(nums)):
     window.append(nums[i])
     if i >= k-1:
-        # process window
+        result.append(max(window))  # O(k) for each window
         window.popleft()
+return result
+
+# 더 효율적인 방법: Monotonic Queue 사용하면 O(N) 가능
 ```
 
 ### 2. Two Pointers
+
+**문제**: 정렬된 배열에서 합이 target이 되는 두 원소 찾기 (Two Sum)
 ```python
 # Sorted Array Two Sum
 left, right = 0, len(nums)-1
@@ -90,29 +165,58 @@ while left < right:
     if s == target: return [left, right]
     elif s < target: left += 1
     else: right -= 1
+```
 
+**문제**: 배열에서 조건을 만족하는 가장 긴 subarray의 길이 찾기 (Variable Sliding Window)
+```python
 # Sliding Window Variable Size
 left = 0
+max_len = 0
 for right in range(len(nums)):
     # expand window
     while condition_violated:
         # shrink window
         left += 1
+    max_len = max(max_len, right - left + 1)
+return max_len
 ```
 
 ### 3. Monotonic Stack
+**문제**: 각 원소에 대해 다음으로 큰 원소 찾기 (Next Greater Element)
 ```python
 stack = []  # stores indices
+result = [-1] * len(nums)  # default if no greater element
 for i, val in enumerate(nums):
     while stack and nums[stack[-1]] < val:
         prev = stack.pop()
-        # process popped element
-        height = nums[prev]
-        width = i if not stack else i - stack[-1] - 1
+        result[prev] = val  # current val is next greater for prev
     stack.append(i)
+return result
 ```
 
-### 4. BFS Shortest Path
+### 4. Monotonic Queue
+**문제**: 크기가 k인 sliding window를 움직이며 각 window의 최대값들을 O(N)에 구하라 (Sliding Window Maximum)
+```python
+from collections import deque
+window = deque()
+result = []
+for i, val in enumerate(nums):
+    # Remove elements smaller than current
+    while window and window[-1][0] <= val:
+        window.pop()
+    window.append((val, i))
+    
+    # Remove elements outside window
+    while window and window[0][1] <= i - k:
+        window.popleft()
+    
+    if i >= k - 1:
+        result.append(window[0][0])  # largest element is located at head
+return result
+```
+
+### 5. BFS Shortest Path
+**문제**: 그래프에서 시작점에서 도착점까지의 최단 경로 길이 찾기
 ```python
 from collections import deque
 queue = deque([(start, 0)])
@@ -124,16 +228,35 @@ while queue:
         if neighbor not in visited:
             visited.add(neighbor)
             queue.append((neighbor, dist + 1))
+return -1  # no path found
 ```
 
-### 5. DP Patterns
-```python
-# 1D DP - Fibonacci/Climbing Stairs
-dp = [0] * (n+1)
-dp[0] = dp[1] = 1
-for i in range(2, n+1):
-    dp[i] = dp[i-1] + dp[i-2]
+### 6. DP Patterns
 
+**문제**: 주식을 여러 번 거래할 수 있지만, 매도 후 1일 쿨다운 필요 (Best Time to Buy and Sell Stock with Cooldown)
+**점화식**: 
+- dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i]) (i일에 주식 미보유)
+- dp[i][1] = max(dp[i-1][1], dp[i-2][0] - prices[i]) (i일에 주식 보유, 쿨다운 고려)
+```python
+# State Machine DP - Stock with Cooldown
+n = len(prices)
+if n <= 1: return 0
+dp = [[0, 0] for _ in range(n)]
+dp[0][1] = -prices[0]  # buy on day 0
+
+for i in range(1, n):
+    dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])  # sell or stay
+    if i >= 2:
+        dp[i][1] = max(dp[i-1][1], dp[i-2][0] - prices[i])  # buy with cooldown
+    else:
+        dp[i][1] = max(dp[i-1][1], -prices[i])  # buy on day 1
+
+return dp[-1][0]  # max profit without holding stock
+```
+
+**문제**: 2D 격자에서 (0,0)에서 (n-1,m-1)까지의 최대 합 경로값 찾기
+**점화식**: dp[i][j] = grid[i][j] + max(dp[i-1][j], dp[i][j-1]) (최대 경로 합)
+```python
 # 2D DP with Space Optimization
 prev = [0] * m
 for i in range(n):
@@ -144,16 +267,35 @@ for i in range(n):
         elif j == 0: cur[j] = prev[j] + grid[i][j]
         else: cur[j] = max(prev[j], cur[j-1]) + grid[i][j]
     prev = cur
+return prev[-1]
+```
 
+**문제**: 동전들을 사용하여 target 금액을 만들 수 있는 조합의 수 구하기, 동전은 중복 사용 가능 (Unbounded Knapsack)
+**점화식**: dp[amount] = dp[amount] + dp[amount - coin] (조합의 수)
+```python
 # Knapsack (Combination)
 dp = [0] * (target + 1)
 dp[0] = 1
 for coin in coins:
     for amount in range(coin, target + 1):
         dp[amount] += dp[amount - coin]
+return dp[target]
 ```
 
-### 6. Graph Traversal
+**문제**: 각 물건은 한 번만 사용 가능하여 capacity 내에서 최대 가치 구하기 (0/1 Knapsack)
+**점화식**: dp[w] = max(dp[w], dp[w-weight] + value) (최대 가치)
+```python
+# 0/1 Knapsack (No repetition)
+dp = [0] * (capacity + 1)
+for i in range(len(items)):
+    weight, value = items[i]
+    for w in range(capacity, weight - 1, -1):
+        dp[w] = max(dp[w], dp[w - weight] + value)
+return dp[capacity]
+```
+
+### 7. Graph Traversal
+**문제**: 방향 그래프에서 사이클 존재 여부 확인하기 (Cycle Detection)
 ```python
 # DFS with Cycle Detection
 def dfs(node, parent, visited, recStack):
@@ -170,6 +312,18 @@ def dfs(node, parent, visited, recStack):
     recStack[node] = False
     return False
 
+# Initialize
+visited = [False] * n
+recStack = [False] * n
+for i in range(n):
+    if not visited[i]:
+        if dfs(i, -1, visited, recStack):
+            return True  # cycle found
+return False  # no cycle
+```
+
+**문제**: 방향 그래프에서 선행 관계를 만족하는 작업 실행 순서 찾기 (Topological Sort)
+```python
 # Topological Sort (Kahn's Algorithm)
 from collections import deque
 in_degree = [0] * n
@@ -193,6 +347,306 @@ while queue:
         in_degree[v] -= 1
         if in_degree[v] == 0:
             queue.append(v)
+
+return result if len(result) == n else []  # empty if cycle exists
+```
+
+### 8. Dutch National Flag
+**문제**: 배열을 0, 1, 2 세 가지 값으로 정렬하기 (Sort Colors)
+```python
+# Dutch National Flag Algorithm
+low, mid, high = 0, 0, len(nums) - 1
+while mid <= high:
+    if nums[mid] == 0:
+        nums[low], nums[mid] = nums[mid], nums[low]
+        low += 1
+        mid += 1
+    elif nums[mid] == 1:
+        mid += 1
+    else:  # nums[mid] == 2
+        nums[mid], nums[high] = nums[high], nums[mid]
+        high -= 1
+```
+
+### 9. Binary Search Patterns
+**문제**: 정렬된 배열에서 특정 조건을 만족하는 첫 번째 원소 찾기 (Binary Search Boundary)
+```python
+# Find first element >= target
+left, right = 0, len(nums) - 1
+result = -1
+while left <= right:
+    mid = left + (right - left) // 2
+    if nums[mid] >= target:
+        result = mid
+        right = mid - 1
+    else:
+        left = mid + 1
+return result
+
+# Find first element > target (upper bound)
+left, right = 0, len(nums) - 1
+result = -1
+while left <= right:
+    mid = left + (right - left) // 2
+    if nums[mid] > target:
+        result = mid
+        right = mid - 1
+    else:
+        left = mid + 1
+return result
+```
+
+### 10. Dijkstra's Algorithm
+**문제**: 양수 가중치 그래프에서 시작점에서 모든 노드까지의 최단 경로 찾기
+```python
+import heapq
+def dijkstra(graph, start):
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    heap = [(0, start)]
+    
+    while heap:
+        dist, node = heapq.heappop(heap)
+        if dist > distances[node]:
+            continue
+            
+        for neighbor, weight in graph[node].items():
+            new_dist = dist + weight
+            if new_dist < distances[neighbor]:
+                distances[neighbor] = new_dist
+                heapq.heappush(heap, (new_dist, neighbor))
+    
+    return distances
+```
+
+### 11. Bellman-Ford Algorithm
+**문제**: 음수 가중치 그래프에서 최단 경로 찾기 및 음수 사이클 감지
+```python
+def bellman_ford(edges, n, start):
+    distances = [float('inf')] * n
+    distances[start] = 0
+    
+    # Relax edges n-1 times
+    for _ in range(n - 1):
+        for u, v, weight in edges:
+            if distances[u] != float('inf') and distances[u] + weight < distances[v]:
+                distances[v] = distances[u] + weight
+    
+    # Check for negative cycles
+    for u, v, weight in edges:
+        if distances[u] != float('inf') and distances[u] + weight < distances[v]:
+            return None  # Negative cycle detected
+    
+    return distances
+```
+
+### 12. MST Algorithms
+**문제**: 그래프의 모든 노드를 최소 비용으로 연결하는 최소 신장 트리 찾기
+```python
+# Kruskal's Algorithm (Union-Find)
+def kruskal(n, edges):
+    parent = list(range(n))
+    rank = [0] * n
+    
+    def find(x):
+        if parent[x] != x:
+            parent[x] = find(parent[x])
+        return parent[x]
+    
+    def union(x, y):
+        px, py = find(x), find(y)
+        if px == py:
+            return False
+        if rank[px] < rank[py]:
+            parent[px] = py
+        elif rank[px] > rank[py]:
+            parent[py] = px
+        else:
+            parent[py] = px
+            rank[px] += 1
+        return True
+    
+    edges.sort(key=lambda x: x[2])  # Sort by weight
+    mst_weight = 0
+    for u, v, weight in edges:
+        if union(u, v):
+            mst_weight += weight
+    
+    return mst_weight
+
+# Prim's Algorithm
+import heapq
+def prim(graph, start):
+    visited = set()
+    min_heap = [(0, start)]
+    mst_weight = 0
+    
+    while min_heap and len(visited) < len(graph):
+        weight, node = heapq.heappop(min_heap)
+        if node in visited:
+            continue
+        visited.add(node)
+        mst_weight += weight
+        
+        for neighbor, w in graph[node].items():
+            if neighbor not in visited:
+                heapq.heappush(min_heap, (w, neighbor))
+    
+    return mst_weight
+```
+
+### 13. BST Operations
+**문제**: 이진 검색 트리에서 삽입, 삭제, 검색 연산 수행하기
+```python
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def insert(root, val):
+    if not root:
+        return TreeNode(val)
+    if val < root.val:
+        root.left = insert(root.left, val)
+    else:
+        root.right = insert(root.right, val)
+    return root
+
+def search(root, val):
+    if not root or root.val == val:
+        return root
+    if val < root.val:
+        return search(root.left, val)
+    return search(root.right, val)
+
+def delete(root, val):
+    if not root:
+        return root
+    if val < root.val:
+        root.left = delete(root.left, val)
+    elif val > root.val:
+        root.right = delete(root.right, val)
+    else:
+        if not root.left:
+            return root.right
+        if not root.right:
+            return root.left
+        # Find inorder successor
+        min_node = root.right
+        while min_node.left:
+            min_node = min_node.left
+        root.val = min_node.val
+        root.right = delete(root.right, min_node.val)
+    return root
+```
+
+### 14. Morris Traversal
+**문제**: 이진 트리를 O(1) 공간으로 중위 순회하기
+```python
+def morris_inorder(root):
+    current = root
+    result = []
+    
+    while current:
+        if not current.left:
+            result.append(current.val)
+            current = current.right
+        else:
+            # Find inorder predecessor
+            predecessor = current.left
+            while predecessor.right and predecessor.right != current:
+                predecessor = predecessor.right
+            
+            if not predecessor.right:
+                predecessor.right = current
+                current = current.left
+            else:
+                predecessor.right = None
+                result.append(current.val)
+                current = current.right
+    
+    return result
+```
+
+### 15. Trie Operations
+**문제**: 문자열 삽입, 검색, 접두사 확인을 효율적으로 수행하기
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+    
+    def insert(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end = True
+    
+    def search(self, word):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.is_end
+    
+    def starts_with(self, prefix):
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+```
+
+### 16. Bit Manipulation
+**문제**: 비트 연산을 사용하여 효율적인 계산 수행하기
+```python
+# Count set bits
+def count_set_bits(n):
+    count = 0
+    while n:
+        count += n & 1
+        n >>= 1
+    return count
+
+# More efficient: Brian Kernighan's algorithm
+def count_set_bits_efficient(n):
+    count = 0
+    while n:
+        n &= (n - 1)  # Remove lowest set bit
+        count += 1
+    return count
+
+# Check if power of 2
+def is_power_of_2(n):
+    return n > 0 and (n & (n - 1)) == 0
+
+# Find single number in array where others appear twice
+def single_number(nums):
+    result = 0
+    for num in nums:
+        result ^= num
+    return result
+
+# Generate all subsets using bit manipulation
+def subsets(nums):
+    n = len(nums)
+    result = []
+    for mask in range(1 << n):
+        subset = []
+        for i in range(n):
+            if mask & (1 << i):
+                subset.append(nums[i])
+        result.append(subset)
+    return result
 ```
 
 ## ⚡ 시간/공간 복잡도 최적화
@@ -214,7 +668,7 @@ while queue:
 ### 자주 쓰는 라이브러리
 ```python
 from collections import defaultdict, deque, Counter
-from heapq import heappush, heappop, heapify
+import heapq
 from bisect import bisect_left, bisect_right
 import math
 
@@ -235,9 +689,9 @@ q.popleft()      # 왼쪽 제거
 
 # heap: 우선순위 큐
 heap = [3, 1, 4, 1, 5]
-heapify(heap)     # 리스트를 힙으로 변환
-heappush(heap, 2) # 원소 추가
-min_val = heappop(heap)  # 최솟값 제거
+heapq.heapify(heap)     # 리스트를 힙으로 변환
+heapq.heappush(heap, 2) # 원소 추가
+min_val = heapq.heappop(heap)  # 최솟값 제거
 
 # bisect: 이진 탐색 삽입 위치
 idx = bisect_left(sorted_list, value)  # 왼쪽 위치
