@@ -216,6 +216,7 @@ return result
 ```
 
 ### 5. BFS Shortest Path
+
 **문제**: 그래프에서 시작점에서 도착점까지의 최단 경로 길이 찾기
 ```python
 from collections import deque
@@ -272,6 +273,8 @@ return prev[-1]
 
 **문제**: 동전들을 사용하여 target 금액을 만들 수 있는 조합의 수 구하기, 동전은 중복 사용 가능 (Unbounded Knapsack)
 **점화식**: dp[amount] = dp[amount] + dp[amount - coin] (조합의 수)
+- dp[amount] 값을 업데이트하기 위해 내부 loop에서 amount를 돌 때, 정방향으로 돌아야한다. 
+- 그래야 dp[amount-coin] 을 참조할 때 coin 이 사용된 dp 값을 바라보기 때문에 중복 사용 가능의 조건을 만족한다. 
 ```python
 # Knapsack (Combination)
 dp = [0] * (target + 1)
@@ -282,42 +285,105 @@ for coin in coins:
 return dp[target]
 ```
 
-**문제**: 각 물건은 한 번만 사용 가능하여 capacity 내에서 최대 가치 구하기 (0/1 Knapsack)
+**문제**: 동전들을 사용하여 target 금액을 만들 수 있는 조합의 수 구하기, 동전은 중복 사용 불가능 (0/1 Knapsack)
+**점화식**: dp[amount] = dp[amount] + dp[amount - coin] (조합의 수)
+- dp[amount] 값을 업데이트하기 위해 내부 loop에서 amount를 돌 때, 역방향으로 돌아야한다. 
+- 그래야 dp[amount-coin] 을 참조할 때 coin 이 사용되지 않은 dp 값을 바라보기 때문에 중복이 없다.
+- 
+```python
+# 0/1 Knapsack (조합의 수, 중복 불가)
+dp = [0] * (target + 1)
+dp[0] = 1 # 아무것도 고르지 않는 경우 1가지
+
+for coin in coins:
+    # 0/1 Knapsack: 역방향 루프
+    for amount in range(target, coin - 1, -1):
+        dp[amount] += dp[amount - coin]
+
+return dp[target]
+```
+
+
+**문제**: 각 물건에는 weight와 value가 있다. 각 물건은 한 번만 사용 가능하여 capacity 내에서 최대 가치를 주는 조합 구하기 (0/1 Knapsack)
 **점화식**: dp[w] = max(dp[w], dp[w-weight] + value) (최대 가치)
 ```python
 # 0/1 Knapsack (No repetition)
 dp = [0] * (capacity + 1)
-for i in range(len(items)):
-    weight, value = items[i]
+for weight, value in range(len(items)):
+    # 중복이 안 되니까 역방향 루프 사용 
     for w in range(capacity, weight - 1, -1):
         dp[w] = max(dp[w], dp[w - weight] + value)
 return dp[capacity]
 ```
 
+**문제**: 동전들을 사용하여 target 금액을 만들 수 있는 순열의 수 구하기, 동전은 중복 사용 가능 (Unbounded Permutation)
+**점화식**: dp[amount] = Sum of dp[amount - coin] for coin in coins
+- coin iteration을 안쪽 루프에서 해야하고, amount iteration 을 바깥 쪽 루프에서 한다.
+```python
+# Unbounded Knapsack (Permutation)
+dp = [0] * (target + 1)
+dp[0] = 1
+# 순열을 위해 금액(amount)이 외부 루프로 나옴
+for amount in range(1, target + 1):
+    for coin in coins:
+        if amount >= coin:
+            # 현재 금액을 만들기 위해 '마지막에 사용한 동전'이 무엇인지에 따라 모든 경우의 수를 누적함
+            dp[amount] += dp[amount - coin]
+return dp[target]
+```
+
+**문제**: 동전들을 사용하여 target 금액을 만들 수 있는 순열의 수 구하기, 동전은 중복 사용 불가능 (Permutation, Traveling Salesman Problem)
+**점화식**: dp[state][amount]: 지금까지 사용한 동전들의 집합이 state이고, 그 동전들을 나열하여 만든 합계가 amount일 때 가능한 순열(Permutation)의 수
+- dp[state][amount] = Σ (dp[이전 state][이전 amount])
+- 이전 state: state ^ (1 << i) (현재 집합에서 동전 i를 제외한 상태)
+- 이전 amount: amount - coins[i] (현재 합계에서 동전 i의 값을 뺀 금액)
+- 조건: 현재 state에 동전 i가 포함되어 있어야 함.
+```python
+# 중복 불가능한 순열 (Bitmask DP) - Hard
+# n: 동전의 개수, target: 목표 금액
+dp = [[0] * (target + 1) for _ in range(1 << n)]
+dp[0][0] = 1
+
+for state in range(1 << n):
+    for amount in range(target + 1):
+        if dp[state][amount] == 0: continue
+        
+        for i in range(n): # i번째 동전 선택 시도
+            # 아직 i번째 동전을 사용하지 않았고, 합계가 target을 넘지 않는다면
+            if not (state & (1 << i)) and amount + coins[i] <= target:
+                next_state = state | (1 << i)
+                dp[next_state][amount + coins[i]] += dp[state][amount]
+```
+
+
 ### 7. Graph Traversal
-**문제**: 방향 그래프에서 사이클 존재 여부 확인하기 (Cycle Detection)
+
+**문제**: undirected 그래프에서 사이클 존재 여부 확인하기 (Cycle Detection)
 ```python
 # DFS with Cycle Detection
-def dfs(node, parent, visited, recStack):
+def dfs(node, parent, visited, on_path):
     visited[node] = True
-    recStack[node] = True
+    on_path[node] = True
     
     for neighbor in graph[node]:
-        if not visited[neighbor]:
-            if dfs(neighbor, node, visited, recStack):
-                return True
-        elif neighbor != parent and recStack[neighbor]:
+        if neighbor != parent and on_path[neighbor]:
+            # neighbor가 원래 왔던 길이라면 cycle이 아님으로 무시한다. 만약 directed graph 라면 이 조건을 빼야한다.
+            # neighbor가 이 DFS에서 이미 지나왔던 곳이라면 cycle이 생긴 것이므로 true 반환한다.
             return True
+        elif not visited[neighbor]:
+            if dfs(neighbor, node, visited, on_path):
+                return True
+
     
-    recStack[node] = False
+    on_path[node] = False
     return False
 
 # Initialize
-visited = [False] * n
-recStack = [False] * n
+visited = [False] * n  # 전체 작업에서 한 번이라도 방문했으면 true
+on_path = [False] * n  # DFS 탐색 중에 방문한 것들, DFS 끝나면 원상복구
 for i in range(n):
     if not visited[i]:
-        if dfs(i, -1, visited, recStack):
+        if dfs(i, -1, visited, on_path):
             return True  # cycle found
 return False  # no cycle
 ```
@@ -342,7 +408,6 @@ for i in range(n):
 while queue:
     u = queue.popleft()
     result.append(u)
-    
     for v in graph[u]:
         in_degree[v] -= 1
         if in_degree[v] == 0:
@@ -352,10 +417,14 @@ return result if len(result) == n else []  # empty if cycle exists
 ```
 
 ### 8. Dutch National Flag
-**문제**: 배열을 0, 1, 2 세 가지 값으로 정렬하기 (Sort Colors)
+**문제**: 0, 1, 2 세 가지 값이 있는 배열 정렬하기 (Sort Colors)
 ```python
-# Dutch National Flag Algorithm
-low, mid, high = 0, 0, len(nums) - 1
+# Dutch National Flag Algorithm O(N)
+low, mid, high = 0, 0, len(nums) - 1  
+# [0, low-1]: 모두 0, [low, mid-1]: 모두 1, [mid, high]: 미지의 영역, [high+1, n-1]: 모두 2 
+# 다음 0은 low로 와야한다. low 미만은 다 0이다.
+# mid는 탐색 중인 포인터이다.
+# 다음 2는 high 로 와야한다. high 초과는 다 2이다.
 while mid <= high:
     if nums[mid] == 0:
         nums[low], nums[mid] = nums[mid], nums[low]
@@ -366,9 +435,11 @@ while mid <= high:
     else:  # nums[mid] == 2
         nums[mid], nums[high] = nums[high], nums[mid]
         high -= 1
+# 색이 늘어나면 포인터를 추가해서 구간을 추가해주면 된다.
 ```
 
-### 9. Binary Search Patterns
+### 9. Binary Search
+
 **문제**: 정렬된 배열에서 특정 조건을 만족하는 첫 번째 원소 찾기 (Binary Search Boundary)
 ```python
 # Find first element >= target
@@ -382,66 +453,68 @@ while left <= right:
     else:
         left = mid + 1
 return result
-
-# Find first element > target (upper bound)
-left, right = 0, len(nums) - 1
-result = -1
-while left <= right:
-    mid = left + (right - left) // 2
-    if nums[mid] > target:
-        result = mid
-        right = mid - 1
-    else:
-        left = mid + 1
-return result
 ```
 
 ### 10. Dijkstra's Algorithm
+
 **문제**: 양수 가중치 그래프에서 시작점에서 모든 노드까지의 최단 경로 찾기
+- 시작점부터 각 도착점까지의 거리인 distance를 inf로 초기화한다.
+- (dist from start, node) 를 heap 에 넣어서 heap 기반으로 BFS 처럼 탐색을 한다.
+- heap pop 하고 인접 노드들을 확인한 뒤 인접 edge 만큼을 추가했을 때 기존 distance 보다 작아지면 업데이트하고 heap에 넣는다.
+- Time: O(E log V), Space: O(V)
 ```python
 import heapq
 def dijkstra(graph, start):
     distances = {node: float('inf') for node in graph}
     distances[start] = 0
-    heap = [(0, start)]
-    
+    heap = [(0, start)]  # (distance, node)
     while heap:
         dist, node = heapq.heappop(heap)
-        if dist > distances[node]:
+        if dist > distances[node]:  
+            # 이 조건에 만족한다면 기존보다 더 오래 걸려서 온 거니까 무시하고 건너뛴다.
             continue
-            
         for neighbor, weight in graph[node].items():
             new_dist = dist + weight
             if new_dist < distances[neighbor]:
+                # new_dist 가 기존보다 크거나 같다면 무시하도록 한다.
                 distances[neighbor] = new_dist
                 heapq.heappush(heap, (new_dist, neighbor))
-    
     return distances
 ```
 
 ### 11. Bellman-Ford Algorithm
+
 **문제**: 음수 가중치 그래프에서 최단 경로 찾기 및 음수 사이클 감지
+- 시작점부터 각 도착점까지의 거리인 distance를 inf로 초기화한다. distance[src] = 0 이다.
+- edges 를 iterate 하면서 distance[start] 가 inf가 아니라면 해당 start node 에 도달이 가능하다는 것이므로 그 edge 를 계산해서 distance[end] 를 업데이트할 수 있으면 업데이트한다.
+- 이러한 edge iteration을 (N-1) 만큼 반복한다. 그러면 src 부터 모든 노드까지 전파가 됨을 보장할 수 있고 최단 경로는 이 이내로 찾아져야한다.
+- (N-1) 번 iterate 한 후 한 번 더 했을 때 또 업데이트되는 게 있다면 음수 사이클이 있다는 뜻이다.
+- Time: O(VE), Space: O(V)
 ```python
 def bellman_ford(edges, n, start):
     distances = [float('inf')] * n
     distances[start] = 0
-    
     # Relax edges n-1 times
+    # why n-1 times? 노드가 n 개인 그래프에서 사이클이 없는 최단 경로는 최대 n-1 개의 간선(edge)을 가질 수 있다.
     for _ in range(n - 1):
         for u, v, weight in edges:
+            # 시작점이 도달 가능한 상태가 되어 있고 & 이 edge로 움직이는 게 도착점을 업데이트할 수 있다면
             if distances[u] != float('inf') and distances[u] + weight < distances[v]:
                 distances[v] = distances[u] + weight
-    
     # Check for negative cycles
     for u, v, weight in edges:
         if distances[u] != float('inf') and distances[u] + weight < distances[v]:
+            # n-1 번 iterate 했는데도 업데이트할 게 있다면 무한히 업데이트할 게 있다는 것이고 음수 사이클이 있다는 것이다.
             return None  # Negative cycle detected
-    
     return distances
 ```
 
 ### 12. MST Algorithms
-**문제**: 그래프의 모든 노드를 최소 비용으로 연결하는 최소 신장 트리 찾기
+
+**문제**: 그래프의 모든 노드를 최소 비용으로 연결하는 최소 신장 트리 찾기 (Kruskal's Algorithm)
+- edge를 weight 순서대로 정렬한다.
+- 작은 weight의 edge 부터 확인하면서 그 edge가 양끝을 union 해준다면 선택한다. 만약 그 edge의 양끝이 이미 같은 set 이라면 무시한다.
+- Time: O(E logE), Space: O(V+E)
 ```python
 # Kruskal's Algorithm (Union-Find)
 def kruskal(n, edges):
@@ -473,7 +546,19 @@ def kruskal(n, edges):
             mst_weight += weight
     
     return mst_weight
+```
 
+**문제**: 그래프의 모든 노드를 최소 비용으로 연결하는 최소 신장 트리 찾기 (Prim's Algorithm)
+- (edge의 목적지 노드, edge의 가중치) 를 저장하는 heap을 사용한다. 처음에 (0, start) 를 넣어놓는다.
+- 처리가 된 노드는 저장하는 visited set 을 사용한다.
+- heap pop 을 하면서 visited set 에 있는 노드라면 무시한다.
+- 그렇지 않다면 해당 노드로는 지금 edge를 선택하는 게 최소의 weight로 추가하는 것이다.
+  - why? 아직 탐색하지 않은 edge를 통해 가는 게 더 빠르다고 가정해보자. 그러면 그 탐색하지 않은 edge는 지금보다 더 느린 edge를 통해 찾아야한다. 그러는 순간 이미 더 비효율적인 탐색이 된 거싱다.
+- 그 노드에 대해 neighbor를 탐색하여 visited 가 아닌 노드들을 추가한다.
+- visited 의 크기가 전체 노드 수가 될 때까지 반복한다.
+- Time: O(E logE), Space: O(E)
+  - heap push, pop 을 모든 edge에 대해 수행해야할 수 있기 때문에 E x logE 가 된다.
+```python
 # Prim's Algorithm
 import heapq
 def prim(graph, start):
@@ -495,7 +580,9 @@ def prim(graph, start):
     return mst_weight
 ```
 
+
 ### 13. BST Operations
+
 **문제**: 이진 검색 트리에서 삽입, 삭제, 검색 연산 수행하기
 ```python
 class TreeNode:
@@ -505,6 +592,8 @@ class TreeNode:
         self.right = right
 
 def insert(root, val):
+    # 지금은 height를 맞추는 동작이 없어서 최악의 경우 O(N)이 걸릴 수 있다.
+    # balanced tree로 만드려면 매번 height를 체크해서 rotate 하는 동작이 추가되어야 한다.
     if not root:
         return TreeNode(val)
     if val < root.val:
@@ -542,6 +631,7 @@ def delete(root, val):
 ```
 
 ### 14. Morris Traversal
+
 **문제**: 이진 트리를 O(1) 공간으로 중위 순회하기
 ```python
 def morris_inorder(root):
@@ -556,12 +646,18 @@ def morris_inorder(root):
             # Find inorder predecessor
             predecessor = current.left
             while predecessor.right and predecessor.right != current:
+                # left subtree의 rightmost 가 current의 바로 직전 값일 것이다. 
+                # right child 가 없거나 right child 가 current가 된다면 탐색을 멈춘다.
                 predecessor = predecessor.right
             
             if not predecessor.right:
+                # right child 가 없다면 rightmost를 잘 찾아온 것이다.
+                # rightmost 의 다음 값을 current로 연결해주고 다시 올라가서 탐색 시작한다.
                 predecessor.right = current
                 current = current.left
             else:
+                # right child 가 current라면 한번 돌아서 올라온 것이다. 
+                # current의 right subtree 처리가 다 끝났다는 뜻이므로 이제는 current를 처리해주면 된다.
                 predecessor.right = None
                 result.append(current.val)
                 current = current.right
@@ -570,12 +666,15 @@ def morris_inorder(root):
 ```
 
 ### 15. Trie Operations
+
 **문제**: 문자열 삽입, 검색, 접두사 확인을 효율적으로 수행하기
 ```python
 class TrieNode:
     def __init__(self):
+        # TrieNode 자체에는 해당 객체가 어떤 char를 갖고 있는지 모르고 이 객체에 매핑된 key를 봐야한다. 
+        # 필요하면 self.char 같은 걸 넣어야 하겠지만 지금은 필요가 없다.
         self.children = {}
-        self.is_end = False
+        self.is_end = False  # 이 값이 True라면 root부터 현재 노드까지 내려오면서 거친 모든 문자들을 합친 단어가 있다는 뜻이다.
 
 class Trie:
     def __init__(self):
@@ -607,6 +706,7 @@ class Trie:
 ```
 
 ### 16. Bit Manipulation
+
 **문제**: 비트 연산을 사용하여 효율적인 계산 수행하기
 ```python
 # Count set bits
@@ -648,6 +748,8 @@ def subsets(nums):
         result.append(subset)
     return result
 ```
+
+
 
 ## ⚡ 시간/공간 복잡도 최적화
 
@@ -781,16 +883,18 @@ a = Decimal('0.1') + Decimal('0.2')
 
 ## 📊 복잡도 요약
 
-| 자료구조/알고리즘 | 시간 복잡도 | 공간 복잡도 | 주요 사용처 |
-|------------------|-------------|-------------|-----------|
-| BFS/DFS | O(V+E) | O(V) | 그래프 탐색 |
-| Dijkstra | O(E log V) | O(V) | 최단 경로 (양수) |
-| Bellman-Ford | O(VE) | O(V) | 최단 경로 (음수) |
-| DP (1D) | O(n) | O(n) or O(1) | 최적화 문제 |
-| DP (2D) | O(nm) | O(nm) or O(m) | 격자, 문자열 |
-| Union-Find | O(α(n)) | O(n) | 연결성, 사이클 |
-| Trie | O(L) | O(NL) | 문자열 검색 |
-| Heap | O(log n) | O(n) | 우선순위 큐 |
+| 자료구조/알고리즘      | 시간 복잡도     | 공간 복잡도        | 주요 사용처        |
+|----------------|------------|---------------|---------------|
+| BFS/DFS        | O(V+E)     | O(V)          | 그래프 탐색        |
+| Dijkstra       | O(E log V) | O(V)          | 최단 경로 (양수)    |
+| Bellman-Ford   | O(VE)      | O(V)          | 최단 경로 (음수)    |
+| DP (1D)        | O(n)       | O(n) or O(1)  | 최적화 문제        |
+| DP (2D)        | O(nm)      | O(nm) or O(m) | 격자, 문자열       |
+| Union-Find     | O(α(n))    | O(n)          | 연결성, 사이클      |
+| Kruskal(MST)   | O(E log E) | O(E)          | 최소 신장 트리      |
+| Floyd-Warshall | O(V^3)     | O(V^2)        | 모든 노드 간 최소 거리 |
+| Trie           | O(L)       | O(NL)         | 문자열 검색        |
+| Heap           | O(log n)   | O(n)          | 우선순위 큐        |
 
 * α(n): 역 애커만 함수, 거의 상수
 * L: 문자열 길이
