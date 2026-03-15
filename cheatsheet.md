@@ -73,7 +73,7 @@
   - 구현 원리: 왼쪽 < 현재 < 오른쪽 속성 유지하며 재귀적으로 탐색
   - 사용 시점: 동적 집합, 빠른 검색/삽입/삭제 필요 시
 - **Morris Traversal**: O(N)/O(1) 공간 순회
-  - 구현 원리: 중위 후계자 포인터 조작으로 스택 없이 트리 순회, 현재 노드의 오른쪽 자식이 null이면 오른쪽으로 이동, 아니면 중위 후계자 찾아서 오른쪽 포인터를 현재 노드로 연결
+  - 구현 원리: 중위 후계자 포인터 조작으로 스택 없이 트리 순회, 현재 노드의 왼쪽 자식이 null이면 오른쪽으로 이동, 아니면 다음 노드 찾아서 오른쪽 포인터를 현재 노드로 연결
   - 사용 시점: 공간 제한이 심할 때 트리 순회
 - **Trie**: 문자열 검색, 접두사
   - 구현 원리: 각 노드가 문자를 저장, 공통 접두사 공유하여 검색 효율화
@@ -754,6 +754,7 @@ def subsets(nums):
 ### 17. Interval Problems
 
 **문제**: 구간의 리스트가 주어졌을 때 겹치는 모든 구간을 병합하여 반환하기 (56. Merge Intervals)
+- 구간 문제는 무조건 시작점 정렬부터 생각한다. 그 후 현재 구간의 끝과 다음 구간의 시작을 비교한다.
 ```python
 def merge_intervals(intervals):
     if not intervals: return []
@@ -948,9 +949,10 @@ class LRUCache:
 ```
 
 LFU cache
-- Hash Map 2개 + Doubly Linked List 여러 개
+- Hash Map 3개 + Doubly Linked List 여러 개
   - cache: key를 넣으면 해당 데이터 노드를 반환한다.
-  - freq_map: 빈도수를 넣으면 해당 빈도수를 가진 노드들의 Doubly Linked List를 반환한다.
+  - freq_to_nodes: 빈도수를 넣으면 해당 빈도수를 가진 노드들의 Doubly Linked List를 반환한다.
+  - node_to_freq: 각 노드의 빈도를 저장한다.
   - min_freq: 현재 캐시 내 최소 빈도수를 추적하여 삭제 대상을 바로 찾는다.
 - 로직
   - 어떤 키가 사용되면 빈도수를 +1 한다.
@@ -967,6 +969,7 @@ LFU cache
 - quick select는 재귀 공간을 제외하고는 O(1)의 공간을 갖는다. 시간은 worst O(N^2)이 걸릴 수 있기 때문에 random pivot이 중요하다.
   - 매번 절반씩 탐색 구간을 줄인다면 N + N/2 + N/4 + ... = 2N = O(N)
   - 운이 나쁘게 매번 하나씩만 줄인다면 N + N-1 + N-2 + ... = O(N^2)
+- quick sort 에서 pivot은 자기 위치를 찾아간다는 점을 활용한 select 방식이다.
 ```python
 def quick_select(nums, k):
     pivot = random.choice(nums)
@@ -980,6 +983,40 @@ def quick_select(nums, k):
         return pivot
     else:
         return quick_select(right, k - len(left) - len(mid))
+```
+
+위에는 공간을 O(N)을 사용한다. 공간 최적화를 하면 다음과 같이 된다.
+
+```python
+def quick_select_inplace(nums, k):
+    # k번째 작은 원소는 인덱스로 k-1 지점임
+    target_idx = k - 1
+    def partition(left, right):
+        # 1. 랜덤 피벗 선택 및 맨 뒤로 보내기 (최악의 경우 방지)
+        pivot_idx = random.randint(left, right)
+        nums[pivot_idx], nums[right] = nums[right], nums[pivot_idx]
+        pivot = nums[right]
+        # 2. 피벗보다 작은 값들을 왼쪽으로 몰기
+        store_idx = left
+        for i in range(left, right):
+            if nums[i] < pivot:
+                nums[store_idx], nums[i] = nums[i], nums[store_idx]
+                store_idx += 1
+        # 3. 피벗을 최종 위치로 이동
+        nums[store_idx], nums[right] = nums[right], nums[store_idx]
+        return store_idx
+    left, right = 0, len(nums) - 1
+    while left <= right:
+        pivot_final_idx = partition(left, right)
+        # 찾고자 하는 인덱스와 일치하면 반환
+        if pivot_final_idx == target_idx:
+            return nums[pivot_final_idx]
+        # 타겟이 피벗보다 오른쪽에 있다면 왼쪽 구간 버림
+        elif pivot_final_idx < target_idx:
+            left = pivot_final_idx + 1
+        # 타겟이 피벗보다 왼쪽에 있다면 오른쪽 구간 버림
+        else:
+            right = pivot_final_idx - 1
 ```
 
 
