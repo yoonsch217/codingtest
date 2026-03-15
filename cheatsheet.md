@@ -751,6 +751,239 @@ def subsets(nums):
 
 
 
+### 17. Interval Problems
+
+**문제**: 구간의 리스트가 주어졌을 때 겹치는 모든 구간을 병합하여 반환하기 (56. Merge Intervals)
+```python
+def merge_intervals(intervals):
+    if not intervals: return []
+    # 1. 시작 시간을 기준으로 정렬
+    intervals.sort(key=lambda x: x[0])
+    merged = []
+    for interval in intervals:
+        # 2. merged가 비었거나, 현재 구간의 시작이 이전 구간의 끝보다 크면(안 겹치면) 추가
+        if not merged or merged[-1][1] < interval[0]:
+            merged.append(interval)
+        else:
+            # 3. 겹치는 경우, 이전 구간의 끝값을 더 큰 값으로 갱신
+            # 왜 max인가? [1, 10]과 [2, 6]이 올 수도 있기 때문
+            merged[-1][1] = max(merged[-1][1], interval[1])
+    return merged
+```
+
+**문제**: 구간들을 정렬하여 겹치는 영역이나 특정 지점의 상태 계산하기(Sweep Line Algorithm)
+- 각 구간의 시작/끝점을 정렬하고 순회하며 현재 상태 업데이트
+```python
+# Sweep Line - Amount of New Area Painted Each Day
+# 매일 일정 구간을 색칠하는데 새로 색칠하는 구간의 크기를 구하라.
+def amount_painted_refined(paint):
+    events = []
+    for i, (s, e) in enumerate(paint):
+        events.append((s, 1, i))  # 시작 이벤트 (타입 1)
+        events.append((e, -1, i)) # 종료 이벤트 (타입 -1)
+    events.sort()  # 위치순으로 정렬
+    current_indices = set()  # 현재 색칠할 수 있는 날짜들의 모음이다.
+    prev_pos = events[0][0]  # 이전 이벤트에서의 위치이다. current_indices는 prev_pos 부터 지금까지를 색칠할 수 있다는 뜻이다.
+    res = [0] * len(paint)
+    for pos, type, idx in events:
+        # prev_pos 부터 pos 까지의 구간을 누가 칠할지는 결정된다. 
+        # pos 지점을 칠해도 되나 헷갈렸는데 이건 점을 칠하는 게 아니라 구간을 칠하는 거니까 해도 된다. prev=1, pos=3 이라면 길이 2만큼 칠해야하는 것이다. 
+        if current_indices:
+            who_paints = min(current_indices)
+            res[who_paints] += (pos - prev_pos)
+        # 현재 이벤트를 바탕으로 상태 업데이트
+        if type == 1:
+            current_indices.add(idx)
+        else:
+            current_indices.remove(idx)   
+        prev_pos = pos
+    return res
+```
+
+
+### 18. Bidirectional Search
+
+**문제**: 그래프에서 두 노드 사이의 최단 경로를 양방향에서 동시에 탐색하여 찾기
+- 양쪽에서 BFS/DFS를 진행하며 탐색 영역이 만나는 지점에서 경로 합체
+```python
+# Bidirectional BFS for Shortest Path
+def bidirectional_bfs(graph, start, end):
+    if start == end: return 0
+    # 딕셔너리에 거리 저장
+    f_dist, b_dist = {start: 0}, {end: 0}
+    f_queue, b_queue = deque([start]), deque([end])
+
+    while f_queue and b_queue:
+        # 항상 작은 큐를 f_queue가 되도록 스왑한다.
+        # 양쪽에서 원을 확장시키면서 만나는 지점을 찾는 건데, 그 양쪽 원의 크기를 비슷하게 맞춰야 효율적이다.
+        if len(f_queue) > len(b_queue):
+            f_queue, b_queue = b_queue, f_queue
+            f_dist, b_dist = b_dist, f_dist
+        current = f_queue.popleft()
+        for neighbor in graph[current]:
+            if neighbor in b_dist:
+                return f_dist[current] + 1 + b_dist[neighbor]
+            if neighbor not in f_dist:
+                f_dist[neighbor] = f_dist[current] + 1
+                f_queue.append(neighbor)
+    return -1
+```
+
+
+### 19. SPFA Algorithm (Shortest Path Faster Algorithm)
+
+**문제**: 음수 가중치 그래프에서 Bellman-Ford를 큐로 최적화하여 최단 경로 찾기
+- 각 노드가 큐에 들어간 횟수로 음수 사이클 감지, 업데이트된 노드만 큐에 재삽입
+```python
+# SPFA - Bellman-Ford Optimization
+def spfa(edges, n, start):
+    distances = [float('inf')] * n
+    distances[start] = 0
+    # 각 노드가 큐에 들어간 횟수 (음수 사이클 감지용)
+    count = [0] * n
+    queue = deque([start])
+    in_queue = [False] * n
+    in_queue[start] = True
+    
+    while queue:
+        u = queue.popleft()
+        in_queue[u] = False
+        for v, weight in edges[u]:
+            if distances[u] + weight < distances[v]:
+                distances[v] = distances[u] + weight
+                if not in_queue[v]:
+                    queue.append(v)
+                    in_queue[v] = True
+                    count[v] += 1
+                    # 음수 사이클 감지: 노드가 n번 이상 큐에 들어가면 사이클
+                    if count[v] > n:
+                        return None  # negative cycle detected
+    
+    return distances
+```
+
+
+### 20. Floyd-Warshall Algorithm
+
+**문제**: 모든 정점 쌍 간의 최단 경로를 한 번에 계산하기
+**점화식**: dp[k][i][j] = min(dp[k-1][i][j], dp[k-1][i][k] + dp[k-1][k][j])
+```python
+# Floyd-Warshall - All Pairs Shortest Path
+def floyd_warshall(graph, n):
+    # distance matrix 초기화
+    dist = [[float('inf')] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                dist[i][j] = 0
+            elif graph[i][j]:
+                dist[i][j] = graph[i][j]
+    # DP: k를 경유점으로 사용
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                # i에서 j로 가는 것 vs i->k->j로 가는 것 비교
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    return dist
+```
+
+
+### 21. LRU, LFC cache
+LRU cache
+- hashmap 으로 cache 의 key value를 관리하고, cache 내에서 사용하고 있는 key들의 사용 시점 관리는 double linked list 를 사용한다.
+- cache size가 capacity를 넘어서면 linked list 맨 앞의 element가 가장 예전에 사용된 값이기 때문에 해당 값을 버려야한다. 
+  - linked list 에서 해당 값 지우고, hashmap 에서도 del 명령어로 지운다. 각각 O(1) 이다.
+- cache에 없는 key에 대해 get 요청이 들어오면, -1 반환한다.
+- cache에 있는 key에 대해 get 요청이 들어오면, cache에서 바로 반환하고 해당 값을 linked list 맨 뒤에 추가해야한다. 기존에 linked list 에 있던 건 삭제해줘야한다. double linked list 이므로 앞뒤를 붙여주면 자동 삭제된다. 
+
+```python
+# LRU cache
+class Node:
+    def __init__(self, key, val):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.cache = {}  # key: Node
+        # Dummy Head와 Tail을 만들어두면 삽입/삭제가 편함
+        self.head, self.tail = Node(0, 0), Node(0, 0)
+        self.head.next, self.tail.prev = self.tail, self.head
+
+    def _remove(self, node):
+        """노드를 연결 리스트에서 제거"""
+        p, n = node.prev, node.next
+        p.next, n.prev = n, p
+
+    def _add(self, node):
+        """새 노드를 항상 tail 바로 앞에 삽입 (가장 최근 사용)"""
+        p = self.tail.prev
+        p.next = node
+        self.tail.prev = node
+        node.prev, node.next = p, self.tail
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            node = self.cache[key]
+            self._remove(node)
+            self._add(node)  # 사용했으므로 가장 최근 위치로 이동
+            return node.val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self._remove(self.cache[key])
+        
+        new_node = Node(key, value)
+        self._add(new_node)
+        self.cache[key] = new_node
+        
+        if len(self.cache) > self.cap:
+            # 가장 오래된 head.next 제거
+            lru = self.head.next
+            self._remove(lru)
+            del self.cache[lru.key]
+```
+
+LFU cache
+- Hash Map 2개 + Doubly Linked List 여러 개
+  - cache: key를 넣으면 해당 데이터 노드를 반환한다.
+  - freq_map: 빈도수를 넣으면 해당 빈도수를 가진 노드들의 Doubly Linked List를 반환한다.
+  - min_freq: 현재 캐시 내 최소 빈도수를 추적하여 삭제 대상을 바로 찾는다.
+- 로직
+  - 어떤 키가 사용되면 빈도수를 +1 한다.
+  - 해당 노드를 기존 freq_map[f] 리스트에서 빼서 freq_map[f+1] 리스트로 옮긴다.
+  - 만약 기존 freq_map[f]가 비었고 그게 min_freq였다면, min_freq를 증가시킨다.
+
+
+### 22. Top K Elements (Quick select)
+
+문제: k번째 작은 원소를 O(N) 시간에 찾아라.
+- 만약 Top K frequent element라면 각 원소마다 count를 세고, count -> element 를 갖는 bucket sort를 사용할 수도 있다. 
+  - 하지만 공간 복잡도 적ㅇ로 비효율적이다. O(N)을 사용하게 된다.
+  - 또한 count 기반이 아니라 value 기반이라면 O(maximum value) 가 되기 때문에 비효율적이다.
+- quick select는 재귀 공간을 제외하고는 O(1)의 공간을 갖는다. 시간은 worst O(N^2)이 걸릴 수 있기 때문에 random pivot이 중요하다.
+  - 매번 절반씩 탐색 구간을 줄인다면 N + N/2 + N/4 + ... = 2N = O(N)
+  - 운이 나쁘게 매번 하나씩만 줄인다면 N + N-1 + N-2 + ... = O(N^2)
+```python
+def quick_select(nums, k):
+    pivot = random.choice(nums)
+    left = [x for x in nums if x < pivot]
+    mid = [x for x in nums if x == pivot]
+    right = [x for x in nums if x > pivot]
+    
+    if k <= len(left):
+        return quick_select(left, k)
+    elif k <= len(left) + len(mid):
+        return pivot
+    else:
+        return quick_select(right, k - len(left) - len(mid))
+```
+
+
+
 ## ⚡ 시간/공간 복잡도 최적화
 
 ### 공간 최적화 기법
