@@ -662,5 +662,211 @@ class Solution:
 </details>
 
 
+### 76. Minimum Window Substring
+
+문제: Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. 
+If there is no such substring, return the empty string "".
+The testcases will be generated such that the answer is unique.
+
+- Input: s = "ADOBECODEBANC", t = "ABC"
+- Output: "BANC"
+- Explanation: The minimum window substring "BANC" includes 'A', 'B', and 'C' from string t.
+
+<details><summary>Solution</summary>
+
+- hard 문제 치고는 접근이 쉬웠다.
+- counter map 기준으로 비교를 한다.
+- t에 대한 counter map 을 만든다.
+- s에 대해서 left, right 포인터를 움직이면서 t의 counter map 을 충족하는 window를 찾는다. 
+  - 충족하는지는 num_found 라는 변수를 사용했다. 각 char 마다 개수를 충족하는 char가 생길 때마다 num_found를 높였다. 
+- 이 window에서 left를 줄여가면서 counter map을 충족하는 최소 크기를 찾는다.
+  - 조건을 만족하는 window 이므로 res를 업데이트를 한다. 
+  - left 위치에 있는 char 에 대해 counter map 을 줄인다. 이때 해당 char의 개수가 target 보다 작아지게 된다면 num_found 값도 업데이트한다.
+- 조건을 만족하지 않는 window가 만들어지는 경우, 이제 다시 right pointer를 옮겨가며 조건에 맞는 window를 찾는다.
+
+```python
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        if len(s) < len(t):
+            return ""
+        res = (math.inf, 0, 0)  # length, left index, right index
+        l, r = 0, 0
+        char_to_count_s = defaultdict(int)
+        char_to_count_t = Counter(t)
+
+        num_found = 0  # compared with len(char_to_count_t)
+        num_found_target = len(char_to_count_t)
+
+        while r < len(s):
+            cur = s[r]
+            char_to_count_s[cur] += 1
+            if cur in char_to_count_t and char_to_count_s[cur] == char_to_count_t[cur]:
+                num_found += 1
+            
+            while num_found == num_found_target and l <= r:
+                cur_len = r - l + 1
+                if cur_len < res[0]:
+                    res = (cur_len, l, r)
+                left_char = s[l]
+                char_to_count_s[left_char] -= 1
+                if left_char in char_to_count_t and char_to_count_s[left_char] < char_to_count_t[left_char]:
+                    num_found -= 1
+                l += 1
+            
+            r += 1
+        
+        if res[0] == math.inf:
+            return ""
+        return s[res[1]: res[2]+1]
+```
+
+</details>
+
+
+
+### 215. Kth Largest Element in an Array
+
+문제: Given an integer array nums and an integer k, return the kth largest element in the array.
+Note that it is the kth largest element in the sorted order, not the kth distinct element.
+Can you solve it without sorting?
+
+- Input: nums = [3,2,1,5,6,4], k = 2
+- Output: 5
+
+<details><summary>Solution</summary>
+
+- quick select 방식을 먼저 써봤다.
+- quick sort의 원리를 활용한다. pivot을 무작위로 고르고 그것보다 작은 값은 앞에, 큰 값은 뒤에 몰아넣으면 pivot 에 해당하는 숫자는 자기 자리를 찾게 된다.
+- 이 자리가 문제에서 찾는 위치라면 그 값을 반환하고, 아니라면 위치에 따라 왼쪽을 볼지 오른쪽을 볼지 결정해서 더 본다.
+- 이론적으로는 average O(N) 이지만 TLE 발생한다.
+
+```python
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        target_idx = len(nums) - k
+        left, right = 0, len(nums) - 1
+        while left <= right:
+            pivot = random.randint(left, right)
+            target = nums[pivot]
+            nums[pivot], nums[right] = nums[right], nums[pivot]  # pivot number moved to right end
+            low, high = left, right-1
+            
+            while low <= high:
+                if nums[low] >= target:
+                    nums[low], nums[high] = nums[high], nums[low]
+                    high -= 1
+                else:
+                    low += 1
+
+            nums[low], nums[right] = nums[right], nums[low]
+            if low == target_idx:
+                return nums[low]
+            if low < target_idx:
+                left = low + 1
+            else:
+                right = low - 1
+```
+
+TLE가 발생했던 이유는 pivot value와 동일한 값이 많을 때 scope이 안 줄여지기 때문이다. 그래서 Dutch National Flag 기법을 활용해서 세 가지로 나눈다.
+
+```python
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        target_idx = len(nums) - k
+        left, right = 0, len(nums) - 1
+        
+        while left <= right:
+            pivot_idx = random.randint(left, right)
+            pivot_val = nums[pivot_idx]
+            
+            # 3-way partition (Dutch National Flag Algorithm)
+            # lt: 피벗보다 작은 값들이 끝나는 지점
+            # gt: 피벗보다 큰 값들이 시작되는 지점
+            # i: 탐색 포인터
+            lt = left
+            gt = right
+            i = left
+            
+            while i <= gt:
+                if nums[i] < pivot_val:
+                    nums[lt], nums[i] = nums[i], nums[lt]
+                    lt += 1
+                    i += 1
+                elif nums[i] > pivot_val:
+                    nums[gt], nums[i] = nums[i], nums[gt]
+                    gt -= 1
+                else:
+                    i += 1
+            
+            # 이제 [lt, gt] 구간은 모두 피벗과 같은 값들입니다.
+            if lt <= target_idx <= gt:
+                return nums[lt]
+            elif target_idx < lt:
+                right = lt - 1
+            else:
+                left = gt + 1
+```
+
+</details>
+
+
+
+### 57. Insert Interval
+
+문제: You are given an array of non-overlapping intervals intervals where intervals[i] = [starti, endi] represent the start and the end of the ith interval and intervals is sorted in ascending order by start. 
+You are also given an interval newInterval = [start, end] that represents the start and end of another interval.
+Insert newInterval into intervals such that intervals is still sorted in ascending order by starti and intervals still does not have any overlapping intervals (merge overlapping intervals if necessary).
+Return intervals after the insertion.
+
+- Input: intervals = [[1,3],[6,9]], newInterval = [2,5]
+- Output: [[1,5],[6,9]]
+
+<details><summary>Solution</summary>
+
+- brute force approach
+  - 처음에는 intervals 를 iterate 하면서 각각 new_interval과 비교하고, is_overlapping 플래그를 사용하려고 했다.
+  - 이렇게 하니까 edge case가 너무 많이 생겨서 복잡했다. interval 과 겹치는 것 없이 맨 앞에 있는 경우, 맨 뒤에 있는 경우 등등
+- merge 할 때는 세 가지로 나눈다: 겹치는 거 생기기 전, 겹치는 중, 겹치는 거 끝난 후
+
+```python
+class Solution:
+    def insert(self, intervals: List[List[int]], new_interval: List[int]) -> List[List[int]]:
+        res = []
+        cur_idx = 0
+        n = len(intervals)
+        new_start, new_end = new_interval
+
+        # before overlapping
+        while cur_idx < n:
+            cur_start, cur_end = intervals[cur_idx]
+            if cur_end >= new_start:
+                break
+            res.append([cur_start, cur_end])
+            cur_idx += 1
+        
+        # during overlapping
+        overlap_start, overlap_end = new_start, new_end
+        while cur_idx < n:
+            cur_start, cur_end = intervals[cur_idx]
+            if cur_start > new_end:
+                break
+            overlap_start = min(overlap_start, cur_start)
+            overlap_end = max(overlap_end, cur_end)
+            cur_idx += 1
+        res.append([overlap_start, overlap_end])
+        
+        # after overlapping
+        while cur_idx < n:
+            res.append(intervals[cur_idx])
+            cur_idx += 1
+        
+        return res
+```
+
+
+</details>
+
+
+
 
 
