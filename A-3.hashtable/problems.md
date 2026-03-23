@@ -36,3 +36,52 @@ Complexity
 - Space Complexity: O(NK)
 
 </details>
+
+
+
+### 560. Subarray Sum Equals K
+https://leetcode.com/problems/subarray-sum-equals-k/description/
+
+문제: Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k. 
+A subarray is a contiguous non-empty sequence of elements within an array.
+
+- Input: nums = [1,1,1], k = 2
+- Output: 2
+
+<details><summary>Solution</summary>
+
+- hashmap + prefix sum 의 정석이다.
+- hashmap 업데이트는 계산이 끝나고 해야한다. 조심.
+- {0:1} 도 넣는 게 안전하다고 한다. 아직 필요성을 못 느꼈는데 참고하자.
+
+```python
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        """
+        Use map. key: sum, value: number of occurences
+        While iterating the list, get prefix sum. 
+        If it is k, increase count by one.
+        If there is (k - current prefix sum) is in map, increase count by its value.
+        """
+        sum_to_count = defaultdict(int)
+        res = 0
+        prefix_sum = 0
+        for num in nums:
+            prefix_sum += num
+            if prefix_sum == k:
+                res += 1
+            res += sum_to_count[prefix_sum - k]
+            sum_to_count[prefix_sum] += 1  # Need to update this at the end of each iteration!
+        return res
+
+
+```
+
+</details>
+ 
+
+
+
+
+
+
