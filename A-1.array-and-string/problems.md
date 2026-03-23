@@ -870,3 +870,128 @@ class Solution:
 
 
 
+### Design Hit Counter
+
+- 문제: 당신은 지난 5분(300초) 동안 발생한 '히트(클릭 등)'의 수를 기록하는 시스템을 설계해야 합니다.
+- 요구 사항
+  - hit(timestamp): 타임스탬프 timestamp(초 단위)에 히트가 발생했음을 기록합니다. 
+  - 입력되는 timestamp는 시간에 따라 **단조 증가(monotonically increasing)**한다고 가정합니다 (즉, 1, 2, 5, 10... 순으로 들어옴). 
+  - 여러 히트가 동일한 타임스탬프에 발생할 수 있습니다. 
+  - getHits(timestamp): 현재 타임스탬프 timestamp를 기준으로, 최근 5분(즉, 300초) 동안 발생한 총 히트 수를 반환합니다. 
+  - 범위 계산 시 현재 타임스탬프를 포함합니다: [timestamp - 299, timestamp].
+
+```
+counter = HitCounter()
+counter.hit(1)       # 1초에 히트 발생
+counter.hit(2)       # 2초에 히트 발생
+counter.hit(3)       # 3초에 히트 발생
+counter.getHits(4)   # 4초 기준 최근 300초(1~4초) 내 히트 수 -> 3 반환
+counter.hit(300)     # 300초에 히트 발생
+counter.getHits(300) # 300초 기준 최근 300초(1~300초) 내 히트 수 -> 4 반환
+counter.getHits(301) # 301초 기준 최근 300초(2~301초) 내 히트 수 -> 3 반환 (1초의 히트 제외)
+```
+
+
+<details><summary>Solution</summary>
+
+- 요구사항
+  - hit 를 저장 => 메모리 필요
+  - hit 수를 받아오기
+    - 받아올 시간 주어짐 => 모든 hit history 저장 필요 & 원하는 시간의 데이터 위치를 빠르게 찾아야 함
+    - 받아올 범위가 주어짐 => hit history 가 연속적으로 저장되어 있어야 함 (range가 고정되어 있음. 이걸 미리 알고 저장하면 최적화 가능?)
+- approach 1
+  - hit 를 list 에 (timestamp, counter) 로 저장 O(1)
+  - hit를 받아올 때 timestamp 기준으로 binary search 후 앞에 300만큼 탐색 O(log N)
+- approach 2
+  - 최근 300 기간 동안의 값만 저장하는 queue 를 갖는다. [timestamp, counter]
+  - 최근 300 기간의 counter sum 을 저장하는 변수를 갖는다. `recent_sum`
+  - 각 timestamp 마다 최근 300 기간의 sum을 유지하는 hashmap을 갖는다. key: timestamp, value: sum of hits
+  - 새로운 hit이 들어올 때
+    - queue 맨 뒤를 확인하고 새로 추가하든가 기존의 값을 증가시킨다. 이걸 바탕으로 recent_sum 을 업데이트한다.
+    - queue 맨 앞을 확인하고 범위를 벗어난 값들은 버린다. 이걸 바탕으로 recent_sum을 업데이트한다.
+    - 이렇게 결정된 recent_sum 을 hashmap에 저장을 한다. map[timestamp] = recent_sum
+  - hit 조회를 할 때
+    - 주어진 timestamp 에 대한 value만 받아오면 된다.
+    - 해당 timestamp 가 hashmap key 에 없을 때, 이게 안 되네 => 사용 불가
+  - Complexity
+    - Time: hit O(1), get_hit O(1)
+    - Space: O(N)
+
+내가 문제를 잘 이해 못 했던 게 있다. get_hits 로 주어지는 timestamp 와 hit로 주어지는 timestamp 모두 단조 증가인 것이다. 즉, 모든 history를 저장할 필요가 없다.
+
+- approach 3
+  - `hit_buffer` 최근 300 기간 동안의 값을 저장하는 queue 를 갖는다. [timestamp, count for current timestamp, sum of counts over the last 300 seconds]
+  - hit 들어올 때
+    - hit_buffer 의 가장 최근 timestamp 와 같다면 거길 업데이트한다.
+    - 그렇지 않다면, new timestamp 가 될 때까지 hit_buffer 를 업데이트한다. 비어있는 시간도 업데이트해야한다. 
+      - latest timestamp 보다 new timestamp - 299 이 더 크면 이것부터 시작을 한다.
+      - latest timestamp 에 대한 count sum 을 받아온 뒤, 앞에서 pop 을 할 때마다 그 count를 빼줘야한다.
+  - hit 조회할 때
+    - 가장 최근의 timestamp 와 조회할 timestamp 를 알면 원하는 timestamp 의 index를 바로 알 수 있다. 거기에 저장된 값을 반환한다.
+  - Complexity
+    - Time: hit O(1), get O(1)
+    - Space: O(300) = O(1)
+  - 구현 어렵네 이거.
+
+코너 케이스
+- 코너 케이스 고려
+  - timestamp의 범위는?
+  - get_hits 에서 주어진 timestamp 의 범위는? 음수가 들어올 때는? exception 처리하자.
+
+
+Using fixed size array   
+Approach 1
+- fixed size array를 사용한다. 길이 300자리 array를 사용한다. 
+  - 각 array에는 [timestamp, count sum] 이 저장되어 있다.
+- hit 처리
+  - (new timestamp % 300) 의 위치를 업데이트해야한다. 
+    - 기존에 timestamp 가 동일하다면 count sum 만 하나 증가시킨다.
+    - 다르다면, 전체를 scan 하면서 timestamp - 299 의 범위 중에서 가장 최신의 값을 받아온 뒤 거기서 하나 증가시킨다.
+- get hit 처리
+  - (timestamp % 300) 의 위치의 timestamp 값이 입력 timestamp 와 같다면 그 값을 반환한다.
+  - 다르다면.. 여기 처리가 안 되네
+
+Approach 2
+- fixed size array를 사용한다. 길이 300자리 array를 사용한다. 
+  - 각 array에는 [timestamp, count] 이 저장되어 있다.
+- hit 처리
+  - (new timestamp % 300) 의 위치를 업데이트해야한다. 
+    - 기존에 timestamp 가 동일하다면 count 만 하나 증가시킨다.
+    - 다르다면 count 를 1로 초기화한다.
+- get hit 처리
+  - buffer를 scan 하면서 timestamp - 299 이상인 것들의 합을 구한다.
+
+
+```python
+class HitCounter:
+    def __init__(self):
+        self.SEARCH_RANGE = 300  # Get hits during the last 300 seconds [timestamp-299, timestamp]
+        self.hit_buffer = [None] * self.SEARCH_RANGE  # [timestamp, current count] 
+    
+    def hit(self, timestamp: int) -> None:
+        idx = timestamp % self.SEARCH_RANGE
+        if self.hit_buffer[idx] and self.hit_buffer[idx][0] == timestamp:
+            self.hit_buffer[idx][1] += 1
+            return
+        self.hit_buffer[idx] = [timestamp, 1]
+            
+                
+    def get_hits(self, timestamp):
+        count_sum = 0
+        for ts, cnt in self.hit_buffer:
+            if ts > timestamp - self.SEARCH_RANGE:
+                count_sum += cnt
+        return count_sum
+          
+    
+    
+    
+
+
+```
+
+</details>
+
+
+
+
