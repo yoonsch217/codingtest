@@ -995,3 +995,79 @@ class HitCounter:
 
 
 
+### Meeting Rooms 2
+문제: 당신에게 여러 회의의 시작 시간과 종료 시간이 담긴 배열 intervals가 주어집니다. 모든 회의를 개최하기 위해 필요한 최소 회의실 개수를 구하세요.
+
+- 입력 
+  - intervals: [[start_1, end_1], [start_2, end_2], ...] 형태의 리스트 
+  - 예: [[0, 30], [5, 10], [15, 20]]
+- 출력 
+  - 필요한 최소 회의실 수 (정수)
+
+예시
+- 입력: [[0, 30], [5, 10], [15, 20]]
+  - 0~30분 회의가 진행되는 동안, 5~10분 회의와 15~20분 회의가 그 사이에 열려야 합니다. 
+  - 따라서 0~30분용 회의실 1개 + 나머지 두 회의가 번갈아 쓸 회의실 1개 = 총 2개가 필요합니다.
+- 입력: [[7, 10], [2, 4]]
+  - 두 회의가 겹치지 않습니다. 회의실 1개로 충분합니다.
+
+
+<details><summary>Solution</summary>
+
+최대로 겹치는 미팅의 수를 구해야한다.
+
+Approach 1
+- 각 미팅마다 나머지 전체와 비교하며 겹치는지 확인한다. 겹칠 때마다 count 증가시킨다. 
+- 가장 count가 큰 값이 답이다.
+- O(N^2)
+
+Approach 2
+- end time 이 제한적이라면, 각 회의마다 bucket 에 색칠을 할 수 있다. 
+- 몇 겹으로 색칠됐는지 확인해서 가장 큰 값이 답이다.
+
+Approach 3 (heap)
+- 시작시간 순서대로 정렬을 한다.
+- 진행 중인 회의를 heap에 넣는다. 끝나는 시간 기준으로 heap에 넣는다.
+- 다음 시작 시간과 heap의 제일 작은 시간을 비교한다. 
+  - heap 의 min 값이 더 클 때까지 pop을 한다.
+  - 시작하는 회의를 heap에 넣는다.
+  - heap의 크기를 저장한다.
+- 가장 컸던 heap size가 답이다.
+
+Approach 4 (Sweep line)
+- 시작 시간과 끝 시간 순서대로 정렬을 한다.
+- 각 정렬된 리스트마다 pointer를 놓는다.
+- start pointer 값이 end pointer 값보다 빠르다면 그 순간에 회의가 하나 시작될 수 있다는 뜻이다.
+- 반대라면 그 순간외 회의가 하나 끝난다는 뜻이다.
+- count 값이 가장 큰 값을 반환한다.
+
+```python
+class Solution:
+    def get_required_rooms(self, meetings: List[List[int]]) -> int:
+        sorted_starts = sorted(m[0] for m in meetings)
+        sorted_ends = sorted(m[1] for m in meetings)
+        start_ptr, end_ptr, count, res = 0, 0, 0, 0
+        
+        while start_ptr < len(meetings):
+            if sorted_starts[start_ptr] == sorted_ends[end_ptr]:
+                start_ptr += 1
+                end_ptr += 1
+                continue
+            if sorted_starts[start_ptr] < sorted_ends[end_ptr]:
+                count += 1
+                res = max(res, count)
+                start_ptr += 1
+                continue
+            if sorted_starts[start_ptr] > sorted_ends[end_ptr]:
+                count -=1
+                end_ptr += 1
+                continue
+        return res
+
+```
+
+
+
+
+</details>
+

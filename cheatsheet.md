@@ -1169,3 +1169,10 @@ a = Decimal('0.1') + Decimal('0.2')
 * α(n): 역 애커만 함수, 거의 상수
 * L: 문자열 길이
 * V: 정점 수, E: 간선 수
+
+
+---
+
+다시 풀어볼 문제들
+- Design Hit Counter
+- Meeting Rooms 2
